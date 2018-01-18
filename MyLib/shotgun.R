@@ -1,10 +1,102 @@
-plink='~/bin/plink-1.07-mac-intel/plink'
-poly='java -jar -Xmx4g /Users/uqgchen5/bin/polygenic.jar'
-gcta='~/bin/gcta_0.93.8/gcta_mac'
-HE='java -jar /Users/uqgchen5/Documents/workspace/HE/HE.jar'
-HE3g='java -jar -Xmx3g /Users/uqgchen5/Documents/workspace/HE/HE.jar'
+gcta='/Users/gc5k/bin/gcta_1.02/gcta_mac'
+gear='java -jar /Users/gc5k/Documents/workspace/FromSVN/GEAR/gear.jar'
+inode='ssh gc5k@inode.qbi.uq.edu.au'
+plink='/Users/gc5k/bin/plink-1.07-mac-intel/plink'
 hapgen='/Users/uqgchen5/bin/hapgen2_macosx_intel/hapgen2'
 HM3='/Users/uqgchen5/bin/hapgen2_macosx_intel/HM3'
+
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+#### input: bv, disease 0/1, sex
+#### output: matrix(1:10, c(decile, or.lo, or, or.hi))
+getDecileOrs = function(bv, phen, sex=NA) {
+  mat = matrix(NA, 4, 10 )
+  d = bv
+  # find decile cutoffs
+  q = quantile(d, seq(0, 1, len=11))
+  dec = list()
+  # group in deciles
+  for(i in 1:(length(q)-1)) { dec[[i]] = which(d >= q[i] & d < q[i+1])}
+  for(decile in 1:10) {
+    d.top = dec[[decile]]
+    d.bot = dec[[1]]
+    # group high and low decile
+    tb = c(d.top, d.bot)
+    # control for sex, if available
+    if(!all(is.na(sex)))
+      df = data.frame(phen=phen[tb], group=c(rep(1, length(d.top)), rep(0, length(d.bot))), sex=sex[tb])
+    else
+      df = data.frame(phen=phen[tb], group=c(rep(1, length(d.top)), rep(0, length(d.bot))))
+    logm = glm(phen ~ ., data=df, family=binomial(logit))
+    #logm = glm(phen ~ group, data=df, family=binomial(logit))
+    est = summary(logm)$coefficients[2,1]
+    std.err = as.numeric(summary(logm)$coefficients[2,2])
+    
+    # get OR from logistic model beta
+    or.adj = as.numeric(exp(est))
+    # 95% confidence interval
+    or.adj.lo = exp(est - 1.96 * std.err)
+    or.adj.hi = exp(est + 1.96 * std.err)
+    pred=1
+    mat[1, decile] = decile
+    mat[2, decile] = or.adj.lo
+    mat[3, decile] = or.adj
+    mat[4, decile] = or.adj.hi
+  }
+  out = data.frame(t(mat))
+  names(out) = c('decile', 'OR.low', 'OR', 'OR.high')
+  return(out)
+}
+
+plot.deciles.2 = function(df, name='profile score decile ORs', size=12) {
+  
+  require(ggplot2)
+  require(grid)
+  
+  th2 = theme(panel.background = element_rect(fill = "white", colour='black'), text=element_text(size=size), legend.title=element_blank(), axis.title.y=element_text(vjust=2), axis.title.x=element_text(vjust=-2.4), plot.margin=unit(c(5,5,15,12),"mm"), panel.grid=element_blank(), legend.position="top")
+  limits = aes(ymax=OR.high, ymin=OR.low)
+  ar=.5
+  ymax=10
+  ro = 3
+  p = ggplot(df, aes(x=decile, y=OR )) + geom_pointrange(limits, size=1) + xlab('decile compared to lowest') + ylab('odds ratio (prediction accuracy)') + scale_x_continuous(breaks=1:10) + th2 + 
+    theme(aspect.ratio=ar) + theme(legend.key.size=unit(8, 'mm'), legend.position=c(.7,.3), legend.key.height=unit(3,"line")) +
+    geom_hline(yintercept=1) + coord_cartesian(ylim=c(0,ymax))
+  p
+  
+}
 
 ccR <- function (cs1, ctrl1, cs2, ctrl2)
 {
@@ -16,7 +108,7 @@ ccR <- function (cs1, ctrl1, cs2, ctrl2)
   return(rho)
 }
 
-LamMetaPlot <- function(file, title=expression(lambda[meta]))
+LamMetaPlot <- function(file, title=expression(lambda[meta]), COL=c("blue", "yellow"))
 {
   lam=read.table(file, as.is=T)
   mlam=as.matrix(lam)
@@ -39,7 +131,73 @@ LamMetaPlot <- function(file, title=expression(lambda[meta]))
   require(reshape)
   mat.frame = data.frame(mat)
   names(mat.frame)=c("Cohort1", "Cohort2", "LambdaCohort")
-  ggplot(mat.frame, aes(x=Cohort1,y=Cohort2, z= LambdaCohort)) + geom_tile(aes(fill= LambdaCohort)) + scale_fill_gradient(low="blue", high="yellow") + theme_bw()
+  ggplot(mat.frame, aes(x=Cohort1,y=Cohort2, z= LambdaCohort)) + geom_tile(aes(fill= LambdaCohort)) + scale_fill_gradient(low=COL[1], high=COL[2]) + theme_bw()
+}
+
+LamMetaPlotA <- function(file, title=expression(lambda[meta]), COL=c("blue", "yellow"))
+{
+  #heatmap plot
+  require(ggplot2)
+  # first need to reshape data to long form
+  require(reshape)
+  require(zoo)
+  lam=read.table(file, as.is=T)
+  random_matrix=as.matrix(lam)
+  
+  
+  ## set color representation for specific values of the data distribution
+  quantile_range <- quantile(random_matrix, probs = seq(0, 1, 0.02))
+  
+  ## use http://colorbrewer2.org/ to find optimal divergent color palette (or set own)
+  color_palette <- colorRampPalette(c("#3794bf", "#FFFFFF", "#df8640"))(length(quantile_range) - 1)
+  
+  ## prepare label text (use two adjacent values for range text)
+  label_text <- rollapply(round(quantile_range, 2), width = 2, by = 1, FUN = function(i) paste(i, collapse = " : "))
+  
+  ## discretize matrix; this is the most important step, where for each value we find category of predefined ranges (modify probs argument of quantile to detail the colors)
+  mod_mat <- matrix(findInterval(random_matrix, quantile_range, all.inside = TRUE), nrow = nrow(random_matrix))
+  
+  ## remove background and axis from plot
+  theme_change <- theme(
+    plot.background = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.background = element_blank(),
+    panel.border = element_blank()
+    #    axis.line = element_blank(),
+    #    axis.ticks = element_blank()
+    #    axis.text.x = element_blank(),
+    #    axis.text.y = element_blank(),
+    #    axis.title.x = element_blank(),
+    #    axis.title.y = element_blank()
+  )
+  
+  ## output the graphics
+  MM=melt(mod_mat)
+  idx1=which(MM[,1] <= MM[,2] &MM[,3] > MM[1,3])
+  idx2=which(MM[,1] > MM[,2] & MM[,3] < MM[1,3])
+  MM1=MM[c(idx1, idx2),]
+  
+  
+  # I only used data from 'random_matrix'
+  MM2 = melt(unname(random_matrix))
+  # here I store the coordinates of a cell which contain 1 in the original data, so I can see what the value is after the transformation
+  midref = MM2[MM2[,1] != MM2[,2] & MM2[,3]==1,][1,1:2]
+  MM2[MM[,1] <= MM[,2] & MM[,3] >= MM[1,3], 3] = NA
+  MM2[MM[,1] > MM[,2] & MM[,3] < MM[1,3], 3] = NA
+  # quantile normalisation
+  MM2$value = rank(MM2$value, na.last='keep')
+  # transforming back to the original scale; this is cheating somewhat, only the min and max values correspond to the values on the legend
+  MM2$value = (MM2$value-1)*(max(random_matrix)-min(random_matrix))/(max(MM2$value, na.rm=T)) + min(random_matrix)
+  # look up the mid point after transformation; I don't use this here, because shifting the midpoint away from the middle makes the high and low colours look different
+  midp = MM2[MM2[,1] == midref[,1] & MM2[,2] == midref[,2], 3]
+  ggplot(MM2, aes(x = X2, y = X1, fill = value)) +
+    geom_tile(color = "grey") +
+    scale_fill_gradient2(limits=c(min(MM2[,3],na.rm=T), max(MM2[,3],na.rm=T)), low='#3794bf', mid='#FFFFFF', high='#df8640', na.value='white', midpoint=median(MM2$value, na.rm=T), name=expression(paste(lambda[meta]))) +
+    # you can use this to see what if looks like if the a value of 1 in the original data is white
+    #scale_fill_gradient2(limits=c(min(MM2[,3],na.rm=T), max(MM2[,3],na.rm=T)), low='#3794bf', mid='#FFFFFF', high='#df8640', na.value='white', midpoint=midp) +
+    labs(x="Cohort 1", y="Cohort 2") +
+    theme_change
 }
 
 metaPlot <- function(file, prune=FALSE, cohortFile=NULL, title="Meta cohort plot", sig=TRUE, xlib="Cohort")
@@ -397,6 +555,193 @@ manhattan <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limit
   }
 }
 
+miamiPlot <- function(dataframe, P1=NULL, P2=NULL, AnoCol="red", AnoCol1="blue", AnoCol2="yellow",colors=c("gray10", "gray50"), ymax="max", limitchromosomes=1:23, suggestiveline=-log10(1e-5), genomewideline=NULL, title="", annotate=NULL, annotate1=NULL, annotate2=NULL, ...) {
+  if(is.null(P1))
+  {
+    P1 = "P"
+  }
+  pidx1=which(colnames(dataframe) == P1)
+  
+  if(is.null(P2))
+  {
+    P2 = "P2"
+  }
+  pidx2=which(colnames(dataframe) == P2)
+  d=dataframe
+  if (!("CHR" %in% names(d) & "BP" %in% names(d) & P1 %in% names(d) & P2 %in% names(d))) stop("Make sure your data frame contains columns CHR, BP, and P")
+  if (any(limitchromosomes)) d=d[d$CHR %in% limitchromosomes, ]
+  d=subset(na.omit(d[order(d$CHR, d$BP), ]), (P>0 & P<=1)) # remove na's, sort, and keep only 0<P<=1
+  d$logp = -log10(d[,pidx1])
+  d$logp2 = log10(d[,pidx2])
+  d$pos=NA
+  ticks=NULL
+  lastbase=0
+  colors <- rep(colors,max(d$CHR))[1:max(d$CHR)]
+  if (ymax=="max") ymax<-ceiling(max(d$logp))
+  if (ymax<8) ymax<-8
+  if (min(d$logp2) > -8) {
+    ymin = -8
+  } else {
+    ymin = floor(min(d$logp2))
+  }
+  
+  numchroms=length(unique(d$CHR))
+  if (numchroms==1) {
+    d$pos=d$BP
+    ticks=floor(length(d$pos))/2+1
+  } else {
+    for (i in unique(d$CHR)) {
+      if (i==1) {
+        d[d$CHR==i, ]$pos=d[d$CHR==i, ]$BP
+      } else {
+        lastbase=lastbase+tail(subset(d,CHR==i-1)$BP, 1)
+        d[d$CHR==i, ]$pos=d[d$CHR==i, ]$BP+lastbase
+      }
+      ticks=c(ticks, d[d$CHR==i, ]$pos[floor(length(d[d$CHR==i, ]$pos)/2)+1])
+    }
+  }
+  if (numchroms==1) {
+    with(d, plot(main=title, pos, logp, ylim=c(-1*max(abs(ymin),abs(ymax)), max(abs(ymin),abs(ymax))), ylab=expression(-log[10](italic(p))), xlab=paste("Chromosome",unique(d$CHR),"position"), ...))
+  } else {
+    with(d, plot(main=title, pos, logp, ylim=c(-1*max(abs(ymin),abs(ymax)), max(abs(ymin),abs(ymax))), ylab=expression(-log[10](italic(p))), xlab="Chromosome", xaxt="n", type="n", ...))
+    axis(1, at=ticks, lab=unique(d$CHR), ...)
+    icol=1
+    for (i in unique(d$CHR)) {
+      with(d[d$CHR==i, ],points(pos, logp, col=colors[icol], ...))
+      with(d[d$CHR==i, ],points(pos, logp2, col=colors[icol], ...))
+      icol=icol+1
+    }
+  }
+  if (!is.null(annotate)) {
+    d.annotate=d[which(d$SNP %in% annotate), ]
+    with(d.annotate, points(pos, logp, col=AnoCol, pch=16, ...))
+    with(d.annotate, points(pos, logp2, col=AnoCol, pch=16, ...))
+#    with(d.annotate, points(pos, logp, col="grey", cex=1, pch=1))
+#    with(d.annotate, points(pos, logp2, col="grey", cex=1, pch=1))
+    
+  }
+
+  if (!is.null(annotate1)) {
+    d.annotate=d[which(d$SNP %in% annotate1), ]
+    with(d.annotate, points(pos, logp, col=AnoCol1, pch=16))
+#    with(d.annotate, points(pos, logp, col="grey", cex=1, pch=1))
+    
+  }
+
+  if (!is.null(annotate2)) {
+    d.annotate=d[which(d$SNP %in% annotate2), ]
+    with(d.annotate, points(pos, logp2, col=AnoCol2, pch=16))
+#    with(d.annotate, points(pos, logp2, col="grey", cex=1, pch=1))
+    
+  }
+  
+  #  if (suggestiveline) abline(h=suggestiveline, col="blue")
+  if (!is.null(genomewideline)) {
+    abline(h=genomewideline, col="gray")
+    abline(h=-1*genomewideline, col="gray")
+    
+  } else {
+    abline(h=-log10(0.05/nrow(d)), col="gray")
+    abline(h=log10(0.05/nrow(d)), col="gray")
+  }
+  abline(h=0, col="white", lwd=2, lty=2)
+}
+
+
+manhattanTrans <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limitchromosomes=1:23, suggestiveline=-log10(1e-5), genomewideline=NULL, title="", annotate=NULL, ...) {
+  
+  d=dataframe
+  if (!("CHR" %in% names(d) & "BP" %in% names(d) & "P" %in% names(d))) stop("Make sure your data frame contains columns CHR, BP, and P")
+  if (any(limitchromosomes)) d=d[d$CHR %in% limitchromosomes, ]
+  d=subset(na.omit(d[order(d$CHR, d$BP), ]), (P>0 & P<=1)) # remove na's, sort, and keep only 0<P<=1
+  d$logp = -log10(d$P)
+  d$pos=NA
+  ticks=NULL
+  lastbase=0
+  colors <- rep(colors,max(d$CHR))[1:max(d$CHR)]
+  if (ymax=="max") ymax<-ceiling(max(d$logp))
+  if (ymax<8) ymax<-8
+  numchroms=length(unique(d$CHR))
+  if (numchroms==1) {
+    d$pos=d$BP
+    ticks=floor(length(d$pos))/2+1
+  } else {
+    for (i in unique(d$CHR)) {
+      if (i==1) {
+        d[d$CHR==i, ]$pos=d[d$CHR==i, ]$BP
+      } else {
+        lastbase=lastbase+tail(subset(d,CHR==i-1)$BP, 1)
+        d[d$CHR==i, ]$pos=d[d$CHR==i, ]$BP+lastbase
+      }
+      ticks=c(ticks, d[d$CHR==i, ]$pos[floor(length(d[d$CHR==i, ]$pos)/2)+1])
+    }
+  }
+  if (numchroms==1) {
+    with(d, plot(bty='n', main=title, y=pos, x=logp, xlim=c(0,ymax), xlab=expression(-log[10](italic(p))), ylab=paste("Chromosome",unique(d$CHR),"position"), ...))
+  }  else {
+    with(d, plot(bty='n', main=title, y=pos, x=logp, xlim=c(0,ymax), xlab=expression(-log[10](italic(p))), ylab="Chromosome", yaxt="n", type="n", ...))
+    axis(2, at=ticks, lab=unique(d$CHR), ...)
+    icol=1
+    for (i in unique(d$CHR)) {
+      with(d[d$CHR==i, ],points(y=pos, x=logp, col=colors[icol], ...))
+      icol=icol+1
+    }
+  }
+  if (!is.null(annotate)) {
+    d.annotate=d[which(d$SNP %in% annotate), ]
+    with(d.annotate, points(y=pos, x=logp, col="green3", ...))
+  }
+  #  if (suggestiveline) abline(h=suggestiveline, col="blue")
+  if (!is.null(genomewideline)) {
+    abline(v=genomewideline, col="gray")
+  } else {
+    abline(v=-log10(0.05/nrow(d)), col="gray")    
+  }
+}
+
+manhattanP <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limitchromosomes=1:23, suggestiveline=-log10(1e-5), genomewideline=NULL, title="", annotate=NULL, ...) {
+  
+  d=dataframe
+  if (!("CHR" %in% names(d) & "BP" %in% names(d) & "P" %in% names(d))) stop("Make sure your data frame contains columns CHR, BP, and P")
+  if (any(limitchromosomes)) d=d[d$CHR %in% limitchromosomes, ]
+  d=subset(na.omit(d[order(d$CHR, d$BP), ]), (P>0 & P<=1)) # remove na's, sort, and keep only 0<P<=1
+  d$pos=NA
+  ticks=NULL
+  lastbase=0
+  colors <- rep(colors,max(d$CHR))[1:max(d$CHR)]
+  if (ymax=="max") ymax<-ceiling(max(d$P))
+  numchroms=length(unique(d$CHR))
+  if (numchroms==1) {
+    d$pos=d$BP
+    ticks=floor(length(d$pos))/2+1
+  } else {
+    for (i in unique(d$CHR)) {
+      if (i==1) {
+        d[d$CHR==i, ]$pos=d[d$CHR==i, ]$BP
+      } else {
+        lastbase=lastbase+tail(subset(d,CHR==i-1)$BP, 1)
+        d[d$CHR==i, ]$pos=d[d$CHR==i, ]$BP+lastbase
+      }
+      ticks=c(ticks, d[d$CHR==i, ]$pos[floor(length(d[d$CHR==i, ]$pos)/2)+1])
+    }
+  }
+  if (numchroms==1) {
+    with(d, plot(main=title, pos, P, ylim=c(0,ymax), ylab=expression(italic(p)), xlab=paste("Chromosome",unique(d$CHR),"position"), ...))
+  }  else {
+    with(d, plot(main=title, pos, P, ylim=c(0,ymax), ylab=expression(italic(p)), xlab="Chromosome", xaxt="n", type="n", ...))
+    axis(1, at=ticks, lab=unique(d$CHR), ...)
+    icol=1
+    for (i in unique(d$CHR)) {
+      with(d[d$CHR==i, ],points(pos, P, col=colors[icol], ...))
+      icol=icol+1
+    }
+  }
+  if (!is.null(annotate)) {
+    d.annotate=d[which(d$SNP %in% annotate), ]
+    with(d.annotate, points(pos, P, col="green3", ...))
+  }
+}
+
 FstPlot <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limitchromosomes=1:23, suggestiveline=NULL, genomewideline=NULL, annotate=NULL, title="", ...) {
 
   d=dataframe
@@ -444,15 +789,36 @@ FstPlot <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limitch
 #  if (genomewideline) abline(h=genomewideline, col="red")
 }
 
-CalLD <- function(freq, dprime)
+Dprime2Correlation <- function(freq, dprime)
+{
+  ld=Dprime2LD(freq, dprime)
+  corl=array(0, dim=length(ld))
+  for(i in 1:length(corl))
+  {
+    corl[i] = ld[i]/sqrt(freq[i]*(1-freq[i])*freq[i+1]*(1-freq[i+1]))
+  }
+  return(corl)
+}
+
+LD2Correlation <- function(freq, ld)
+{
+  corl=array(0, dim=length(ld))
+  for(i in 1:length(corl))
+  {
+    corl[i] = ld[i]/sqrt(freq[i]*(1-freq[i])*freq[i+1]*(1-freq[i+1]))
+  }
+  return(corl)
+}
+
+Dprime2LD <- function(freq, dprime)
 {
   if(length(freq) == length(dprime))
   {
-    ld=array(dim=length(dprime)-1)
+    ld=array(0, dim=length(dprime)-1)
   }
   else if(length(dprime) == (length(freq) -1) )
   {
-    ld=array(dim=length(dprime))
+    ld=array(0, dim=length(dprime))
   }
   
   for(i in 1:length(ld))
@@ -468,6 +834,39 @@ CalLD <- function(freq, dprime)
   }
   return(ld)
 }
+
+GenerateGenoDprime <- function(freq, Dprime, N)
+{
+  g = matrix(0, nrow=N, ncol=length(freq))
+  
+  ld=Dprime2LD(freq, Dprime)
+  for(h in 1:N)
+  {
+    gMat = matrix(0, nrow=length(freq), ncol=2)
+    for(i in 1:length(freq))
+    {
+      for(j in 1:2)
+      {
+        idx = ifelse(runif(1, 0, 1) < freq[i], 0, 1)
+        if(i == 1)
+        {
+          gMat[i,j] = idx
+        }
+        else
+        {
+          d = runif(1, 0, 1)
+          a = gMat[i-1,j]
+          f1 = ifelse(a == 0, freq[i-1], 1-freq[i-1])
+          f2 = ifelse(a == 0, freq[i], 1-freq[i])
+          gMat[i,j] = ifelse(d < (f1 * f2 +ld[i-1])/f1, gMat[i-1,j], 1-gMat[i-1,j])
+        }
+      }
+    }
+    g[h,] = gMat[,1] + gMat[,2]
+  }
+  return(g)
+}
+
 
 GenerateGeno <- function(freq, ld, N)
 {
