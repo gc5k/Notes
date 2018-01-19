@@ -1,0 +1,204 @@
+args = commandArgs(T)
+if(length(args) >=6 )
+{
+  N1=as.numeric(args[1])
+  N2=as.numeric(args[2])
+  N12=as.numeric(args[3])
+  h2=as.numeric(args[4])
+  Mk=as.numeric(args[5])
+  Q=as.numeric(args[6])  
+} else {
+  N1=1000
+  N2=1000
+  N12=100
+  h2=0.005
+  Mk=1000
+  Q=100
+}
+
+Er12=(N12/sqrt(N1*N2))/(sqrt(N1/Mk*h2+1)*sqrt(N2/Mk*h2+1))
+Erg=(sqrt(N1*N2)/Mk * h2)/(sqrt(N1/Mk*h2+1)*sqrt(N2/Mk*h2+1))  
+gamma12=N12/sqrt(N1*N2)
+
+if(Sys.info()[['sysname']] == "Darwin")
+{
+  source("~/R/MyLib/shotgun.R")
+} else {
+  source("~/bin/MyLib/shotgun.R")
+}
+
+beta=matrix(0, Mk, 1)
+if(h2 > 0.01)
+{
+  Qidx=sample(Mk, Q)
+  beta[Qidx,1]=rnorm(Q)
+}
+
+freq=runif(Mk, 0.05, 0.5)
+ld=runif(Mk, -1, 1)
+ld=rep(0, Mk)
+
+
+##################
+#generating data
+g1=GenerateGeno(freq, ld, N1)
+g2=GenerateGeno(freq, ld, N2)
+gv1=g1 %*% beta
+gv2=g2 %*% beta
+if(h2 > 0.01)
+{
+  e1=sqrt(var(gv1)/h2 * (1-h2))
+} else {
+  e1 = 1
+}
+E1=rnorm(N1, 0, e1)
+E2=rnorm(N2, 0, e1)
+y1=gv1+E1
+y2=gv2+E2
+
+#setting overlapping samples
+if(N12 > 0)
+{
+  g1[1:N12,] = g2[1:N12,]
+  y1[1:N12,1] =y2[1:N12,1]
+}
+  
+###########gwas1
+Z1=matrix(Mk, Mk, 3)
+Z2=matrix(Mk, Mk, 3)
+chi=matrix(Mk, Mk, 1)
+for(i in 1:Mk)
+{
+  md1=lm(y1~g1[,i])
+  md2=lm(y2~g2[,i])
+  Z1[i,1]=summary(md1)$coefficients[2,3]
+  Z1[i,2]=summary(md1)$coefficients[2,1]
+  Z1[i,3]=summary(md1)$coefficients[2,2]
+
+  Z2[i,1]=summary(md2)$coefficients[2,3]
+  Z2[i,2]=summary(md2)$coefficients[2,1]
+  Z2[i,3]=summary(md2)$coefficients[2,2]
+}
+
+layout(matrix(1:4, 2, 2))
+###chisq
+rho=cor(Z1[,1], Z2[,1])
+V=matrix(c(1,rho, rho, 1), 2, 2)
+IV=solve(V)
+TT=matrix(Mk, Mk, 1)
+for(i in 1:Mk)
+{
+  z=matrix(0, 2, 1)
+  z[1,1]=Z1[i,1]
+  z[2,1]=Z2[i,1]
+  TT[i,1]=t(z) %*% IV %*% z
+}
+
+plot(main="Multi-variate Chi-square test", x=NULL, y=NULL, xlim=c(0, 25), ylim=c(0,25), xlab=expression(paste("Theoretical ", chi[2]^2)), ylab=expression(paste("Observed ", chi[2]^2)))
+if(h2 > 0.01)
+{
+  mk=Mk-length(Qidx)
+} else {
+  mk=Mk
+}
+alpha=seq(1, mk)
+beta=mk-alpha+1
+pv=alpha/(alpha+beta)
+Xm=matrix(0, mk, 2)
+Ym=matrix(0, mk, 2)
+Ym[,1]=qbeta(0.025, alpha, beta)
+Ym[,2]=qbeta(0.975, alpha, beta)
+Xm[,1]=pv
+Xm[,2]=pv
+for(ii in 1:(mk-1))
+{
+  dx=c(t(Xm[ii:(ii+1),]))
+  dy=c(Ym[ii,],Ym[ii+1,c(2,1)])
+  polygon(x=qchisq(dx,1), y=qchisq(dy,1), col="grey80", border="grey80")
+}
+
+
+if (h2 > 0.01)
+{
+#  plot(x=qchisq(seq(1/(Mk-length(Qidx)+1),1-1/(Mk-length(Qidx)+1), length=Mk-length(Qidx)), 2), y=sort(TT[-Qidx,1]), xlab=expression(paste("Theoretical ", chi[2]^2)), ylab=expression(paste("Observed ", chi[2]^2)))
+  points(x=qchisq(seq(1/(Mk-length(Qidx)+1),1-1/(Mk-length(Qidx)+1), length=Mk-length(Qidx)), 2), y=sort(TT[-Qidx,1]))
+} else {
+#  plot(x=qchisq(seq(1/(Mk+1),1-1/(Mk+1), length=Mk), 2), y=sort(TT), xlab=expression(paste("Theoretical ", chi[2]^2)), ylab=expression(paste("Observed ", chi[2]^2)))
+  points(x=qchisq(seq(1/(Mk+1),1-1/(Mk+1), length=Mk), 2), y=sort(TT))
+}
+
+abline(a=0, b=1, col="grey", lty=2)
+abline(a=0, b=(1-(Er12+Erg)*gamma12)/(1-(Er12+Erg)^2), col="blue")
+text(x=15, y=5, label=paste("Slop (blue) =", format((1-(Er12+Erg)*gamma12)/(1-(Er12+Erg)^2), digits=3)))
+
+
+###inverse-variance
+RV=matrix(Mk, Mk, 1)
+for(i in 1:Mk)
+{
+  v=V
+  v[1,1]=v[1,1]*Z1[i,3]^2
+  v[2,2]=v[2,2]*Z2[i,3]^2
+  v[1,2]=v[1,2]*Z1[i,3]*Z2[i,3]
+  v[2,1]=v[1,2]
+
+  iv=solve(v)
+  U=matrix(1, 2, 1)
+  de=t(U) %*% iv
+  num=t(U) %*% iv %*% U
+  w=de/num[1,1]
+  sd=sqrt(1/num[1,1])
+
+  b=w[1,1]*Z1[i,2] + w[1,2]*Z2[i,2]
+  RV[i,1]=(b/sd)^2
+}
+
+#plot for inverse-variance
+plot(main="Squared inverse-variance meta-analysis", x=NULL, y=NULL, xlim=c(0, 25), ylim=c(0,25), xlab=expression(paste("Theoretical ", chi[1]^2)), ylab=expression(paste("Observed ", chi[1]^2)))
+if(h2 > 0.01)
+{
+  mk=Mk-length(Qidx)
+} else {
+  mk=Mk
+}
+alpha=seq(1, mk)
+beta=mk-alpha+1
+pv=alpha/(alpha+beta)
+Xm=matrix(0, mk, 2)
+Ym=matrix(0, mk, 2)
+Ym[,1]=qbeta(0.025, alpha, beta)
+Ym[,2]=qbeta(0.975, alpha, beta)
+Xm[,1]=pv
+Xm[,2]=pv
+for(ii in 1:(mk-1))
+{
+  dx=c(t(Xm[ii:(ii+1),]))
+  dy=c(Ym[ii,],Ym[ii+1,c(2,1)])
+  polygon(x=qchisq(dx,1), y=qchisq(dy,1), col="grey80", border="grey80")
+}
+
+if(h2 > 0.01)
+{
+#  plot(x=qchisq(seq(1/(Mk-length(Qidx)+1),1-1/(Mk-length(Qidx)+1), length=Mk-length(Qidx)), 1), y=sort(RV[-Qidx,1]), xlab=expression(paste("Theoretical ", chi[1]^2)), ylab=expression(paste("Observed ", chi[1]^2)))
+  points(x=qchisq(seq(1/(Mk-length(Qidx)+1),1-1/(Mk-length(Qidx)+1), length=Mk-length(Qidx)), 1), y=sort(RV[-Qidx,1]))
+} else {
+#  plot(x=qchisq(seq(1/(Mk+1),1-1/(Mk+1), length=Mk), 1), y=sort(RV), xlab=expression(paste("Theoretical ", chi[1]^2)), ylab=expression(paste("Observed ", chi[1]^2)))
+  points(x=qchisq(seq(1/(Mk+1),1-1/(Mk+1), length=Mk), 1), y=sort(RV))
+}
+abline(a=0, b=1, col="grey", lty=2)
+abline(a=0, b=(1+gamma12)/(1+(Er12+Erg)), col="blue")
+text(x=15, y=5, label=paste("Slop (blue) =",format((1+gamma12)/(1+(Er12+Erg)), digits=3)))
+
+plot(x=RV[,1], y=TT, xlab=expression(paste("Squared IV meta-analysis ", chi[1]^2)), ylab=expression(paste("Multi-variant ", chi[2]^2)))
+if(h2 > 0.01)
+{
+  points(x=RV[Qidx,1], y=TT[Qidx,1], col="red")
+}
+abline(a=0, b=1, col="grey", lty=2)
+
+plot(xlim=c(0, 25), ylim=c(0,25), x=NULL, y=NULL, axes=F, xlab="", ylab="")
+text(x=5, y=20, label=paste("N12=", N12))
+text(x=5, y=17, label=paste("N1=", N1))
+text(x=5, y=14, label=paste("N2=", N2))
+text(x=5, y=11, label=paste("M=", Mk))
+text(x=5, y=8, label=paste("h2=", h2))
