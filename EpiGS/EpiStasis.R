@@ -1,8 +1,8 @@
 source("EpiNOIA.R")
 N=400
 REP=5000
-M=2000
-freq=runif(M, 0.5, 0.5)
+M=500
+freq=runif(M, 0.3, 0.5)
 
 F2=matrix(0, N, M)
 F2D=matrix(0, N, M)
@@ -22,9 +22,55 @@ GA=N*A/sum(diag(A))
 D=Hd %*% t(Hd)
 GD=N*D/sum(diag(D))
 
+#######AD epi
+##Vitezica
+GAD_=GA*GD
+GAD=N*GAD_/sum(diag(GAD_))
+
+#CGB
+GAD_t=matrix(0, nrow=nrow(GAD_), ncol=ncol(GAD_))
+for(i in 1:nrow(GAD_t))
+{
+  for(j in 1:ncol(GAD_t))
+  {
+    for(k in 1:M)
+    {
+      GAD_t[i,j] =GAD_t[i,j] + Ha[i,k] * Ha[j,k] * Hd[i,k] * Hd[j,k]
+    }
+  }
+}
+gad=A*D-GAD_t
+GAD_cgb=N*gad/sum(diag(gad))
+
+####AA epi,
+##Vitezica
+GAA_=GA*GA
+GAA=N*GAA_/sum(diag(GAA_))
+
+##CGB
+GAA_t=matrix(0, nrow=nrow(GAA_), ncol=ncol(GAA_))
+for(i in 1:nrow(GAA_t))
+{
+  for(j in 1:i)
+  {
+    for(k in 1:M)
+    {
+      GAA_t[i,j] =GAA_t[i,j] + Ha[i,k] * Ha[j,k] * Ha[i,k] * Ha[j,k]
+    }
+    GAA_t[j,i] =GAA_t[i,j]
+  }
+}
+gaa=A*A-GAA_t
+GAA_cgb=N*gaa/sum(diag(gaa))
+
 layout(matrix(1:4, 2,2))
-hist(GA[col(GA) < row(GA)], main="GA", xlab="")
-hist(GD[col(GD) < row(GD)], main="GD", xlab="")
+hist(GAD_cgb[row(GAD_cgb) > col(GAD_cgb)], breaks = 50, main="AD")
+hist(GAD[row(GAD) > col(GAD)], breaks = 50, main="AD (Vitezica)")
+
+hist(GAA_cgb[row(GAA_cgb) > col(GAA_cgb)], breaks = 50, main="AA")
+hist(GAA[row(GAA) > col(GAA)], breaks = 50, main="AA (Vitezica)")
+
+
 
 #######HE
 REP=100
