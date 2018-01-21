@@ -1,0 +1,22 @@
+###PCA
+HP=read.table("HapMap.profile", as.is=T, header=T)
+IBD=read.table("IBDMergeComSNPKeep.profile", as.is=T, header=T)
+png(filename="PCA.png", width=800, height=800)
+plot(xlab="PC 1", ylab="PC 2", HP$SCORE.BLUP1, HP$SCORE.BLUP2, col=ifelse((HP$FID == "CEU" | HP$FID == "TSI"), "blue", ifelse(HP$FID == "YRI", "black", ifelse((HP$FID == "CHB" | HP$FID == "JPT" | HP$FID == "CHD"), "green", "grey"))))
+eu=which(HP$FID == "CEU" | HP$FID == "TSI")
+sd1=sd(HP$SCORE.BLUP1[eu])
+sd2=sd(HP$SCORE.BLUP2[eu])
+cut=qnorm(0.025/nrow(HP))
+cut=7
+points(IBD$SCORE.BLUP1, IBD$SCORE.BLUP2, col="pink", pch=16)
+lines(x=c(mean(HP$SCORE.BLUP1[eu])-sd1*abs(cut),mean(HP$SCORE.BLUP1[eu])+sd1*abs(cut)), y=c(mean(HP$SCORE.BLUP2[eu]), mean(HP$SCORE.BLUP2[eu])))
+lines(x=c(mean(HP$SCORE.BLUP1[eu]),mean(HP$SCORE.BLUP1[eu])), y=c(mean(HP$SCORE.BLUP2[eu])-abs(cut)*sd2, mean(HP$SCORE.BLUP2[eu])+abs(cut)*sd2))
+idx1=which(IBD$SCORE.BLUP1 > (mean(HP$SCORE.BLUP1[eu]) + abs(cut) * sd1) | IBD$SCORE.BLUP1 < (mean(HP$SCORE.BLUP1[eu] - abs(cut) * sd1)))
+idx2=which(IBD$SCORE.BLUP2 > (mean(HP$SCORE.BLUP2[eu]) + abs(cut) * sd2) | IBD$SCORE.BLUP2 < (mean(HP$SCORE.BLUP2[eu] - abs(cut) * sd2)))
+total=union(idx1, idx2)
+points(IBD$SCORE.BLUP1[total], IBD$SCORE.BLUP2[total], col="gold", pch=15)
+legend(x=0.01, y=-0.032, legend=c("YRI", "CEU|TSI", "CHB|CHD|JPT"), col=c("black", "blue", "green"), pch=1, bty="n")
+legend(x=0.01, y=-0.022, legend=c("Europeans", "Admixed"), col=c("pink", "gold"), pch=c(16, 15), bty="n")
+write.table(IBD[total, c(1,2)], "Admixed.txt", row.names=F, col.names=F, quote=F)
+
+dev.off()
