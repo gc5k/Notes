@@ -1,9 +1,9 @@
 source("EpiNOIA.R")
 N=400
 REP=5000
-M=500
-freq=runif(M, 0.3, 0.5)
-
+M=2000
+freq=runif(M, 0.5, 0.5)
+set.seed(2018)
 F2=matrix(0, N, M)
 F2D=matrix(0, N, M)
 Ha=matrix(0, N, M)
@@ -29,15 +29,14 @@ GAD=N*GAD_/sum(diag(GAD_))
 
 #CGB
 GAD_t=matrix(0, nrow=nrow(GAD_), ncol=ncol(GAD_))
+
 for(i in 1:nrow(GAD_t))
 {
-  for(j in 1:ncol(GAD_t))
+  for(j in 1:i)
   {
-    for(k in 1:M)
-    {
-      GAD_t[i,j] =GAD_t[i,j] + Ha[i,k] * Ha[j,k] * Hd[i,k] * Hd[j,k]
-    }
+    GAD_t[i,j] = sum(Ha[i,] * Ha[j,] * Hd[i,] * Hd[j,])
   }
+  GAD_t[j,i]=GAD_t[i,j]
 }
 gad=A*D-GAD_t
 GAD_cgb=N*gad/sum(diag(gad))
@@ -53,10 +52,7 @@ for(i in 1:nrow(GAA_t))
 {
   for(j in 1:i)
   {
-    for(k in 1:M)
-    {
-      GAA_t[i,j] =GAA_t[i,j] + Ha[i,k] * Ha[j,k] * Ha[i,k] * Ha[j,k]
-    }
+    GAA_t[i,j] = sum(Ha[i,] * Ha[j,] * Ha[i,] * Ha[j,])
     GAA_t[j,i] =GAA_t[i,j]
   }
 }
@@ -69,7 +65,6 @@ hist(GAD[row(GAD) > col(GAD)], breaks = 50, main="AD (Vitezica)")
 
 hist(GAA_cgb[row(GAA_cgb) > col(GAA_cgb)], breaks = 50, main="AA")
 hist(GAA[row(GAA) > col(GAA)], breaks = 50, main="AA (Vitezica)")
-
 
 
 #######HE
