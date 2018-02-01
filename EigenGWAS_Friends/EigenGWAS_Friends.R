@@ -1,3 +1,85 @@
+grmStats <- function(root, pdf="n")
+{
+  grm=grmReader(root)
+  grmS=grm[col(grm) > row(grm)]
+  ne=-1/mean(grmS)
+  me=1/var(grmS)
+  if (pdf == "pdf")
+  {
+    pdf(paste0(root, "_grm.pdf"))
+  }
+  hist(grmS, xlab="GRM scores", main ="GRM distribution", breaks=25)
+  legend("topright", legend = c(paste0("ne=", format(ne, digits=3, nsmall=2)), paste0("me=", format(me, digits=3, nsmall=2))), bty='n')
+
+  if (pdf == "pdf")
+  {
+    dev.off()
+  }
+}
+
+pcPlot <- function(root, pdf="n")
+{
+  Evec=read.table(paste0(root, ".eigenvec"), as.is = T)
+  if(pdf == "pdf")
+  {
+    pdf(paste0(root, ".pc.pdf"))
+  }
+  plot(Evec[,3], Evec[,4], pch=16, xlab="PC 1", ylab="PC 2", frame.plot = F)
+  if(pdf == "pdf")
+  {
+    dev.off()
+  }
+}
+
+EigenValuePlot <- function(root, PC, pdf="n")
+{
+  Evev=read.table(paste0(root, ".eigenval"), as.is = T)
+  GC=array(0, dim=PC)
+
+  for(i in 1:PC)
+  {
+    eg = read.table(paste0(root, ".", i, ".egwas"), as.is = T, header = T)
+    GC[i] = qchisq(median(eg$P), 1, lower.tail = F)/qchisq(0.5, 1)
+  }
+
+  egc=matrix(c(Evev[1:PC,1], GC), PC, 2, byrow = F)
+  rownames(egc)=seq(1, PC)
+  if(pdf == "pdf")
+  {
+    pdf(paste0(FN, ".EV.pdf"))
+  }
+  barplot(t(egc), beside = T, border = F)
+  legend("topright", legend = c("Eigenvalue", expression(paste(lambda[gc]))), pch=15, col=c("black", "grey"), bty='n')
+  if(pdf == "pdf")
+  {
+    dev.off()
+  }
+}
+
+EigenGWASPlot <- function(root, pc, pdf='n')
+{
+  eg=read.table(paste0(root, ".", pc, ".egwas"), as.is = T, header = T)
+
+  if(pdf == "pdf")
+  {
+    pdf(paste0(root, "_", pc, ".pdf"))
+  }
+  layout(matrix(1:3, 3, 1))
+  
+  eg=eg[,-which(colnames(eg)=="P")]
+  colnames(eg)[which(colnames(eg)=="PGC")]="P"
+  manhattan(eg, pch=16, cex=0.5)
+  FstPlot(eg, pch=16, cex=0.5)
+  plot(eg$Chi, eg$Fst, xlab=expression(chi^2), ylab=expression(paste(italic("F")[italic("ST")])), pch=16, cex=0.5)
+  rsq=cor(eg$Chi, eg$Fst, use="pairwise.complete.obs")^2
+  legend("topright", legend = c(paste("Rsq=", format(rsq, digits = 4, nsmall = 3))), bty='n')
+
+  if(pdf == "pdf")
+  {
+    dev.off()
+  }
+}
+
 grmReader <- function(root)
 {
   grmFile = gzfile(paste0(root, ".grm.gz"))
