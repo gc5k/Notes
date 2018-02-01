@@ -22,7 +22,7 @@ pcPlot <- function(root, pdf="n")
   Evec=read.table(paste0(root, ".eigenvec"), as.is = T)
   if(pdf == "pdf")
   {
-    pdf(paste0(root, ".pc.pdf"))
+    pdf(paste0(root, "_pc.pdf"))
   }
   plot(Evec[,3], Evec[,4], pch=16, xlab="PC 1", ylab="PC 2", frame.plot = F)
   if(pdf == "pdf")
@@ -46,7 +46,7 @@ EigenValuePlot <- function(root, PC, pdf="n")
   rownames(egc)=seq(1, PC)
   if(pdf == "pdf")
   {
-    pdf(paste0(FN, ".EV.pdf"))
+    pdf(paste0(FN, "_EV.pdf"))
   }
   barplot(t(egc), beside = T, border = F)
   legend("topright", legend = c("Eigenvalue", expression(paste(lambda[gc]))), pch=15, col=c("black", "grey"), bty='n')
@@ -62,7 +62,7 @@ EigenGWASPlot <- function(root, pc, pdf='n')
 
   if(pdf == "pdf")
   {
-    pdf(paste0(root, "_", pc, ".pdf"))
+    pdf(paste0(root, "_E", pc, ".pdf"))
   }
   layout(matrix(1:3, 3, 1))
   
@@ -70,7 +70,7 @@ EigenGWASPlot <- function(root, pc, pdf='n')
   colnames(eg)[which(colnames(eg)=="PGC")]="P"
   manhattan(eg, pch=16, cex=0.5)
   FstPlot(eg, pch=16, cex=0.5)
-  plot(eg$Chi, eg$Fst, xlab=expression(chi^2), ylab=expression(paste(italic("F")[italic("ST")])), pch=16, cex=0.5)
+  plot(eg$Chi, eg$Fst, xlab=expression(chi[1]^2), ylab=expression(paste(italic("F")[italic("ST")])), pch=16, cex=0.5, frame.plot = F)
   rsq=cor(eg$Chi, eg$Fst, use="pairwise.complete.obs")^2
   legend("topright", legend = c(paste("Rsq=", format(rsq, digits = 4, nsmall = 3))), bty='n')
 
@@ -79,6 +79,58 @@ EigenGWASPlot <- function(root, pc, pdf='n')
     dev.off()
   }
 }
+
+SWEigenGWASPlot <- function(root, pc, kb=5, pdf='n')
+{
+  eg=read.table(paste0(root, ".", pc, ".egwas"), as.is = T, header = T)
+  lgc=qchisq(median(eg$P), 1, lower.tail = F)/qchisq(0.5, 1)
+  CHR=names(table(eg$CHR))
+  for(i in 1:length(CHR))
+  {
+    egs=eg[which(eg$CHR == CHR[i]),]
+    rg=range(egs$BP)
+    meg=matrix(0, nrow(egs), 5)
+    
+    for(j in 1:nrow(meg))
+    {
+      idx=which((egs$BP >= egs$BP[j] - kb*1000) & (egs$BP <= egs$BP[j] + kb * 1000))
+      meg[j, 1] = egs$CHR[j]
+      meg[j, 2] = egs$BP[j]
+      meg[j, 3] = mean(egs$Fst[idx])
+      meg[j, 4] = pchisq(mean(egs$Chi[idx]/lgc), 1, lower.tail = F)
+      meg[j, 5] = mean(egs$Chi[idx])
+    }
+
+    if(i == 1)
+    {
+      Meg = meg
+    }
+    else {
+      Meg = rbind(Meg, meg)
+    }
+  }
+  DMeg=as.data.frame(Meg)
+  colnames(DMeg)=c("CHR", "BP", "Fst", "P", "Chi")
+
+  
+  if(pdf == "pdf")
+  {
+    pdf(paste0(root, "_SE", pc, ".pdf"))
+  }
+  layout(matrix(1:3, 3, 1))
+
+  manhattan(DMeg, cex=0.5, pch=16)
+  FstPlot(DMeg, pch=16, cex=0.5)
+  plot(DMeg$Chi, DMeg$Fst, xlab=expression(chi[1]^2), ylab=expression(paste(italic("F")[italic("ST")])), pch=16, cex=0.5, frame.plot = F)
+  rsq=cor(DMeg$Chi, DMeg$Fst, use="pairwise.complete.obs")^2
+  legend("topright", legend = c(paste("Rsq=", format(rsq, digits = 4, nsmall = 3))), bty='n')
+  
+  if(pdf == "pdf")
+  {
+    dev.off()
+  }
+}
+
 
 grmReader <- function(root)
 {
@@ -127,9 +179,9 @@ manhattan <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limit
     }
   }
   if (numchroms==1) {
-    with(d, plot(main=title, pos, logp, ylim=c(0,ymax), ylab=expression(-log[10](italic(p))), xlab=paste("Chromosome",unique(d$CHR),"position"), ...))
+    with(d, plot(main=title, pos, logp, ylim=c(0,ymax), ylab=expression(-log[10](italic(p))), xlab=paste("Chromosome",unique(d$CHR),"position"), frame.plot = F, ...))
   }  else {
-    with(d, plot(main=title, pos, logp, ylim=c(0,ymax), ylab=expression(-log[10](italic(p))), xlab="Chromosome", xaxt="n", type="n", ...))
+    with(d, plot(main=title, pos, logp, ylim=c(0,ymax), ylab=expression(-log[10](italic(p))), xlab="Chromosome", xaxt="n", type="n", frame.plot = F, ...))
     axis(1, at=ticks, lab=unique(d$CHR), ...)
     icol=1
     for (i in unique(d$CHR)) {
@@ -178,9 +230,9 @@ FstPlot <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limitch
     }
   }
   if (numchroms==1) {
-    with(d, plot(pos, logp, ylim=c(0,ymax), ylab=expression(paste(italic("F")[italic("ST")])), xlab=paste("Chromosome",unique(d$CHR),"position"), main=title,...))
+    with(d, plot(pos, logp, ylim=c(0,ymax), ylab=expression(paste(italic("F")[italic("ST")])), xlab=paste("Chromosome",unique(d$CHR),"position"), main=title, frame.plot=F, ...))
   }  else {
-    with(d, plot(pos, logp, ylim=c(0,ymax), ylab=expression(paste(italic("F")[italic("ST")])), xlab="Chromosome", xaxt="n", type="n", main=title,...))
+    with(d, plot(pos, logp, ylim=c(0,ymax), ylab=expression(paste(italic("F")[italic("ST")])), xlab="Chromosome", xaxt="n", type="n", main=title, frame.plot = F, ...))
     axis(1, at=ticks, lab=unique(d$CHR), ...)
     icol=1
     for (i in unique(d$CHR)) {

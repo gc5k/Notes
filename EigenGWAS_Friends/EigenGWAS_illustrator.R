@@ -21,4 +21,9 @@ EigenValuePlot(FN, PC, "pdf")
 for(i in 1:PC)
 {
   EigenGWASPlot(FN, i, "pdf")
+  SWEigenGWASPlot(FN, i, 10, "pdf") 
+  #sliding window, @parameters, 1 file name, 2 pc, 3 kb, 4 pdf or not
 }
+
+####
+
