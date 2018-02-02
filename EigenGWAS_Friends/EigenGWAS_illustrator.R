@@ -14,7 +14,7 @@ pcPlot(FN, "pdf")
 ####EigenValue plot
 #EigenValuePlot(FN, PC)
 EigenValuePlot(FN, PC, "pdf")
-
+DeepEigenValuePlot(FN, 1, seq(0.1, 0.9, 0.05))
 ###EigenGWAS plot
 #EigenGWASPlot(FN, 1)
 

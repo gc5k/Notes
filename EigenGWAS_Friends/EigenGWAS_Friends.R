@@ -56,6 +56,28 @@ EigenValuePlot <- function(root, PC, pdf="n")
   }
 }
 
+DeepEigenValuePlot <- function(root, PC, cutV, pdf="n")
+{
+  Evev=read.table(paste0(root, ".eigenval"), as.is = T)
+  GC=matrix(0, nrow=1, ncol=length(cutV)+1)
+  GC[1]=Evev[PC,1]
+  eg = read.table(paste0(root, ".", PC, ".egwas"), as.is = T, header = T)
+
+  for(i in 1:length(cutV))
+  {
+    GC[1,1+i] = qchisq(sort(eg$P, T)[ceiling(cutV[i]*nrow(eg))], 1, lower.tail = F)/qchisq(cutV[i], 1, lower.tail = T)
+  }
+  colnames(GC)=c("EV", cutV)
+  par(las=2)
+  barplot(GC, ylim=c(0, max(GC)*1.3), beside = T, border = F, col=c("black", rep("grey", length(cutV))))
+  legend("topright", legend = c("Eigenvalue", expression(paste(lambda[gc]))), pch=15, col=c("black", "grey"), bty='n')
+  if(pdf == "pdf")
+  {
+    dev.off()
+  }
+}
+
+
 EigenGWASPlot <- function(root, pc, pdf='n')
 {
   eg=read.table(paste0(root, ".", pc, ".egwas"), as.is = T, header = T)
