@@ -1,3 +1,25 @@
+EigenQQPlot <- function(root, pc, pdf="n")
+{
+  eg = read.table(paste0(root, ".", PC, ".egwas"), as.is = T, header = T)
+  if (pdf == "pdf")
+  {
+    pdf(paste0(root, "_grm.pdf"))
+  }
+
+  gc = qchisq(median(eg$P), 1, lower.tail = F)/qchisq(0.5, 1)
+  thchi = rchisq(which(!is.na(eg$P)), 1)
+  qqplot(main="", thchi, eg$Chi, xlab=expression(paste("Theoretical ", chi[1]^2)), ylab=expression(paste("EigenGWAS ", chi[1]^2)), frame.plot=F, pch=16, cex=0.5) 
+  points(sort(thchi), sort(eg$Chi[!is.na(eg$Chi)]/gc), pch=1, cex=0.7, col="blue")
+  abline(a=0, b=1, col="red", lty=2)
+  legend("topleft", legend = c(paste0("LambdaGC=", format(gc, digits=3, nsmall=2))), bty='n')
+
+  if (pdf == "pdf")
+  {
+    dev.off()
+  }
+}
+
+
 grmStats <- function(root, pdf="n")
 {
   grm=grmReader(root)
