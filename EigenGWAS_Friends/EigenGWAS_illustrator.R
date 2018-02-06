@@ -3,6 +3,7 @@ PC=5
 
 source("EigenGWAS_Friends.R")
 
+gwas=read.table("Arab452SetMAFclean_Naive_1.assoc.linear", as.is = T, header = T)
 ####GRM stats
 #grmStats(FN)
 grmStats(FN, "pdf") #save as pdf automatically
@@ -27,5 +28,6 @@ for(i in 1:PC)
   #sliding window, @parameters, 1 file name, 2 pc, 3 kb, 4 pdf or not
 }
 
-####
+####pheno eigen
+SWPhenoEigenGWASPlot("Arab452SetMAFclean_Naive_1.assoc.linear", FN, 10)
 
