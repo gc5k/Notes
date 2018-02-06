@@ -39,6 +39,46 @@ grmStats <- function(root, pdf="n")
   }
 }
 
+pcMatPlot <- function(root, pc=2, pdf="n", COL="grey", ma=0.3)
+{
+  Evec=read.table(paste0(root, ".eigenvec"), as.is = T)
+  if(pdf == "pdf")
+  {
+    pdf(paste0(root, "_pcMat.pdf"))
+  }
+  par(mai=c(ma, ma, ma, ma))
+  nt=pc*(pc-1)/2
+  mat=matrix(nt+pc+1, pc, pc)
+  mat[col(mat) < row(mat)] = 1:nt
+  diag(mat)=(nt+1):(nt+pc)
+  layout(mat)
+  for(i in 1:(pc-1))
+  {
+    for(j in (i+1):pc)
+    {
+      plot(Evec[,i+2],Evec[, j+2], cex=0.5, pch=16, col=COL, xlim=1.2*range(Evec[,i+2]), ylim=1.2*range(Evec[,j+2]), bty="l", axes = F)
+      abline(h=0, v=0, col="grey70", lty=2)
+    }
+  }
+  for(i in 1:pc)
+  {
+    if (i== 1)
+    {
+      plot(x=NULL, y=NULL, xlim=1.2*range(Evec[,i+2]), ylim=1.2*range(Evec[,i+2]), bty="l")
+    } else if (i == pc)
+    {
+      plot(x=NULL, y=NULL, xlim=1.2*range(Evec[,i+2]), ylim=1.2*range(Evec[,i+2]), bty="l")
+    } else {
+      plot(x=NULL, y=NULL, xlim=1.2*range(Evec[,i+2]), ylim=1.2*range(Evec[,i+2]), bty="l")
+    }
+    text(mean(1.2*range(Evec[,i+2])), mean(1.2*range(Evec[,i+2])),labels = paste("EV", i))
+  }
+  if(pdf == "pdf")
+  {
+    dev.off()
+  }
+}
+
 pcPlot <- function(root, pdf="n")
 {
   Evec=read.table(paste0(root, ".eigenvec"), as.is = T)

@@ -10,6 +10,7 @@ grmStats(FN, "pdf") #save as pdf automatically
 ############PC plot
 #pcPlot(FN)
 pcPlot(FN, "pdf")
+pcMatPlot(FN, 5, COL="green", ma=0.2)
 
 ####EigenValue plot
 #EigenValuePlot(FN, PC)
