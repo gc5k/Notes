@@ -1,6 +1,6 @@
 EigenQQPlot <- function(root, pc, pdf="n")
 {
-  eg = read.table(paste0(root, ".", pc, ".egwas"), as.is = T, header = T)
+  eg = read.table(paste0(root, ".", PC, ".egwas"), as.is = T, header = T)
   if (pdf == "pdf")
   {
     pdf(paste0(root, "_grm.pdf"))
