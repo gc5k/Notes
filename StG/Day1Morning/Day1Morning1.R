@@ -22,15 +22,25 @@ qqplot(freqDat, rnorm(M, freq, sqrt(freq*(1-freq)/(2*N))), xlab = "Observed", yl
 abline(a=0, b=1, col="red")
 pvN=pnorm((freqDat-0.5)/sqrt(freqDat*(1-freqDat)/(2*N)))
 pvB=pbinom(apply(gmat, 2, sum), 2*N, 0.5)
-hist(pvN)
-hist(pvB)
+hist(pvN, main="Normal distribution")
+hist(pvB, main="Binomial distribution")
+
+hdtest=matrix(0, M, 2)
+for(i in 1:M)
+{
+  gcount=table(gmat[,i])
+  hdtest[i,1] = (gcount[1] - N/4)^2/(N/4) + (gcount[2] - N/2)^2/(N/2) + (gcount[3] - N/4)^2/(N/4)
+}
+layout(matrix(1:2, 1, 2))
+plot(density(hdtest[,1]), main="density of chisq[2df]")
+hist(hdtest[,2], main="Hardy p-value")
 
 ###############################
 #D1-2
 #Maize real inbred lines
 ###############################
 layout(matrix(1:6, 2, 3))
-FinaC=read.table("../Data/Fina_Genotype.ped", as.is = T, na.strings = "99")[,-c(1:6)]
+FinaC=read.table("Fina_Genotype.ped", as.is = T, na.strings = "99")[,-c(1:6)]
 GCnt=array(0, ncol(FinaC))
 for(i in 1:ncol(FinaC))
 {
