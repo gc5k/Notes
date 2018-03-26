@@ -1,10 +1,3 @@
-gcta='/Users/gc5k/bin/gcta_1.02/gcta_mac'
-gear='java -jar /Users/gc5k/Documents/workspace/FromSVN/GEAR/gear.jar'
-inode='ssh gc5k@inode.qbi.uq.edu.au'
-plink='/Users/gc5k/bin/plink-1.07-mac-intel/plink'
-hapgen='/Users/uqgchen5/bin/hapgen2_macosx_intel/hapgen2'
-HM3='/Users/uqgchen5/bin/hapgen2_macosx_intel/HM3'
-
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   library(grid)
   
@@ -504,18 +497,21 @@ OverLapIndex <- function(s1, s2) {
   return(idx)
 }
 
-manhattan <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limitchromosomes=1:23, suggestiveline=-log10(1e-5), genomewideline=NULL, title="", annotate=NULL, ...) {
+manhattan <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limitchromosomes=NULL, suggestiveline=-log10(1e-5), genomewideline=NULL, title="", annotate=NULL, ...) {
   
   d=dataframe
   if (!("CHR" %in% names(d) & "BP" %in% names(d) & "P" %in% names(d))) stop("Make sure your data frame contains columns CHR, BP, and P")
-  if (any(limitchromosomes)) d=d[d$CHR %in% limitchromosomes, ]
+  if (!is.null(limitchromosomes)) {
+    d=d[d$CHR %in% limitchromosomes, ]
+  }
+  
   d=subset(na.omit(d[order(d$CHR, d$BP), ]), (P>0 & P<=1)) # remove na's, sort, and keep only 0<P<=1
   d$logp = -log10(d$P)
   d$pos=NA
   ticks=NULL
   lastbase=0 #  colors <- rep(colors,max(d$CHR))[1:max(d$CHR)]
   colors <- rep(colors,max(d$CHR))[1:length(unique(d$CHR))]
-
+  
   if (ymax=="max") ymax<-ceiling(max(d$logp))
   if (ymax<8) ymax<-8
   numchroms=length(unique(d$CHR))
@@ -550,7 +546,7 @@ manhattan <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limit
     d.annotate=d[which(d$SNP %in% annotate), ]
     with(d.annotate, points(pos, logp, col="green3", ...))
   }
-#  if (suggestiveline) abline(h=suggestiveline, col="blue")
+  #  if (suggestiveline) abline(h=suggestiveline, col="blue")
   if (!is.null(genomewideline)) {
     abline(h=genomewideline, col="gray")
   } else {
@@ -558,7 +554,7 @@ manhattan <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limit
   }
 }
 
-miamiPlot <- function(dataframe, P1=NULL, P2=NULL, AnoCol="red", AnoCol1="blue", AnoCol2="yellow",colors=c("gray10", "gray50"), ymax="max", limitchromosomes=1:23, suggestiveline=-log10(1e-5), genomewideline=NULL, title="", annotate=NULL, annotate1=NULL, annotate2=NULL, ...) {
+miamiPlot <- function(dataframe, P1=NULL, P2=NULL, AnoCol="red", AnoCol1="blue", AnoCol2="yellow",colors=c("gray10", "gray50"), ymax="max", limitchromosomes=NULL, suggestiveline=-log10(1e-5), genomewideline=NULL, title="", annotate=NULL, annotate1=NULL, annotate2=NULL, ...) {
   if(is.null(P1))
   {
     P1 = "P"
@@ -572,7 +568,10 @@ miamiPlot <- function(dataframe, P1=NULL, P2=NULL, AnoCol="red", AnoCol1="blue",
   pidx2=which(colnames(dataframe) == P2)
   d=dataframe
   if (!("CHR" %in% names(d) & "BP" %in% names(d) & P1 %in% names(d) & P2 %in% names(d))) stop("Make sure your data frame contains columns CHR, BP, and P")
-  if (any(limitchromosomes)) d=d[d$CHR %in% limitchromosomes, ]
+  if (!is.null(limitchromosomes)) {
+    d=d[d$CHR %in% limitchromosomes, ]
+  }
+
   d=subset(na.omit(d[order(d$CHR, d$BP), ]), (P>0 & P<=1)) # remove na's, sort, and keep only 0<P<=1
   d$logp = -log10(d[,pidx1])
   d$logp2 = log10(d[,pidx2])
@@ -593,14 +592,15 @@ miamiPlot <- function(dataframe, P1=NULL, P2=NULL, AnoCol="red", AnoCol1="blue",
     d$pos=d$BP
     ticks=floor(length(d$pos))/2+1
   } else {
-    for (i in unique(d$CHR)) {
+    Uchr=unique(d$CHR)
+    for (i in 1:length(Uchr)) {
       if (i==1) {
-        d[d$CHR==i, ]$pos=d[d$CHR==i, ]$BP
+        d[d$CHR==Uchr[i], ]$pos=d[d$CHR==Uchr[i], ]$BP
       } else {
-        lastbase=lastbase+tail(subset(d,CHR==i-1)$BP, 1)
-        d[d$CHR==i, ]$pos=d[d$CHR==i, ]$BP+lastbase
+        lastbase=lastbase+tail(subset(d,CHR==Uchr[i-1])$BP, 1)
+        d[d$CHR==Uchr[i], ]$pos=d[d$CHR==Uchr[i], ]$BP+lastbase
       }
-      ticks=c(ticks, d[d$CHR==i, ]$pos[floor(length(d[d$CHR==i, ]$pos)/2)+1])
+      ticks=c(ticks, d[d$CHR==Uchr[i], ]$pos[floor(length(d[d$CHR==Uchr[i], ]$pos)/2)+1])
     }
   }
   if (numchroms==1) {
@@ -609,9 +609,10 @@ miamiPlot <- function(dataframe, P1=NULL, P2=NULL, AnoCol="red", AnoCol1="blue",
     with(d, plot(main=title, pos, logp, ylim=c(-1*max(abs(ymin),abs(ymax)), max(abs(ymin),abs(ymax))), ylab=expression(-log[10](italic(p))), xlab="Chromosome", xaxt="n", type="n", ...))
     axis(1, at=ticks, lab=unique(d$CHR), ...)
     icol=1
-    for (i in unique(d$CHR)) {
-      with(d[d$CHR==i, ],points(pos, logp, col=colors[icol], ...))
-      with(d[d$CHR==i, ],points(pos, logp2, col=colors[icol], ...))
+    Uchr=unique(d$CHR)
+    for (i in 1:length(Uchr)) {
+      with(d[d$CHR==Uchr[i], ],points(pos, logp, col=colors[icol], ...))
+      with(d[d$CHR==Uchr[i], ],points(pos, logp2, col=colors[icol], ...))
       icol=icol+1
     }
   }
@@ -650,12 +651,13 @@ miamiPlot <- function(dataframe, P1=NULL, P2=NULL, AnoCol="red", AnoCol1="blue",
   abline(h=0, col="white", lwd=2, lty=2)
 }
 
-
-manhattanTrans <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limitchromosomes=1:23, suggestiveline=-log10(1e-5), genomewideline=NULL, title="", annotate=NULL, ...) {
+manhattanTrans <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limitchromosomes=NULL, suggestiveline=-log10(1e-5), genomewideline=NULL, title="", annotate=NULL, ...) {
   
   d=dataframe
   if (!("CHR" %in% names(d) & "BP" %in% names(d) & "P" %in% names(d))) stop("Make sure your data frame contains columns CHR, BP, and P")
-  if (any(limitchromosomes)) d=d[d$CHR %in% limitchromosomes, ]
+  if (!is.null(limitchromosomes)) {
+    d=d[d$CHR %in% limitchromosomes, ]
+  }
   d=subset(na.omit(d[order(d$CHR, d$BP), ]), (P>0 & P<=1)) # remove na's, sort, and keep only 0<P<=1
   d$logp = -log10(d$P)
   d$pos=NA
@@ -669,14 +671,15 @@ manhattanTrans <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", 
     d$pos=d$BP
     ticks=floor(length(d$pos))/2+1
   } else {
-    for (i in unique(d$CHR)) {
+    Uchr=unique(d$CHR)
+    for (i in 1:length(Uchr)) {
       if (i==1) {
-        d[d$CHR==i, ]$pos=d[d$CHR==i, ]$BP
+        d[d$CHR==Uchr[i], ]$pos=d[d$CHR==Uchr[i], ]$BP
       } else {
-        lastbase=lastbase+tail(subset(d,CHR==i-1)$BP, 1)
-        d[d$CHR==i, ]$pos=d[d$CHR==i, ]$BP+lastbase
+        lastbase=lastbase+tail(subset(d,CHR==Uchr[i-1])$BP, 1)
+        d[d$CHR==Uchr[i], ]$pos=d[d$CHR==Uchr[i], ]$BP+lastbase
       }
-      ticks=c(ticks, d[d$CHR==i, ]$pos[floor(length(d[d$CHR==i, ]$pos)/2)+1])
+      ticks=c(ticks, d[d$CHR==Uchr[i], ]$pos[floor(length(d[d$CHR==Uchr[i], ]$pos)/2)+1])
     }
   }
   if (numchroms==1) {
@@ -685,8 +688,9 @@ manhattanTrans <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", 
     with(d, plot(bty='n', main=title, y=pos, x=logp, xlim=c(0,ymax), xlab=expression(-log[10](italic(p))), ylab="Chromosome", yaxt="n", type="n", ...))
     axis(2, at=ticks, lab=unique(d$CHR), ...)
     icol=1
-    for (i in unique(d$CHR)) {
-      with(d[d$CHR==i, ],points(y=pos, x=logp, col=colors[icol], ...))
+    Uchr=unique(d$CHR)
+    for (i in 1:length(Uchr)) {
+      with(d[d$CHR==Uchr[i], ],points(y=pos, x=logp, col=colors[icol], ...))
       icol=icol+1
     }
   }
@@ -745,11 +749,14 @@ manhattanP <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limi
   }
 }
 
-FstPlot <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limitchromosomes=1:23, suggestiveline=NULL, genomewideline=NULL, annotate=NULL, title="", ...) {
+FstPlot <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limitchromosomes=NULL, suggestiveline=NULL, genomewideline=NULL, annotate=NULL, title="", ...) {
 
   d=dataframe
   if (!("CHR" %in% names(d) & "BP" %in% names(d) & "Fst" %in% names(d))) stop("Make sure your data frame contains columns CHR, BP, and P")
-  if (any(limitchromosomes)) d=d[d$CHR %in% limitchromosomes, ]
+  if (!is.null(limitchromosomes)) {
+    d=d[d$CHR %in% limitchromosomes, ]
+  }
+
   d=subset(na.omit(d[order(d$CHR, d$BP), ]), (Fst>0 & Fst<=1)) # remove na's, sort, and keep only 0<P<=1
   d$logp = d$Fst
   d$pos=NA
@@ -757,20 +764,20 @@ FstPlot <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limitch
   lastbase=0
   colors <- rep(colors,max(d$CHR))[1:max(d$CHR)]
   if (ymax=="max") ymax<-max(d$logp)*1.1
-#  if (ymax<8) ymax<-8
   numchroms=length(unique(d$CHR))
   if (numchroms==1) {
     d$pos=d$BP
     ticks=floor(length(d$pos))/2+1
   } else {
-    for (i in unique(d$CHR)) {
+    Uchr=unique(d$CHR)
+    for (i in 1:length(Uchr)) {
       if (i==1) {
-        d[d$CHR==i, ]$pos=d[d$CHR==i, ]$BP
+        d[d$CHR==Uchr[i], ]$pos=d[d$CHR==Uchr[i], ]$BP
       } else {
-        lastbase=lastbase+tail(subset(d,CHR==i-1)$BP, 1)
-        d[d$CHR==i, ]$pos=d[d$CHR==i, ]$BP+lastbase
+        lastbase=lastbase+tail(subset(d,CHR==Uchr[i-1])$BP, 1)
+        d[d$CHR==Uchr[i], ]$pos=d[d$CHR==Uchr[i], ]$BP+lastbase
       }
-      ticks=c(ticks, d[d$CHR==i, ]$pos[floor(length(d[d$CHR==i, ]$pos)/2)+1])
+      ticks=c(ticks, d[d$CHR==Uchr[i], ]$pos[floor(length(d[d$CHR==Uchr[i], ]$pos)/2)+1])
     }
   }
   if (numchroms==1) {
@@ -779,8 +786,9 @@ FstPlot <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limitch
     with(d, plot(pos, logp, ylim=c(0,ymax), ylab=expression(paste(italic("F")[italic("ST")])), xlab="Chromosome", xaxt="n", type="n", main=title,...))
     axis(1, at=ticks, lab=unique(d$CHR), ...)
     icol=1
-    for (i in unique(d$CHR)) {
-      with(d[d$CHR==i, ],points(pos, logp, col=colors[icol], ...))
+    Uchr=unique(d$CHR)
+    for (i in 1:length(Uchr)) {
+      with(d[d$CHR==Uchr[i], ], points(pos, logp, col=colors[icol], ...))
       icol=icol+1
     }
   }
