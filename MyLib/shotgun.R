@@ -554,7 +554,7 @@ manhattan <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limit
   }
 }
 
-miamiPlot <- function(dataframe, P1=NULL, P2=NULL, AnoCol="red", AnoCol1="blue", AnoCol2="yellow",colors=c("gray10", "gray50"), ymax="max", limitchromosomes=NULL, suggestiveline=-log10(1e-5), genomewideline=NULL, title="", annotate=NULL, annotate1=NULL, annotate2=NULL, ...) {
+miamiPlot <- function(dataframe, P1=NULL, P2=NULL, Log1=TRUE, Log2=TRUE, AnoCol="red", AnoCol1="blue", AnoCol2="yellow", colors=c("gray10", "gray50"), limitchromosomes=NULL, suggestiveline=-log10(1e-5), genomewideline=NULL, title="", annotate=NULL, annotate1=NULL, annotate2=NULL, ...) {
   if(is.null(P1))
   {
     P1 = "P"
@@ -565,27 +565,44 @@ miamiPlot <- function(dataframe, P1=NULL, P2=NULL, AnoCol="red", AnoCol1="blue",
   {
     P2 = "P2"
   }
-  pidx2=which(colnames(dataframe) == P2)
-  d=dataframe
-  if (!("CHR" %in% names(d) & "BP" %in% names(d) & P1 %in% names(d) & P2 %in% names(d))) stop("Make sure your data frame contains columns CHR, BP, and P")
+  pidx2 = which(colnames(dataframe) == P2)
+  d = dataframe
+  if (!("CHR" %in% names(d) & "BP" %in% names(d) & P1 %in% names(d) & P2 %in% names(d))) stop(paste0("Make sure your data frame contains columns CHR, BP, ", P1, " and ", P2,"."))
   if (!is.null(limitchromosomes)) {
     d=d[d$CHR %in% limitchromosomes, ]
   }
-
-  d=subset(na.omit(d[order(d$CHR, d$BP), ]), (P>0 & P<=1)) # remove na's, sort, and keep only 0<P<=1
-  d$logp = -log10(d[,pidx1])
-  d$logp2 = log10(d[,pidx2])
+  
+  d=subset(na.omit(d[order(d$CHR, d$BP), ]), (!is.na(d[,pidx1]) & !is.na(d[,pidx2]))) # remove na's, sort, and keep only 0<P<=1
+  
+  if (Log1)
+  {
+    d$logp = -log10(d[,pidx1])
+  } else {
+    d$logp = d[,pidx1]
+  }
+  
+  if (Log2)
+  {
+    d$logp2 = log10(d[,pidx2])
+  } else {
+    d$logp2 = -1*d[,pidx2]
+  }
+  
+  ytick = c(ceiling(max(abs(d$logp2))), 0, ceiling(max(abs(d$logp))))
+  
+  if ( max(d$logp) > abs(max(d$logp2)) )
+  {
+    d$logp2 = d$logp2 * max(d$logp)/max(abs(d$logp2))
+  } else {
+    d$logp = d$logp * max(abs(d$logp2))/max(d$logp)
+  }
+  
   d$pos=NA
   ticks=NULL
   lastbase=0
   colors <- rep(colors,max(d$CHR))[1:max(d$CHR)]
-  if (ymax=="max") ymax<-ceiling(max(d$logp))
-  if (ymax<8) ymax<-8
-  if (min(d$logp2) > -8) {
-    ymin = -8
-  } else {
-    ymin = floor(min(d$logp2))
-  }
+  ymax = 1.2*(max(d$logp))
+  ymin = 1.2*(min(d$logp2))
   
   numchroms=length(unique(d$CHR))
   if (numchroms==1) {
@@ -604,10 +621,11 @@ miamiPlot <- function(dataframe, P1=NULL, P2=NULL, AnoCol="red", AnoCol1="blue",
     }
   }
   if (numchroms==1) {
-    with(d, plot(main=title, pos, logp, ylim=c(-1*max(abs(ymin),abs(ymax)), max(abs(ymin),abs(ymax))), ylab=expression(-log[10](italic(p))), xlab=paste("Chromosome",unique(d$CHR),"position"), ...))
+    with(d, plot(main=title, pos, logp, ylim=c(ymin, ymax), xlab=paste("Chromosome", unique(d$CHR), "position"), ylab='n',  axes=F, ...))
   } else {
-    with(d, plot(main=title, pos, logp, ylim=c(-1*max(abs(ymin),abs(ymax)), max(abs(ymin),abs(ymax))), ylab=expression(-log[10](italic(p))), xlab="Chromosome", xaxt="n", type="n", ...))
+    with(d, plot(main=title, pos, logp, ylim=c(ymin, ymax), ylab='', xlab="Chromosome", axes=F, type="n", ...))
     axis(1, at=ticks, lab=unique(d$CHR), ...)
+    axis(2, at=c(-1*(max(abs(d$logp2))), 0, max(abs(d$logp))), lab=c(-1*(max(abs(d$logp2))), 0, max(abs(d$logp))), ...)
     icol=1
     Uchr=unique(d$CHR)
     for (i in 1:length(Uchr)) {
@@ -620,33 +638,24 @@ miamiPlot <- function(dataframe, P1=NULL, P2=NULL, AnoCol="red", AnoCol1="blue",
     d.annotate=d[which(d$SNP %in% annotate), ]
     with(d.annotate, points(pos, logp, col=AnoCol, pch=16, ...))
     with(d.annotate, points(pos, logp2, col=AnoCol, pch=16, ...))
-#    with(d.annotate, points(pos, logp, col="grey", cex=1, pch=1))
-#    with(d.annotate, points(pos, logp2, col="grey", cex=1, pch=1))
-    
   }
-
+  
   if (!is.null(annotate1)) {
     d.annotate=d[which(d$SNP %in% annotate1), ]
     with(d.annotate, points(pos, logp, col=AnoCol1, pch=16))
-#    with(d.annotate, points(pos, logp, col="grey", cex=1, pch=1))
-    
   }
-
+  
   if (!is.null(annotate2)) {
     d.annotate=d[which(d$SNP %in% annotate2), ]
     with(d.annotate, points(pos, logp2, col=AnoCol2, pch=16))
-#    with(d.annotate, points(pos, logp2, col="grey", cex=1, pch=1))
-    
   }
   
-  #  if (suggestiveline) abline(h=suggestiveline, col="blue")
   if (!is.null(genomewideline)) {
     abline(h=genomewideline, col="gray")
-    abline(h=-1*genomewideline, col="gray")
-    
+    #    abline(h=-1*genomewideline, col="gray")
   } else {
     abline(h=-log10(0.05/nrow(d)), col="gray")
-    abline(h=log10(0.05/nrow(d)), col="gray")
+    #    abline(h=log10(0.05/nrow(d)), col="gray")
   }
   abline(h=0, col="white", lwd=2, lty=2)
 }
