@@ -1,9 +1,9 @@
 source("~/R/MyLib/shotgun.R")
 gear='java -jar /Users/gc5k/Documents/workspace/FromSVN/GEAR/gear.jar'
 REP=100
-LOCI=2
+LOCI=10
 effMat=matrix(0, LOCI, 1)
-effMat[,1]=c(1, 1)
+effMat[,1]=rep(1, LOCI)
 h2Mat=matrix(0, REP, LOCI)
 write.table(effMat, "effect.txt", row.names = F, col.names = F, quote=F, append=F)
 result=matrix(0, REP, LOCI)
@@ -11,8 +11,10 @@ result=matrix(0, REP, LOCI)
 LD = c(-0.75, 0.5, 0.25, 0, 0.25, 0.5, 0.75)
 REC = c(0.01, 0.1, 0.25, 0.5)
 
-LD = c(0.75)
-REC = c(0.1)
+LD = rep(0.75, LOCI-1)
+REC = rep(0.1, LOCI-1)
+LD=c(0.75)
+REC=c(0.1)
 
 mat=matrix(0, length(REC), length(LD))
 smat=matrix(0, length(REC), length(LD))
@@ -23,10 +25,10 @@ for(r in 1:length(REC))
 {
   for(ld in 1:length(LD))
   {
-    for(rep in 1:200)
+    for(rep in 1:REP)
     {
-      cmd=paste(gear, "simufam --num-fam 1000 --num-marker ", LOCI , " --effect-file effect.txt --out test --hsq 0.5 --freq 0.5")
-      cmd=paste(cmd, "--ld ", LD[ld], " --rec ", REC[r])  
+      cmd=paste(gear, "simufam --num-fam 1000 --num-marker ", LOCI , " --effect-file effect.txt --out test --hsq 0.5 --unif-freq")
+      cmd=paste(cmd, "--ld ", LD[ld], " --rec ", REC[r])
       cmd=paste(cmd, "--make-bed --seed ", rep+1000)
       print(cmd)
       system(cmd)
@@ -44,10 +46,10 @@ for(r in 1:length(REC))
     smat[r, ld] = sd(he$V2)
 
     system("grep Mean *.he > heM.txt")
-    he=read.table("he.txt", as.is = T)
+    heM=read.table("heM.txt", as.is = T)
 
-    mat1[r, ld] = mean(he$V2)
-    smat1[r, ld] = sd(he$V2)
+    mat1[r, ld] = mean(heM$V2)
+    smat1[r, ld] = sd(heM$V2)
   }
 }
 write.table(mat, "heBeta.txt", row.names = F, col.names = F, quote = F)
