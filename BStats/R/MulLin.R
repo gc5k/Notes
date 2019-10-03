@@ -27,7 +27,7 @@ for (i in 1:n_iterations){
   
   part = (y - X %*% beta)
   
-  sigma2 = 1/rgamma(1, n_obs/2, t(part) %*% part * .5 )
+  sigma2 = 1/rgamma(1, n_obs/2, t(part) %*% part * .5)
   #or sigma2 = rinvgamma(1, n_obs/2, t(part) %*% part * .5 ) from library (MCMCpark)
   
   beta_out[i,] = beta
