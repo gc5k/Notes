@@ -81,7 +81,7 @@ run_metropolis_MCMC <- function(startvalue, iterations){
 }
 
 startvalue = c(4,0,1,3)
-chain = run_metropolis_MCMC(startvalue, 1000000)
+chain = run_metropolis_MCMC(startvalue, 50000)
 
 burnIn = 2000
 acceptance = 1-mean(duplicated(chain[-(1:burnIn),]))
