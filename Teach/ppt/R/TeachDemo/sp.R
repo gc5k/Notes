@@ -46,3 +46,44 @@ abline(v=mean(coinMean[,3]), lwd=2, lty=2)
 sort(coinMean[,1])[c(25,975)]
 sort(coinMean[,2])[c(25,975)]
 sort(coinMean[,3])[c(25,975)]
+
+par(mfrow=c(1,1))
+colnames(coinMean)=k
+boxplot(coinMean, col=c("red", "green", "blue"))
+
+######Normal distribution
+par(mfrow=c(2,3))
+mn=c(0, 0, 0, -2, 1, 2)
+s=c(1, 0.5, 0.3, 1, 1, 1)
+COL=c("red", "red", "red", "cyan", "cyan", "cyan")
+for(i in 1:length(mn)) {
+  curve(main=paste0("mean=",mn[i], ", s.d.=",s[i]), dnorm(x, mn[i], s[i]), seq(-5, 5, 1000), xlim=c(-5,5), ylim=c(0, 1.5), col=COL[i], bty='l')
+  abline(v=0, lty=2)
+}
+
+
+par(mfrow=c(3,1))
+ct=c(1.28, 1.64, 1.96)
+COL=c("red", "blue", "orange")
+for(i in 1:3) {
+  curve(dnorm(x), xlab = "", seq(-5, 5, length=1000), xlim=c(-5,5), lwd=5, col="cyan", bty='l', ylab ="")
+  abline(v=ct[i], col=COL[i])
+  LN=seq(-5, ct[i], length=100)
+  for(j in 1:100) {
+    lines(x=c(LN[j], LN[j]), y=c(0,dnorm(LN[j])), col=COL[i])
+  }
+}
+
+###############yao ming
+par(mfrow=c(1,2))
+curve(bty='l',main="China (1.7)", xlab="Men's height", dnorm(x, 1.7, 0.075), seq(1, 2.4, 1000), xlim=c(1, 2.4),col='red', ylab="")
+abline(v=2.26, lty=2)
+
+curve(bty='l',main="Netherlands (1.84)", xlab="Men's height", dnorm(x, 1.84, 0.08), seq(1, 2.4, 1000), xlim=c(1, 2.4),col='blue', ylab="")
+abline(v=2.26, lty=2)
+
+1/10^(pnorm((2.26-1.7)/0.075, log.p = T, lower.tail = F)/log(10))
+1/10^(pnorm((2.26-1.84)/0.08, log.p = T, lower.tail = F)/log(10))
+
+
+###########
