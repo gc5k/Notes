@@ -70,5 +70,23 @@ cat(normalizePath(c(R.home(), tempdir())), sep = "\n")
 sessionInfo()
 ```
 
-## Startup package
-More about the private setting up for R please refer to [starup package](https://cran.r-project.org/web/packages/startup/vignettes/startup-intro.html)
+## Rprofile
+A file "~.Rprofile" can be defined as below to set up private setting for R session.
+
+```{r, eval=FALSE}
+local({
+        r <- getOption("repos")
+        r["CRAN"] <- "https://mirrors.ustc.edu.cn/CRAN/"
+        options(repos=r)
+})
+
+Sys.setenv(R_LIBS_USER="/Library/Frameworks/R.framework/Versions/3.6/Resources/library")
+tryCatch(startup::startup(), error=function(ex) message(".Rprofile error: ", conditionMessage(ex)))
+
+library(Rcpp)
+
+```
+
+## startup package
+More about the private setting up for R please refer to [startup package](https://cran.r-project.org/web/packages/startup/vignettes/startup-intro.html). 
+

@@ -429,7 +429,7 @@ summary {
 <pre class="r"><code>R.home()</code></pre>
 <pre><code>## [1] &quot;/Library/Frameworks/R.framework/Resources&quot;</code></pre>
 <pre class="r"><code>tempdir()</code></pre>
-<pre><code>## [1] &quot;/var/folders/vv/05ybzm_j1lvglv684n98r6vc0000gn/T//RtmppIqxIi&quot;</code></pre>
+<pre><code>## [1] &quot;/var/folders/vv/05ybzm_j1lvglv684n98r6vc0000gn/T//RtmpAfIqt7&quot;</code></pre>
 </div>
 <div id="cran-setup" class="section level2">
 <h2>CRAN setup</h2>
@@ -483,7 +483,7 @@ options(repos=rCRAN)</code></pre>
 <h2>Normalized Path</h2>
 <pre class="r"><code>cat(normalizePath(c(R.home(), tempdir())), sep = &quot;\n&quot;)</code></pre>
 <pre><code>## /Library/Frameworks/R.framework/Versions/3.6/Resources
-## /private/var/folders/vv/05ybzm_j1lvglv684n98r6vc0000gn/T/RtmppIqxIi</code></pre>
+## /private/var/folders/vv/05ybzm_j1lvglv684n98r6vc0000gn/T/RtmpAfIqt7</code></pre>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
@@ -511,9 +511,23 @@ options(repos=rCRAN)</code></pre>
 ##  [9] stringr_1.4.0   xfun_0.12       digest_0.6.24   rlang_0.4.4    
 ## [13] evaluate_0.14</code></pre>
 </div>
+<div id="rprofile" class="section level2">
+<h2>Rprofile</h2>
+<p>A file “~.Rprofile” can be defined as below to set up private setting for R session.</p>
+<pre class="r"><code>local({
+        r &lt;- getOption(&quot;repos&quot;)
+        r[&quot;CRAN&quot;] &lt;- &quot;https://mirrors.ustc.edu.cn/CRAN/&quot;
+        options(repos=r)
+})
+
+Sys.setenv(R_LIBS_USER=&quot;/Library/Frameworks/R.framework/Versions/3.6/Resources/library&quot;)
+tryCatch(startup::startup(), error=function(ex) message(&quot;.Rprofile error: &quot;, conditionMessage(ex)))
+
+library(Rcpp)</code></pre>
+</div>
 <div id="startup-package" class="section level2">
-<h2>Startup package</h2>
-<p>More about the private setting up for R please refer to <a href="https://cran.r-project.org/web/packages/startup/vignettes/startup-intro.html">starup package</a></p>
+<h2>startup package</h2>
+<p>More about the private setting up for R please refer to <a href="https://cran.r-project.org/web/packages/startup/vignettes/startup-intro.html">startup package</a>.</p>
 </div>
 </div>
 
