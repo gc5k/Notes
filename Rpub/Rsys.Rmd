@@ -1,0 +1,74 @@
+---
+title: "R.sys"
+author: "gc5k"
+date: "2/18/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# R system {.tabset .tabset-fade .tabset-pills}
+
+## System
+```{r sys}
+Sys.info()
+
+names(.Platform)
+
+getOption("repos")
+
+Sys.getenv("R_LIBS_USER")
+
+Sys.setenv(R_LIBS_USER="/Library/Frameworks/R.framework/Versions/3.6/Resources/library")
+
+
+```
+
+
+## Lib Path
+
+```{r Libpath}
+.libPaths()
+```
+
+## R version
+```{r R}
+R.version
+```
+
+## R home
+```{r Rhome}
+R.home()
+tempdir()
+```
+
+## CRAN setup
+```{r CRAN}
+#chooseCRANmirror()
+
+CRANList=getCRANmirrors()
+
+head(CRANList)
+
+rCRAN <- getOption("repos")
+
+rCRAN["CRAN"] <- "https://mirrors.ustc.edu.cn/CRAN/"
+
+options(repos=rCRAN)
+```
+
+## Normalized Path
+```{r path}
+cat(normalizePath(c(R.home(), tempdir())), sep = "\n")
+
+```
+
+## Session information
+```{r seesionInfo}
+sessionInfo()
+```
+
+## Startup package
+More about the private setting up for R please refer to [starup package](https://cran.r-project.org/web/packages/startup/vignettes/startup-intro.html)
