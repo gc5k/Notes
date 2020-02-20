@@ -874,7 +874,7 @@ GenerateGenoDprime <- function(freq, Dprime, N)
     {
       for(j in 1:2)
       {
-        idx = ifelse(runif(1, 0, 1) < freq[i], 0, 1)
+        idx = rbinom(1, 1, 1-freq[i])
         if(i == 1)
         {
           gMat[i,j] = idx
@@ -889,7 +889,7 @@ GenerateGenoDprime <- function(freq, Dprime, N)
         }
       }
     }
-    g[h,] = gMat[,1] + gMat[,2]
+    g[h,] = 2-(gMat[,1] + gMat[,2])
   }
   return(g)
 }
@@ -921,7 +921,7 @@ GenerateGeno <- function(freq, ld, N)
         }
       }
     }
-    g[h,] = gMat[,1] + gMat[,2]
+    g[h,] = 2- (gMat[,1] + gMat[,2])
   }
   return(g)
 }
@@ -952,8 +952,8 @@ GenerateHaplo <- function(freq, ld, N)
         }
       }
     }
-    g[h*2-1,] = gMat[,1]
-    g[h*2,] = gMat[,2]
+    g[h*2-1,] = 1-gMat[,1]
+    g[h*2,] = 1-gMat[,2]
   }
   return(g)
 }

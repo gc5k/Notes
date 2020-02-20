@@ -1,15 +1,23 @@
 source("~/R/MyLib/shotgun.R")
-M=1000
+#source("~/git/Notes/R/RLib/shotgun.R")
+sourceCpp("~/git/EigenGWASRDoc/EigenISdosage/lib/cormatrix.cpp")
+M=100
 N=500
 frq=runif(M, 0.1, 0.5)
 #frq=runif(M, 0.1, 0.5)
 Dp=sample(c(runif(M/2, 0.5, 1), runif(M/2, -1, -0.5)), M)
-
+ld=Dprime2LD_Rcpp(frq, Dp)
+ld1=Dprime2LD(frq, Dp)
 #simu
 G=GenerateGenoDprime(frq, Dp, N)
+Gld=GenerateGeno(frq, ld1, N)
+G2=GenerateGenoDprime_Rcpp(frq, Dp, N)
 
 FQ=colMeans(G)/2
-plot(frq, 1-colMeans(G)/2)
+layout(matrix(1:2,1,2))
+plot(frq, colMeans(G)/2)
+plot(frq, colMeans(G2)/2)
+
 cr=cor(G)
 
 cr2=cr^2
