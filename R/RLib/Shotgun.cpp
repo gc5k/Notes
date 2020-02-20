@@ -31,20 +31,25 @@ NumericMatrix CorMatrix(NumericMatrix Mat)
   return wrap(exCor);
 }
 
-// [[Rcpp::export(Dprime2LDRcpp)]]
-NumericVector Dprime2LD(NumericVector freq, NumericVector Dp) {
+inline static bool check(int l1, int l2, int diff) {
   try {
-    if ((freq.length() != Dp.length())) {
+    if (l1 != (l2+diff)) {
       throw std::range_error("unequal size of freq and Dprime."); 
-    } else if(freq.length() < 2) {
-      throw std::range_error("at least two loci.");
     }
   } catch (std::exception &ex) {
     forward_exception_to_r(ex);
   } catch (...) {
-    ::Rf_error("unequal size of freq and Dprime, or too small freq.length (at least 2).");
+    ::Rf_error("length(freq) -length (Dprime) != 1, or too small freq.length (at least 2).");
   }
-  NumericVector ld(Dp.length()-1);
+  return true;
+}
+
+// [[Rcpp::export(Dprime2LDRcpp)]]
+NumericVector Dprime2LD(NumericVector freq, NumericVector Dp) {
+
+  if(!check(freq.length(), Dp.length(), 1)) Rcpp::stop("failed");
+
+  NumericVector ld(Dp.length());
   
   for(int i = 0; i < ld.length(); i++) {
     if (Dp[i]>0) {
@@ -60,17 +65,42 @@ NumericVector Dprime2LD(NumericVector freq, NumericVector Dp) {
   return ld;
 }
 
+// [[Rcpp::export(Dprime2CorRcpp)]]
+NumericVector Dprime2Cor(NumericVector freq, NumericVector Dp) {
+  if(!check(freq.length(), Dp.length(), 1)) Rcpp::stop("failed");
+  
+  NumericVector ld=Dprime2LD(freq, Dp);
+  NumericVector corl=NumericVector(freq.length()-1);
+  for(int i = 0; i < corl.length(); i++) {
+    corl[i] = ld[i]/sqrt(freq[i]*(1-freq[i])*freq[i+1]*(1-freq[i+1]));
+  }
+  return(corl);
+}
+
+// [[Rcpp::export(LD2CorRcpp)]]
+NumericVector LD2Cor (NumericVector freq, NumericVector ld) {
+  if(!check(freq.length(), ld.length(), 1)) Rcpp::stop("failed");
+
+  NumericVector corl= NumericVector(freq.length()-1);
+  for(int i = 0; i < corl.length(); i++) {
+    corl[i] = ld[i]/sqrt(freq[i]*(1-freq[i])*freq[i+1]*(1-freq[i+1]));
+  }
+  return corl;
+}
+
 // [[Rcpp::export(GenerateGenoDprimeRcpp)]] 
 NumericMatrix GenerateGenoDprime(NumericVector freq, NumericVector Dp, int N) {
+  if(!check(freq.length(), Dp.length(), 1)) Rcpp::stop("failed");
+
   NumericMatrix G(N, freq.length());
   NumericVector ld = Dprime2LD(freq, Dp);
 
   for(int h = 0; h < N; h++) {
     NumericMatrix gMat = NumericMatrix(freq.length(), 2);
     
-    for(int i = 0; i < freq.length(); i++) {
+    for(int i = 0; i < gMat.nrow(); i++) {
       
-      for(int j = 0; j < 1; j++) {
+      for(int j = 0; j < gMat.ncol(); j++) {
         if(i == 0) {
           gMat(i,j) = (int) Rcpp::rbinom(1, 1, 1-freq[i])[0];
         } else {
@@ -88,23 +118,91 @@ NumericMatrix GenerateGenoDprime(NumericVector freq, NumericVector Dp, int N) {
         }
       }
     }
+
     for(int i = 0; i < freq.length(); i++) {
-      G(h,i) = 2- (gMat(i,0) + gMat(i,1));
+      G(h,i) = 2 - (gMat(i,0) + gMat(i,1));
     }
   }
 
   return G;
 }
 
-// [[Rcpp::export(Dprime2CorRcpp)]]
-NumericVector Dprime2Cor (NumericVector freq, NumericVector Dp) {
-  NumericVector ld=Dprime2LD(freq, Dp);
-  NumericVector corl=NumericVector(ld.length());
-  for(int i = 0; i < corl.length(); i++) {
-    corl[i] = ld[i]/sqrt(freq[i]*(1-freq[i])*freq[i+1]*(1-freq[i+1]));
+// [[Rcpp::export(GenerateGenoLDRcpp)]]
+NumericMatrix GenerateGenoLD(NumericVector freq, NumericVector ld, int N) {
+  if(!check(freq.length(), ld.length(), 1)) Rcpp::stop("failed");
+
+  NumericMatrix G(N, freq.length());
+
+  for(int h = 0; h < N; h++) {
+    NumericMatrix gMat = NumericMatrix(freq.length(), 2);
+    
+    for(int i = 0; i < gMat.nrow(); i++) {
+      
+      for(int j = 0; j < gMat.ncol(); j++) {
+        if(i == 0) {
+          gMat(i,j) = (int) Rcpp::rbinom(1, 1, 1-freq[i])[0];
+        } else {
+          double ff = freq[i-1] * freq[i];
+          double hap_pro = (ff +ld[i-1])/freq[i-1];
+          if (gMat(i-1,j)!=0) {
+            ff = (1-freq[i-1])*(1-freq[i]);
+            hap_pro = (ff +ld[i-1])/(1-freq[i-1]);
+          }
+          
+          gMat(i,j) = gMat(i-1,j);
+          if (Rcpp::runif(1, 0, 1)[0] > hap_pro) {
+            gMat(i,j) = 1-gMat(i-1,j);
+          }
+        }
+      }
+    }
+    for(int i = 0; i < freq.length(); i++) {
+      G(h,i) = 2- (gMat(i,0) + gMat(i,1));
+    }
   }
-  return(corl);
+  
+  return G;
 }
+
+// [[Rcpp::export(GenerateHapLDRcpp)]]
+NumericMatrix GenerateHapLD(NumericVector freq, NumericVector ld, int N) {
+
+  if(!check(freq.length(), ld.length(), 1)) Rcpp::stop("failed");
+  
+  NumericMatrix G(N*2, freq.length());
+  
+  for(int h = 0; h < N; h++) {
+    NumericMatrix gMat = NumericMatrix(freq.length(), 2);
+    
+    for(int i = 0; i < gMat.nrow(); i++) {
+      
+      for(int j = 0; j < gMat.ncol(); j++) {
+        if(i == 0) {
+          gMat(i,j) = (int) Rcpp::rbinom(1, 1, 1-freq[i])[0];
+        } else {
+          double ff = freq[i-1] * freq[i];
+          double hap_pro = (ff +ld[i-1])/freq[i-1];
+          if (gMat(i-1,j)!=0) {
+            ff = (1-freq[i-1])*(1-freq[i]);
+            hap_pro = (ff +ld[i-1])/(1-freq[i-1]);
+          }
+          
+          gMat(i,j) = gMat(i-1,j);
+          if (Rcpp::runif(1, 0, 1)[0] > hap_pro) {
+            gMat(i,j) = 1-gMat(i-1,j);
+          }
+        }
+      }
+    }
+    for(int i = 0; i < freq.length(); i++) {
+      G(h*2,i) = 1 - gMat(i,0);
+      G(h*2+1,i) = 1 - gMat(i,1);
+    }
+  }
+  
+  return G;
+}
+
 
 // [[Rcpp::export]]
 Rcpp::List MailmanProductL(NumericMatrix G1, NumericMatrix G2, NumericVector sg) {
