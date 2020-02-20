@@ -24,7 +24,7 @@ source("~/R/MyLib/shotgun.R")
 
 ## Read data & QC
 ```{r readdata}
-dat=read.csv("covid-data-pph.csv", header = T)
+dat=read.csv("covid-data-pph1.csv", header = T)
 dat=dat[dat[,22]!=0.5,] #delete missing value
 md.na=md.pattern(dat) #check missing value pattern
 rmNA=which(apply(is.na(dat), 1, any)) #remove
