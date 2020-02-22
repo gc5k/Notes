@@ -8,19 +8,18 @@ using namespace std;
 //[[Rcpp::export(CorMatrixRcpp)]]
 NumericMatrix CorMatrix(NumericMatrix Mat)
 {
-  int i=0,j=0,k=0;
   int num;
   double sum,temp;
   int c=Mat.ncol();
   int r=Mat.nrow();
   NumericMatrix exCor(r,r);
-  for(i=0; i<r;i++)
+  for(int i=0; i<r;i++)
   {
-    for(j=0; j<=i; j++)
+    for(int j=0; j<=i; j++)
     {
       sum=0.0;
       num=0;
-      for(k=0; k<c; k++)
+      for(int k=0; k<c; k++)
       {
         temp = Mat(i,k)*Mat(j,k);
         if(abs(temp)>1.0e-8) {num++;sum += temp;}
@@ -30,6 +29,43 @@ NumericMatrix CorMatrix(NumericMatrix Mat)
   }
   return wrap(exCor);
 }
+
+//[[Rcpp::export(CorMatrix2Rcpp)]]
+NumericMatrix CorMatrix2(NumericMatrix Mat1, NumericMatrix Mat2)
+{
+  try {
+    if (Mat1.ncol() != Mat2.ncol()) {
+      throw std::range_error("unequal size of freq and Dprime."); 
+    }
+  } catch (std::exception &ex) {
+    forward_exception_to_r(ex);
+  } catch (...) {
+    ::Rf_error("Unequal ncol for matrix 1 and 2.");
+  }
+
+  int num;
+  double sum,temp;
+  int r1=Mat1.nrow();
+  int r2=Mat2.nrow();
+  int c=Mat1.ncol();
+  NumericMatrix exCor(r1,r2);
+  for(int i=0; i<r1;i++)
+  {
+    for(int j=0; j<r2; j++)
+    {
+      sum=0.0;
+      num=0;
+      for(int k=0; k<c; k++)
+      {
+        temp = Mat1(i,k)*Mat2(j,k);
+        if(abs(temp)>1.0e-8) {num++;sum += temp;}
+      }
+      exCor(i,j) = sum/(double)num;
+    }
+  }
+  return wrap(exCor);
+}
+
 
 inline static bool check(int l1, int l2, int diff) {
   try {
