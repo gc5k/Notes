@@ -1,10 +1,63 @@
 library(Rcpp)
 sourceCpp("~/git/Notes/R/RLib/Shotgun.cpp")
 M=10000
-N=500
-frq=runif(M, 0.1, 0.5)
-Dp=sample(c(runif(M/2, 0.5, 1), runif(M/2, -1, -0.5)), M)
+N=1000
+frq=runif(M, 0.5, 0.5)
+Dp=sample(c(runif(M/2, 0.9, 1), runif(M/2, -1, -0.9)), M)
 Dp=Dp[-1]
+
+G=GenerateGenoDprimeRcpp(frq, Dp, N)
+FQ=colMeans(G)/2
+plot(colMeans(G)/2, frq)
+
+#cr=cor(G)
+#cr2=cr^2
+
+#Ecr2=mean(cr2[row(cr2) < col(cr2)])
+#Ocr2=mean(cr2[row(cr2) != col(cr2)])
+#standardization
+s=apply(G, 2, scale)
+Kcpp=CorMatrixRcpp(s)
+
+#K
+K=1/M * s %*% t(s)
+K2=K^2
+diagK2=sum(diag(K2))
+mVar=mean(1/(2*FQ*(1-FQ)))
+ss=apply(s^2,1, sum)
+
+me=var(K[row(K)<col(K)])
+R2=(var(K[row(K)<col(K)])-1/M)*M/(M-1)
+EK2=N*(N-1)/M+N+N/M*(mVar-2)+R2*N^2
+SK2=sum(K2)
+##################################
+
+bootS=30
+EK2_=array(0, dim=bootS)
+for(i in 1:bootS) {
+  meFun=MeFun(N/4, G)
+  EK2_[i]=N*(N-1)/M+N+N/M*(mVar-2)+meFun$R2*N^2
+}
+
+MeFun <-function(sn, G) {
+  n=nrow(G)
+  m=ncol(G)
+  SP=sample(n, sn)
+  Gs_=G[SP,]
+  s=apply(Gs_, 2, scale)
+  K_=1/m * s %*% t(s)
+  K2_=K_^2
+  FQ_=colMeans(Gs_)/2
+  mVar_=mean(1/(2*FQ_*(1-FQ_)))
+
+  me_=var(K_[row(K_)<col(K_)])
+  R2_=(var(K_[row(K_)<col(K_)])-1/m)*m/(m-1)
+  EK2_=sn*(sn-1)/m+sn+sn/m*(mVar-2)+R2_*sn^2
+  SK2_=sum(K2_)
+  
+  pa=list("EK2"=EK2_, "SK2"=SK2_, "R2"=R2_, "me"=me_)
+}
+
 #simu
 Gc=GenerateGenoDprimeRcpp(frq, Dp, N)
 Gn=GenerateGenoDprimeRcpp(frq, Dp, N)
