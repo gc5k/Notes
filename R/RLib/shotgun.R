@@ -1,4 +1,35 @@
 
+readPlinkBed <-function(root) {
+  fam.file=read.table(paste0(root,".fam"), as.is = T)
+  bim.file=read.table(paste0(root, ".bim"), as.is = T)
+  bed.file="test.bed"
+  bin.connection = file(bed.file, 'rb') # opens a connection with .bed file
+  test.bytes = readBin(bin.connection, what = "raw", n = 3) # bytes 1 and 2 store infor about file type, byte 3 about array type
+  if(!identical(as.character(test.bytes), c('6c', '1b', '01'))) {
+    stop('BED file not a v0.99 SNP-major BED file, please re-encode the data as v0.99 SNP-major file')
+  }
+  
+  snp.size=nrow(bim.file)
+  sample.size=nrow(fam.file)
+  genotype = array(NA, dim = c(sample.size,snp.size))
+  
+  for(k in 1:snp.size){
+    r.bin.snp = readBin(bin.connection, what = 'raw', n = sample.size/4)
+    bin.snp = matrix(as.numeric(rawToBits(r.bin.snp)), ncol = 2, byrow = TRUE)
+    if(dim(bin.snp)[1]==0){
+      genotype[genotype == -9] = NA 
+      return(genotype[,1:k-1,drop=F])
+    }
+    bin.snp = bin.snp[1:sample.size,]
+    genotype[,k] = bin.snp[,1] + bin.snp[,2] - 10 * ((bin.snp[,1] == 1) & (bin.snp[,2] == 0))
+  }
+  
+  genotype[genotype == -9] = NA
+  idx=is.na(genotype)
+  genotype[idx]=2-genotype[idx]
+  return (genotype)
+}
+
 KFold <- function(k, datasize) {
   n <- rep(1:k,ceiling(datasize/k))[1:datasize]
   return(n)
