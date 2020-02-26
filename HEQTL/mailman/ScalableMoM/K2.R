@@ -1,10 +1,11 @@
 library(Rcpp)
 sourceCpp("~/git/Notes/R/RLib/Shotgun.cpp")
 M=10000
-N=1000
+N=500
 frq=runif(M, 0.5, 0.5)
-Dp=sample(c(runif(M/2, 0.9, 1), runif(M/2, -1, -0.9)), M)
+Dp=sample(c(runif(M/2, 0, 0), runif(M/2, 0, 0)), M)
 Dp=Dp[-1]
+
 
 G=GenerateGenoDprimeRcpp(frq, Dp, N)
 FQ=colMeans(G)/2
@@ -21,6 +22,7 @@ Kcpp=CorMatrixRcpp(s)
 
 #K
 K=1/M * s %*% t(s)
+KtK=K%*%t(K)
 K2=K^2
 diagK2=sum(diag(K2))
 mVar=mean(1/(2*FQ*(1-FQ)))
@@ -30,9 +32,38 @@ me=var(K[row(K)<col(K)])
 R2=(var(K[row(K)<col(K)])-1/M)*M/(M-1)
 EK2=N*(N-1)/M+N+N/M*(mVar-2)+R2*N^2
 SK2=sum(K2)
-##################################
 
-bootS=30
+
+Sh2=matrix(0, 100, 1)
+for(i in 1:100) {
+  h2=0.5
+  pp=0.5
+  M1=ceiling(M*pp)
+  beta=c(rnorm(M1, sd=sqrt(h2/M1)), rnorm(M-M1))
+  bv=G%*%beta
+  res=var(bv)*(1-h2)/h2
+  Y=bv+rnorm(N, sd=sqrt(res))
+  y=scale(Y)
+
+  yX=t(y)%*%s
+
+  yKy=t(y)%*%K%*%y
+  yy=t(y)%*%y
+  Sh2[i,1]=(yKy-N)/(SK2-N)
+  print(h2)
+}
+plot(Sh2)
+
+
+
+##################################
+RmeMat=matrix(0, 100, 1)
+for(i in 1:100) {
+  Rme=RMe(100, s)
+  RmeMat[i,1]=Rme$me
+}
+
+bootS=10
 EK2_=array(0, dim=bootS)
 for(i in 1:bootS) {
   meFun=MeFun(N/4, G)
@@ -52,10 +83,21 @@ MeFun <-function(sn, G) {
 
   me_=var(K_[row(K_)<col(K_)])
   R2_=(var(K_[row(K_)<col(K_)])-1/m)*m/(m-1)
-  EK2_=sn*(sn-1)/m+sn+sn/m*(mVar-2)+R2_*sn^2
+  EK2_=sn*(sn-1)/m+sn+sn/m*(mVar_-2)+R2_*sn^2
   SK2_=sum(K2_)
   
-  pa=list("EK2"=EK2_, "SK2"=SK2_, "R2"=R2_, "me"=me_)
+  pa=list("EK2"=EK2_, "SK2"=SK2_, "R2"=R2_, "me"=me_, "mVar"=mVar_)
+}
+
+RMe <-function(B, sG) {
+  z=matrix(rnorm(B*nrow(sG)), B, nrow(sG))
+  v1=(z%*%s)^2/N
+  qqplot(v1[1,], rchisq(M, 1))
+  abline(a=0, b=1, col="red")
+  vv=apply(v1, 1, sum)
+  v_vv=var(vv)
+  me_v=v_vv/(2*M^2)-1/(N-1)
+  pa=list("me"=me_v)
 }
 
 #simu
