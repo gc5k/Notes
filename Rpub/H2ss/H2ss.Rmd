@@ -1,0 +1,227 @@
+---
+title: "H2ss"
+author: "gc5k"
+date: "2/27/2020"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: false
+#    theme: united
+#    highlight: tango
+    code_folding: hide
+---
+# TOC {.tabset .tabset-fade .tabset-pills}
+
+## MoM
+
+$y|e,\mathbf{\beta}=\mathbf{X}\beta+e$
+
+$e|\sigma^2_e~N(0,\sigma^2I_N)$
+
+$\beta|\sigma^2_g~N(\frac{\sigma^2_g}{M},I_M)$
+
+$y$ is centered.
+
+\begin{align}
+cov(y)&=\mathbb{E}(yy^T)-\mathbb{y}\mathbb{y}^T\\
+&=\sigma^2_g\mathbf{\Omega}+\sigma^2_eI_N
+\end{align}
+
+
+### OLS
+
+The target to be minimized is 
+
+$Q=argmin_{(\sigma^2_g,\sigma^2_e)}|| yy^T-(\sigma^2_g\mathbf{\Omega}+\sigma^2_eI_N)||_F^2$
+
+Here $_{F}$ is for Frobenius norm of a matrix $A$, $||A||_F=\sqrt{tr(AA^T)}$. 
+
+
+\begin{align}
+Q&=argmin_{(\sigma^2_g,\sigma^2_e)}|| yy^T-(\sigma^2_g\mathbf{\Omega}+\sigma^2_eI_N)||_F^2\\
+&=tr[yy^T-(\sigma^2_g\mathbf{\Omega}+\sigma^2_gI)][yy^T-(\sigma^2_g\mathbf{\Omega}+\sigma^2_gI)]^T
+\end{align}
+
+An ordinary least squares (OLS) probelm of $Q$ is 
+
+\[
+\left\{
+ \begin{array}{lll}
+  \frac{\partial{Q}}{\partial{\sigma^2_g}} & =tr\{\frac{yy^Tyy^T-(\sigma^2_g\mathbf{\Omega}+\sigma^2_eI_N)+(\sigma^2_g\mathbf{\Omega}+\sigma^2_eI_N)^2}{\partial{\sigma^2_g}}\}&=tr\{\sigma^2_g\mathbf{\Omega}\mathbf{\Omega}^T+\sigma^2_e\mathbf{\Omega}-yy^T\mathbf{\Omega}\}=0\\
+  \frac{\partial{Q}}{\partial{\sigma^2_e}} & =tr\{\frac{yy^Tyy^T-(\sigma^2_g\mathbf{\Omega}+\sigma^2_eI_N)+(\sigma^2_g\mathbf{\Omega}+\sigma^2_eI_N)^2}{\partial{\sigma^2_e}}\}&=tr\{\sigma^2_g\mathbf{\Omega}+\sigma^2_e\mathbf{I}-yy^T\mathbf{I}\}=0
+ \end{array}
+\right.
+\]
+
+\[
+\left\{
+ \begin{array}{lll}
+tr\{\sigma^2_g\mathbf{\Omega}\mathbf{\Omega}^T+\sigma^2_e\mathbf{\Omega}\}=tr\{yy^T\mathbf{\Omega}\}=tr\{y^T\mathbf{\Omega}y\}\\
+tr\{\sigma^2_g\mathbf{\Omega}+\sigma^2_e\mathbf{I}\}=tr\{yy^T\mathbf{I}\}=tr\{y^T\mathbf{I}y\}
+ \end{array}
+\right.
+\]
+The last step uses cycling property of [$trace$](https://en.wikipedia.org/wiki/Trace_(linear_algebra)).
+
+The above result can be orgainzed in to normal equation below
+
+\[
+\begin{bmatrix} tr[\mathbf{\Omega}\mathbf{\Omega}^T] & tr[\mathbf{\Omega}] \\ tr[\mathbf{\Omega}] & N \end{bmatrix} \left[ \begin{array}{c} \hat{\sigma}^2_g \\ \hat{\sigma}^2_e \end{array} \right] = \left[ \begin{array}{c} tr[y^t\mathbf{\Omega}y] \\ tr[y^TI_Ny] \end{array} \right] 
+\]
+
+It is easy to find that
+
+$$\hat{\sigma}^2_g=\frac{y^T(\mathbf{\Omega}-I_N)y}{tr[\mathbf{\Omega}\mathbf{\Omega}^T]-N}$$
+
+### Link to summary statistics
+After rearrangement, it is easy to see that
+$y^T\mathbf{\Omega}y=\frac{1}{M}y^T\mathbf{SS}^Ty$, and $E(\frac{1}{M}y^T\mathbf{SS}^Ty)=NE(\chi^2_{1,h^2})=N(1+N\frac{h^2}{M_Q}\sum_{m=1}^Mr^2_{k,m})$. `**It is available as summary statistics!**`
+
+It is easy to see $E(y^TI_Ny)=N$, so the expectation of the numerator is $N^2\frac{h^2}{M_q}\sum^{M_{q}}_{m=1}r^2_{k,m}$, in which $M_q$ is the number of causal variants. 
+
+### Link to the reference population
+The denominator can be derived that $tr[\mathbf{\Omega}^2]=N^2E^2(\rho)+N$, in which $$E^2(\rho)=\frac{\sum_{k_1=1}^M\sum_{k_2=1}^M \rho^2_{k_1k_2}}{M^2} = \frac{\sum_{k=1}^M1+\sum_{k_1=1}^M\sum_{k_2 \ne k_1}^M \rho^2_{k_1k_2}}{M^2} \geq \frac{1}{M}$$
+
+## 2 Basic Tables
+
+### Haplotype for a pair of biallelic loci
+
+----
+
+| |$a_l$|$A_l$| |
+|:---:|:---:|:---:|:---:|
+|$a_k$| $r_{kl}=q_l+\frac{D_{kl}}{q_k}$ | $\bar{r}_{kl}=q_l+\frac{D_{kl}}{q_k}$ | $q_k$|
+|$A_k$| $\bar{R}_{kl}=q_l+\frac{D_{kl}}{p_{kl}}$| $R_{kl}=p_l+\frac{D_{kl}}{p_{kl}}$| $p_k$|
+||$q_l$|$p_l$||
+
+-----
+
+$p_k$ and $p_l$ are minor allelic frequencies of the two loci, respectively.
+It exists the transformation as $D_{kl}=\rho_{kl}\sqrt{p_kq_kp_lq_l}$. 
+Of note, $D_{kl}$ is restrained as `min`($p_kq_l$, $q_kp_l$), and consequently
+$\rho_{kl}=\sqrt{\frac{p_kq_l}{p_lq_k}}<1$.
+
+### **Frequencies for a pair of loci for the $i^{th}$ individual**
+
+------
+
+|| | | | | Locus $l$ | |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+||Geno | | |$a_la_l$ | $a_lA_l$|$A_lA_l$ |
+|| | Standardized geno | |$s_{il}=\frac{-2p_l}{\sqrt{2p_lq_l}}$ | $s_{il}=\frac{q_l-p_l}{\sqrt{2p_lq_l}}$|$s_{il}=\frac{2q_l}{\sqrt{2p_lq_l}}$ |
+|| | | Frequency |$q_l^2$ | $2p_lq_l$|$p_l^2$ |
+||$a_ka_k$|$s_{ik}=\frac{-2p_k}{\sqrt{2p_kq_k}}$ | $q_k^2$|$r_{kl}^2$ |$2r_{kl}\bar{r}_{kl}$ | $\bar{r}_{kl}^2$ |
+|Locus $k$|$a_ka_k$|$s_{ik}=\frac{q_k-p_k}{\sqrt{2p_kq_k}}$ | $q_k^2$ |$r_{kl}\bar{R}_{kl}$| $r_{kl}\bar{R}_{kl}+\bar{r}_{kl}R_{kl}$ | $\bar{r}_{kl}R_{kl}$ |
+||$A_kA_k$|$s_{ik}=\frac{2q_k}{\sqrt{2p_kq_k}}$ |$p_k^2$ | $\bar{R}_{kl}^2$ | $2R_{kl}\bar{R}_{kl}$ | $R_{kl}^2$ |
+
+----
+
+
+## 3 GRM statistics $\mathbf{\Omega}$
+$\mathbf{\Omega}=\mathbf{s^Ts}$, in which $\mathbf{s}$ as defined in the last page. In particular, for a pair of individuals $i$ and $j$, their relatedness is
+$\Omega_{ij}=\frac{1}{M}\sum_{k=1}^Ms_{i,k}s_{j,k}=\frac{1}{M}\sum_{k=1}^Ms_{i,k}s_{j,k}$
+
+$\mathbf{\Omega}$ is a Hermitian matrix (symetric), and the diagonal element is $\Omega_{ii}=\frac{1}{M}\sum_{k=1}^Ms_{i,k}^2$.
+
+### Diagonal elements
+$E(s_{ii}^2)=diag(\Omega_{ii})=1$, interpreting that an individual is identical to himself under random mating (no inbred, otherwise $1+F$).
+
+\begin{align}
+\Omega_{ii}^2 &= \frac{1}{M^2}[\color{red} {\sum_{k=1}^M s_{ik}^4}+\color{green}{\sum_{k_1}\sum_{k_1 \ne k_2} s_{i,k_1}^2s_{i,k_2}^2}] \\
+ &=\frac{1}{M^2}\{\color{red} {\sum_{k=1}^M \frac{1}{2p_kq_k}}+\color{green}{\sum_{k_1}\sum_{k_1 \ne k_2} [(1+\rho^2_{k_1,k_2})+\frac{\rho_{k_1,k_2}(p_{k_1}-q_{k_1})(p_{k_2}-q_{k_2})}{2\sqrt{p_{k_1}q_{k_1}p_{k_2}q_{k_2}}}]}\} 
+\end{align}
+
+Under large sample and many loci, $E(\frac{\rho_{k_1,k_2}(p_{k_1}-q_{k_1})(p_{k_2}-q_{k_2})}{2\sqrt{p_{k_1}q_{k_1}p_{k_2}q_{k_2}}})=0$
+
+So, we have
+
+\begin{align}
+\Omega_{ii}^2&=\frac{1}{M^2}[M\frac{1}{E(\sigma_k^2)}+M(M-1)(1+E(\rho^2_{k_1k_2}))]\\
+&=\frac{1}{E(\sigma_k^2)}\frac{1}{M}+\frac{M-1}{M}[1+\color{red}{E(\rho^2_{k_1k_2})}]
+\end{align}
+
+### Off-diagonal elements
+$\Omega_{ij}=\frac{1}{M}\sum_{k=1}^Ms_{ik}s_{jk}$
+
+and 
+$\Omega_{ij}^2=\frac{1}{M^2}[\sum_{k=1}^Ms^2_{ik}s^2_{jk}+\sum_{k_1=1}^M\sum_{k_2=1}^Ms_{ik_1}s_{ik_2}s_{jk_1}s_{jk_2}]$
+
+in which
+$E(s_{ik}^2s_{jk}^2)=E(s_{ik}^2)E(s_{jk}^2)$, if the individuals are not related.
+
+$E(s_{ik_1}s_{ik_2}s_{jk_1}s_{jk_2})=E(s_{ik_1}s_{ik_2})E(s_{jk_1}s_{jk_2})=E(\rho_{i,k_1k_2})E(\rho_{j,k_1k_2})=E^2(\rho_{k_1k_2})$.
+
+So
+
+$$E(\mathbf{\Omega}_{ij}^2)=\frac{1}{M}+\frac{M-1}{M}\color{green}{E^2(\rho_{k_1k_2})}$$
+
+## 4 $E(s^2_{ii,k}),E(s^4_{ii,k}), var(s_{ii}^2)$
+
+### Some useful identities for $s$.
+
+$$E(s^2_{ii,k})=1$$
+
+$$E(\color{red} {s^4_{ii,k}})=\frac{1}{2p_kq_k}$$
+The $\color{red} {s^4_{ik} = \frac{1}{2p_kq_k}}$, in which $2p_kq_k$ is the expected value of the variance of the $k^{th}$ locus under random mating. $\color{red} {s^4_{ik}}$ can be derived as below,
+
+| | $a_ka_k$ | $A_ka_k$ | $A_kA_k$|
+|:---:|:---:|:----:|:----:|
+| |$q_k^2$|$2p_kq_k$|$p_k^2$|
+|$\Omega_{ii}=s^2_{ii}$| $\frac{4p_k^2}{2p_kq_k}$ |$\frac{(1-2p_k)^2}{2p_kq_k}$ |$\frac{4q_k^2}{2p_kq_k}$ |
+|$\Omega_{ii}^2=s^4_{ii}$| $\frac{16p_k^4}{4p_k^2q_k^2}$ |$\frac{(q_k-p_k)^4}{4p_k^2q_k^2}$ |$\frac{16p_k^4}{4p_k^2q_k^2}$ |
+
+
+$$var(s_{ii}^2)=E(s_{ii}^4)-E^2(s_{ii}^2)=\frac{1}{2p_kq_k}-1$$
+
+```{r s4, eval=F}
+library(Rcpp)
+sourceCpp("~/git/Notes/R/RLib/Shotgun.cpp")
+source("~/git/Notes/R/RLib/shotgun.R")
+M=1000
+N=500
+frq=runif(M, 0.1, 0.5)
+Dp=sample(c(runif(M/2, 0, .5), runif(M/2, -0.5, 0)), M)
+Dp=Dp[-1]
+
+G=GenerateGenoDprimeRcpp(frq, Dp, N)
+s=apply(G, 2, scale)
+#Kcpp=CorMatrixRcpp(s)
+FQ=colMeans(G)/2
+s2=s^2
+s4=s^4
+layout(matrix(1:3, 1, 3))
+hist(main="Simulation test for s^2", colMeans(s2), xlab="E(s^2)")
+plot(main="Simulation test for s^4", 1/(2*FQ*(1-FQ)), colMeans(s4), pch=16, cex=0.5, xlab="1/(2pq)", ylab="Simulated s^4")
+abline(a=0, b=1, col="red", lwd=2, lty=2)
+
+vs2=apply(s2, 2, var)
+plot(main="Siulation test for var(s^2)",1/(2*FQ*(1-FQ))-1, vs2, pch=16, cex=0.5, xlab="1/(2pq)-1", ylab="Simulated var(s^2)")
+abline(a=0, b=1, col="red", lwd=2, lty=2)
+
+#K
+K=1/M * s %*% t(s)
+
+```
+
+## 5 $E(s_{ii,k_1}^2s_{ii,k_2}^2), cov(s_{ii,k_1}^2,s_{ii,k_2}^2)$
+
+\begin{align}
+E(\color{green}{s_{ii,k_1}^2s_{ii,k_2}^2})&= \color{purple}{q^2_{k_1}\frac{4p_{k_1}^2}{2p_{k_1}q_{k_1}} [\frac{4p_{k_2}^2r^2_{k_1k_2}+(q_{k_2}-p_{k_2})^2 2r_{k_1k_2}\bar{r}_{k_1k_2} + 4q_{k_2}^2\bar{r}_{k_1k_2}^2}{2p_{k_2}q_{k_2}}]}\\
+&+2p_{k_1k_2}\frac{(q_{k_1}-p_{k_2})^2}{2p_{k_1k_2}}[\frac{4p_{k_2}^2r_{k_1k_2}\bar{R}_{k_1k_2}+(q_{k_2}-p_{k_2})^2 (\bar{r}_{k_1k_2}\bar{R}_{k_1k_2}+r_{k_1k_2}R_{k_1k_2}) + 4q_{k_2}^2\bar{r}_{k_1k_2}R_{k_1k_2}}{2p_{k_2}q_{k_2}}]\\
+&+\color{purple}{p^2_{k_1}\frac{4q_{k_1}^2}{2p_{k_1}q_{k_1}}[\frac{4p_{k_2}^2\bar{R}^2_{k_1k_2}+(q_{k_2}-p_{k_2})^2 2R_{k_1k_2}\bar{R}_{k_1k_2} + 4q_{k_2}^2R_{k_1k_2}^2}{2p_{k_2}q_{k_2}}]}\\
+&=\color{purple}{2p_{k_1}q_{k_1}[\frac{4p^2_{k_2}(r^2_{k_1k_2}+\bar{R}_{k_1k_2})+(q_{k_2}-p_{k_2})^2(2r_{k_1k_2}\bar{r}_{k_1k_2}+2R_{k_1k_2}\bar{R}_{k_1k_2})+4q^2_{k_2}(\bar{r}^2_{k_1k_2}+R^2_{k_1k_2})}{2p_{k_2}{k_2}}]}\\
+&+(1-4p_{k_1}q_{k_1})\frac{4p^2_{k_2}r_{k_1k_2}\bar{R}_{k_1k_2}+(q_{k_2}-p_{k_2})^2(\bar{r}_{k_1}{k_2}\bar{R}_{k_1}{k_2}+r_{k_1}{k_2}R_{k_1}{k_2})}{2p_{k_2}q_{k_2}})\\
+&=1+\frac{D_{k_1k_2}[(p_{k_1}-q_{k_1})(p_{k_2}-q_{k_2})]}{2p_{k_1}q_{k_1}p_{k_2}q_{k_2}}-\frac{D^2_{k_1k_2}}{p_{k_1}q_{k_1}p_{k_2}q_{k_2}}\\
+&=1+\rho^2_{k_1k_2}+\frac{\rho_{k_1k_2}(p_{k_1}-q_{k_1})(p_{k_2}-q_{k_2})}{2\sqrt{p_{k_1}q_{k_1}p_{k_2}q_{k_2}}}
+\end{align}
+
+And consequently, we can derive
+\begin{align}
+cov(s_{ii,k_1}^2,s_{ii,k_2}^2)&=E(s_{i,k_1}^2s_{i,k_2}^2)-E^2(s_{i,k_1})E^2(s_{i,k_2})\\
+&=1+\rho^2_{k_1k_2}+\frac{\rho_{k_1k_2}(p_{k_1}-q_{k_1})(p_{k_2}-q_{k_2})}{2\sqrt{p_{k_1}q_{k_1}p_{k_2}q_{k_2}}}-1\\
+&=\rho^2_{k_1k_2}+\rho_{k_1k_2}\frac{(p_{k_1}-q_{k_1})(p_{k_2}-q_{k_2})}{2\sqrt{p_{k_1}q_{k_1}p_{k_2}q_{k_2}}}
+\end{align}
+
+When $k_1 = k_2$, it is obviously that $\rho_{k_1,k_2}=1, p_{k_1}=p_{k_2}$, and
+$$cov(s_{ii,k_1}^2,s_{ii,k_2}^2)=1+1\times\frac{(p_{k}-q_{k})^2}{2p_{k}q_{k}}=1+\frac{1-4p_{k}q_{k}}{2p_{k}q_{k}}=\frac{1}{2p_{k}q_{k}}-1=var(s_{ii,k}^2)$$

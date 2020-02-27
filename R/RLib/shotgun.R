@@ -1,3 +1,56 @@
+MeVarK <-function(sn, G) {
+  m=ncol(G)
+  SP=sample(nrow(G), sn)
+  Gs_=G[SP,]
+  s=apply(Gs_, 2, scale)
+  K_=1/m * s %*% t(s)
+  K2_=K_^2
+  FQ_=colMeans(Gs_)/2
+  mVar_=mean(1/(2*FQ_*(1-FQ_)))
+
+  me_=var(K_[row(K_)<col(K_)])
+  R2_=(me_-1/m)*m/(m-1)
+  EK2_=sn*(sn-1)/m+sn+sn/m*(mVar_-2)+R2_*sn^2
+  SK2_=sum(K2_)
+  
+  pa=list("EK2"=EK2_, "SK2"=SK2_, "R2"=R2_, "me"=me_, "mVar"=mVar_)
+}
+
+MeChi2 <-function(K, sG) {
+  z=matrix(rnorm(K*nrow(sG)), K, nrow(sG))
+  m=ncol(sG)
+  n=nrow(sG)
+  v1=(z%*%sG)^2/n
+  vv=apply(v1, 1, sum)
+  v_vv=var(vv)
+  me_v=v_vv/(2*m^2)-1/(n-1)
+  pa=list("me"=me_v)
+}
+
+MeSriram <-function(B, sG) {
+  k2=array(0, dim=B)
+  for(i in 1:B) {
+    z=matrix(rnorm(nrow(sG)), 1, nrow(sG))    
+    v1=t(sG)%*%t(z)
+    v2=sG%*%v1
+    k2[i]=sum(v2^2)/ncol(sG)^2
+  }
+  pa=list("k2"=k2)
+}
+
+MeSriramSub <-function(B, n, G) {
+  k2=array(0, dim=c(B,2))
+  ss=G[sample(nrow(G), n),]
+  sG=apply(ss, 2, scale)
+  for(i in 1:B) {
+    z=matrix(rnorm(n),1,n)    
+    v1=t(sG)%*%t(z)
+    v2=sG%*%v1
+    k2[i,1]=sum(v2^2)/ncol(sG)^2
+    k2[i,2]=(k2[i,1]-n)/n^2
+  }
+  pa=list("k2"=k2)
+}
 
 readPlinkBed <-function(root) {
   fam.file=read.table(paste0(root,".fam"), as.is = T)
