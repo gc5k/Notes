@@ -43,7 +43,7 @@ Q&=argmin_{(\sigma^2_g,\sigma^2_e)}|| yy^T-(\sigma^2_g\mathbf{\Omega}+\sigma^2_e
 &=tr[yy^T-(\sigma^2_g\mathbf{\Omega}+\sigma^2_gI)][yy^T-(\sigma^2_g\mathbf{\Omega}+\sigma^2_gI)]^T
 \end{align}
 
-An ordinary least squares (OLS) probelm of $Q$ is 
+An ordinary least squares (OLS) problem of $Q$ is as below
 
 \[
 \left\{
@@ -67,18 +67,21 @@ The last step uses cycling property of [$trace$](https://en.wikipedia.org/wiki/T
 The above result can be orgainzed in to normal equation below
 
 \[
-\begin{bmatrix} tr[\mathbf{\Omega}\mathbf{\Omega}^T] & tr[\mathbf{\Omega}] \\ tr[\mathbf{\Omega}] & N \end{bmatrix} \left[ \begin{array}{c} \hat{\sigma}^2_g \\ \hat{\sigma}^2_e \end{array} \right] = \left[ \begin{array}{c} tr[y^t\mathbf{\Omega}y] \\ tr[y^TI_Ny] \end{array} \right] 
+\begin{bmatrix} tr[\mathbf{\Omega}\mathbf{\Omega}^T] & tr[\mathbf{\Omega}] \\ tr[\mathbf{\Omega}] & N \end{bmatrix} \left[ \begin{array}{c} \hat{\sigma}^2_g \\ \hat{\sigma}^2_e \end{array} \right] = \left[ \begin{array}{c} tr[y^T\mathbf{\Omega}y] \\ tr[y^TI_Ny] \end{array} \right] 
 \]
 
 It is easy to find that
 
 $$\hat{\sigma}^2_g=\frac{y^T(\mathbf{\Omega}-I_N)y}{tr[\mathbf{\Omega}\mathbf{\Omega}^T]-N}$$
 
+**Notes**:, the $y^T(\mathbf{\Omega}-I_N)y$ is quadratic form [wiki link](https://en.wikipedia.org/wiki/Quadratic_form_(statistics)).
+
+
 ### Link to summary statistics
 After rearrangement, it is easy to see that
 $y^T\mathbf{\Omega}y=\frac{1}{M}y^T\mathbf{SS}^Ty$, and $E(\frac{1}{M}y^T\mathbf{SS}^Ty)=NE(\chi^2_{1,h^2})=N(1+N\frac{h^2}{M_Q}\sum_{m=1}^Mr^2_{k,m})$. `**It is available as summary statistics!**`
 
-It is easy to see $E(y^TI_Ny)=N$, so the expectation of the numerator is $N^2\frac{h^2}{M_q}\sum^{M_{q}}_{m=1}r^2_{k,m}$, in which $M_q$ is the number of causal variants. 
+It is easy to see $E(y^TI_Ny)=N$, so the expectation of the numerator is $N^2\frac{h^2}{M_q}\sum^{M_{q}}_{m=1}r^2_{k,m}=N^2h^2E(\bar{r}^2)$, in which $M_q$ is the number of causal variants.
 
 ### Link to the reference population
 The denominator can be derived that $tr[\mathbf{\Omega}^2]=N^2E^2(\rho)+N$, in which $$E^2(\rho)=\frac{\sum_{k_1=1}^M\sum_{k_2=1}^M \rho^2_{k_1k_2}}{M^2} = \frac{\sum_{k=1}^M1+\sum_{k_1=1}^M\sum_{k_2 \ne k_1}^M \rho^2_{k_1k_2}}{M^2} \geq \frac{1}{M}$$
@@ -119,6 +122,7 @@ $\rho_{kl}=\sqrt{\frac{p_kq_l}{p_lq_k}}<1$.
 
 
 ## 3 GRM statistics $\mathbf{\Omega}$
+
 $\mathbf{\Omega}=\mathbf{s^Ts}$, in which $\mathbf{s}$ as defined in the last page. In particular, for a pair of individuals $i$ and $j$, their relatedness is
 $\Omega_{ij}=\frac{1}{M}\sum_{k=1}^Ms_{i,k}s_{j,k}=\frac{1}{M}\sum_{k=1}^Ms_{i,k}s_{j,k}$
 
@@ -155,6 +159,10 @@ $E(s_{ik_1}s_{ik_2}s_{jk_1}s_{jk_2})=E(s_{ik_1}s_{ik_2})E(s_{jk_1}s_{jk_2})=E(\r
 So
 
 $$E(\mathbf{\Omega}_{ij}^2)=\frac{1}{M}+\frac{M-1}{M}\color{green}{E^2(\rho_{k_1k_2})}$$
+
+
+It may be related to high-order moments for multivariate normal distribution, see [Isserlis Theorem](https://en.wikipedia.org/wiki/Isserlis%27_theorem), published in *Biometrika*, 12:[134-139](https://www.jstor.org/stable/2331932?seq=1). However, Isserlis Theorem works for normal distribution only, but it is not "normal" for a standardized locus.
+
 
 ## 4 $E(s^2_{ii,k}),E(s^4_{ii,k}), var(s_{ii}^2)$
 
@@ -225,3 +233,86 @@ cov(s_{ii,k_1}^2,s_{ii,k_2}^2)&=E(s_{i,k_1}^2s_{i,k_2}^2)-E^2(s_{i,k_1})E^2(s_{i
 
 When $k_1 = k_2$, it is obviously that $\rho_{k_1,k_2}=1, p_{k_1}=p_{k_2}$, and
 $$cov(s_{ii,k_1}^2,s_{ii,k_2}^2)=1+1\times\frac{(p_{k}-q_{k})^2}{2p_{k}q_{k}}=1+\frac{1-4p_{k}q_{k}}{2p_{k}q_{k}}=\frac{1}{2p_{k}q_{k}}-1=var(s_{ii,k}^2)$$
+
+## LSE (Phenome)
+For a linear model $\mathbf{y}=\mathbf{X\beta}+e$,
+
+We have the target function 
+$$Q=e^Te=argmin_{\mathbf{\beta}}(\mathbf{y}-\mathbf{X\beta})^T(\mathbf{y}-\mathbf{X\beta})$$
+It can be minized with OLS as below
+$$\begin{align}
+\frac{\partial Q}{\partial \beta}&=\frac{(\mathbf{y}-\mathbf{X\beta})^T(\mathbf{y}-\mathbf{X\beta})}{\partial \beta}\\
+&=\frac{\partial [y^Ty-\color{red}{\mathbf{\beta}^T\mathbf{X}^Ty}-\color{green}{y^T\mathbf{X\beta}}+\color{blue}{\mathbf{\beta}^T\mathbf{X}^T\mathbf{X}\beta}]}{\partial \mathbf{\beta}}\\
+&=0-\color{red}{\mathbf{Xy}^T}-\color{green}{\mathbf{X}\mathbf{y}^T}+\color{blue}{[\mathbf{X}^T\mathbf{X}+(\mathbf{X}^T\mathbf{X})^T]\mathbf{\beta}}, (side\ notes, \mathbf{X}^T\mathbf{X}=(\mathbf{X}^T\mathbf{X})^T)\\
+&=-2\mathbf{Xy}^T-2\mathbf{X^TX}\beta
+\end{align}
+$$
+Then, we have 
+
+$$\hat{\mathbf{\beta}}=(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}$$
+
+#### Notes for matrix calculus
+
+**1:** more topics about matrix calculus please refer to ["Matrix Calculus Wiki"](https://en.wikipedia.org/wiki/Matrix_calculus#Derivatives_with_vectors).
+
+**2:** Or read a gentle introduction ["Matrix Calculus You Need for Deep Learning"](https://arxiv.org/abs/1802.01528).
+
+#### GLSE
+If it is general linear model, the LSE is to *minimize* $Q=argmin_{\mathbf{\beta}}{(\mathbf{y}-\mathbf{X\beta})^TV^{-1}(\mathbf{y}-\mathbf{X\beta})}$, and its corresponding $\hat{\mathbf{\beta}}=(\mathbf{X}^T\mathbf{V}^{-1}\mathbf{X})^{-1}(\mathbf{X}^T\mathbf{V}^{-1}\mathbf{y})$.
+
+#### The sampling variance of $\hat{\mathbf{\beta}}$ is 
+
+\begin{align}
+SSE&=\color{red}{e^T}\color{green}{e}\\
+&=\color{red}{(\mathbf{y}-\mathbf{X\hat{\beta}})^T}\color{green}{(\mathbf{y}-\mathbf{X\hat{\beta}})}\\
+&=\color{red}{[\mathbf{y}-\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^{T}\mathbf{y}]^T}\color{green}{[\mathbf{y}-\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}]}\\
+&=\color{red}{\mathbf{y}^T}\color{green}{\mathbf{y}}-\color{red}{\mathbf{y}^T}\color{green}{\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}}-\color{red}{\mathbf{y}{\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T}}\color{green}{\mathbf{y}}+\color{red}{\mathbf{y}^T\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^{T}}\color{green}{\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^{T}\mathbf{y}}\\
+&=\mathbf{y}^T\mathbf{y}-\mathbf{y}^T\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}\\
+&=\mathbf{y}^T(I-\mathbf{P}_{\mathbf{X}})\mathbf{y}
+\end{align}
+
+Notes: $\mathbf{P}_{\mathbf{X}}=\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T$ is [projection  matrix wiki ](https://en.wikipedia.org/wiki/Projection_(linear_algebra))), that $\mathbf{P}^n=\mathbf{P}$.
+
+$$\hat{\sigma}_{\beta}^2=\frac{SSE}{n-m}(\mathbf{X}^T\mathbf{X})^{-1}=\hat{\sigma}^2_e(\mathbf{X}^T\mathbf{X})^{-1}$$
+
+### Variation for LSE
+
+#### SLR and MLR
+
+There is connection of the regression coefficients between simple linear regresssion and multiple linear regrression.
+
+\begin{align}
+\hat{\mathbf{\beta}}&=(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}\mathbf{y}\\
+&=(\mathbf{X}^T\mathbf{X})^{-1}\Lambda\hat{b}
+\end{align}
+
+in which $\hat{b}_{[i]}=\frac{cov(y, x_i)}{var(x_i)}=\rho_{y,x_i}\frac{\sigma_y}{\sigma_{x_i}}$, estimated from the simple linear regression from $y=a+b_ix_i+e$.
+
+And similarly, $\hat{\sigma}^2_{\beta}=\frac{y^Ty-\hat{\mathbf{\beta}}^T\mathbf{\Lambda}\hat{b}}{n-m}$
+
+## Quadratic form statistics
+Let $x$ be a vector for $n$ random variables, and $A$ be a $n\times n$ symmetric matrix, the scalar quantity $xAx$ is known as quadratic form.
+If 
+$$x \sim MVN(\mu,\sum)$$, 
+it can be shown that 
+
+$$E[xAx]=tr[A\sum]+\mu^TA\mu$$
+
+It can be proved as below
+$x^TAx = tr[x^TAx]$, and by the cyclic property of the trace operator
+$E[tr(x^TAx)]=E[tr[Axx^T]]$. Since trace operator is linear combination of matrices, it therefor follows from the linearity of the expectation operator that 
+$$E[tr(Axx^T)]=tr[AE(xx^T)]=tr[A(\sum+\mu\mu^T)]=tr(A\sum)+tr(\sum\mu\mu^T)=tr(A\sum)+tr(\mu^T\sum\mu)=tr(A\sum)+\mu^TA\mu$$.
+
+-------
+Variance 
+$$var[\mu^TA\mu]=2tr[A\sum A\sum]+4\mu^TA\sum A\mu$$
+Covariance
+$$cov[\mu^TA_1, \mu A_2]=2tr[A_1\sum A_2\sum]+4\mu^TA_1\sum A_2\mu$$
+for both variance and covariance, $A$ is required to be **symmetric**.
+
+When $A$ is not **symmetric**
+
+When $A$ is asymmetric, 
+$$x^T\tilde{A}x=x^T(A+A^T)x/2$$
+the expression of var and cov are the same, provided $A$ is replaced by $\tilde{A}=(A+A^T)/2$.
+
