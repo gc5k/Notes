@@ -160,10 +160,6 @@ So
 
 $$E(\mathbf{\Omega}_{ij}^2)=\frac{1}{M}+\frac{M-1}{M}\color{green}{E^2(\rho_{k_1k_2})}$$
 
-
-It may be related to high-order moments for multivariate normal distribution, see [Isserlis Theorem](https://en.wikipedia.org/wiki/Isserlis%27_theorem), published in *Biometrika*, 12:[134-139](https://www.jstor.org/stable/2331932?seq=1). However, Isserlis Theorem works for normal distribution only, but it is not "normal" for a standardized locus.
-
-
 ## 4 $E(s^2_{ii,k}),E(s^4_{ii,k}), var(s_{ii}^2)$
 
 ### Some useful identities for $s$.
@@ -315,4 +311,31 @@ When $A$ is not **symmetric**
 When $A$ is asymmetric, 
 $$x^T\tilde{A}x=x^T(A+A^T)x/2$$
 the expression of var and cov are the same, provided $A$ is replaced by $\tilde{A}=(A+A^T)/2$.
+
+
+## Isserlis theorem
+It may be related to high-order moments for multivariate normal distribution, see [Isserlis Theorem](https://en.wikipedia.org/wiki/Isserlis%27_theorem), published in *Biometrika*, 12:[134-139](https://www.jstor.org/stable/2331932?seq=1). 
+
+$X_i$ is a vector that follows standard Gaussian distribution $N(0,1)$. The product below can be expanded as
+
+#### Example 1 (4-order moments)
+
+\begin{align}
+E(X_1X_2X_3X_4)&=E(X_1X_2)E(X_3X_4)+E(X_1X_3)E(X_2X_4)+E(X_1X_4)E(X_2X_3)
+\end{align}
+When $X_i$, $i=1$, it is $E(X_1^4)=3E(X_1^2)=3$.
+
+#### Example 2 (6-order moments)
+\begin{align}
+E(X_1X_2X_3X_4X_5X_5)&=E(X_1X_2)E(X_3X_4X_5X_6)+E(X_1X_3)E(X_2X_4X_5X_6)+E(X_1X_4)E(X_2X_3X_5X_6)+E(X_1X_5)E(X_2X_3X_4X_6)+E(X_1X_6)E(X_2X_3X_4X_5), (5\ terms)\\
+&=E(X_1X_2)[E(X_3X_4)E(X_5X_6)+E(X_3X_5)E(X_4X_6)+E(X_3X_6)E(X_4X_5)]+...,(E(X_3X_4)E(X_5X_6)\ can\ be\ expanded\ as\ Example\ 1)\\
+&=15
+\end{align}
+
+
+However, Isserlis Theorem works for normal distribution only, but it is not "normal" for a standardized locus. 
+
+#### Cumulant
+Another possible method is "Cumulant", see its [ Wiki](https://en.wikipedia.org/wiki/Cumulant). Or for "joint Cumulant" if covariance exists beween two vectors, see [Joint Cumulant](https://en.wikipedia.org/wiki/Law_of_total_cumulance).
+
 
