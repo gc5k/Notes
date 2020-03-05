@@ -1,0 +1,143 @@
+---
+title: "LMreg"
+author: "gc5k"
+date: "2/17/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(pROC) #Roc
+library(MASS) #stepAIC
+library(psych) #pairs, pairs.panel
+library(glmnet) #lasso
+library(lmvar) #cv.lm, does not allow missing data
+library(boot) #cv.glm
+library(randomForest) #
+library(mice) #md.pattern
+library(leaps) #best subset
+source("~/R/MyLib/shotgun.R")
+
+```
+
+# COVID-19 {.tabset .tabset-fade .tabset-pills}
+
+## Read data & QC
+```{r readdata}
+dat=read.csv("covid-data-pph1.csv", header = T)
+dat=dat[dat[,22]!=0.5,] #delete missing value
+md.na=md.pattern(dat) #check missing value pattern
+rmNA=which(apply(is.na(dat), 1, any)) #remove
+
+if(length(rmNA) > 0) {
+  dt=data.frame(dat[-rmNA,])
+  print(paste("Remove", length(rmNA), "records due to missing."))
+  print(paste(nrow(dt), "samples remained."))
+} else {
+  dt=dat
+}
+```
+
+## Feature selection
+We evaluate ROC for each associated clinical measure. As seem below, it is nearly equivalent to logistic model analysis. We also conducted simple linear regression for "clinical score" that summarises all clinical measures.
+
+```{r ROC, prompt=FALSE}
+#feature selection using AUC
+aucMat=matrix(0, ncol(dt)-1, 1)
+rownames(aucMat)=colnames(dt)[1:nrow(aucMat)]
+for(i in 1:nrow(aucMat)) {
+  rocObj=roc(dt$diag, dt[,i], quiet = T)
+  aucMat[i,1]=rocObj$auc
+}
+
+#######simple linear regression
+respose=dt[,c("score", "diag")]
+fm=c("gaussian", "binomial")
+
+sReg=array(0, dim=c(length(fm), ncol(dt)-1, 7))
+for(i in 1:dim(sReg)[1]) {
+  for(j in 1:dim(sReg)[2]) {
+    lm1=glm(respose[,i]~dt[,j], family=fm[i], data=dt)
+    sReg[i,j,1:4]=summary(lm1)$coefficient[2,]
+    sReg[i,j,5]=lm1$null.deviance
+    sReg[i,j,6]=lm1$deviance
+  }
+}
+logP=t(matrix(-log10(sReg[,-21,4]), 20, 2, byrow = T))
+colnames(logP)=colnames(dt)[1:20]
+
+par(las=2)
+layout(matrix(c(1,1,3,2,2,3), byrow=T, 2, 3))
+barplot(main="COVID ROC", aucMat[,1], beside = T, border = F, col="green")
+abline(h=c(0.8, 0.7), col=c("blue", "yellow"), lty=2)
+
+par(mar=c(6,4,2,2))
+barplot(logP, angle = 45, beside = T, horiz = F, border = F, ylab="-log10(p)", col=c("blue", "green"), main="Feature selection")
+abline(h=c(8,10), col=c("red", "blue"), lty=2)
+legend("topleft", legend = c("ClinicScore", "KitDiag"), pch=15, col=c("black", "green"), bty = 'n')
+
+plot(rocObj, main="ROC using clinical-score")
+
+sumTab=matrix(0, nrow=nrow(aucMat), 3)
+rownames(sumTab)=rownames(aucMat)
+colnames(sumTab)=c("AUC", "p-lm", "p-glm")
+sumTab[,1]=aucMat[,1]
+sumTab[1:20,2:3]=t(logP)
+print(sumTab)
+```
+
+## CV-glm for selected features
+```{r CV-glm}
+##cross-validation for glm in boot package
+
+Ksize=5
+KF=sample(KFold(Ksize, nrow(dt)), nrow(dt))
+cvMod=array(0, dim=c(Ksize, 4, 4))
+for(i in 1:Ksize) {
+  TrSet=which(KF!=i)
+  dtTrGLM=data.frame(dt[TrSet, c("Home_Work", "CT", "diag")])
+  dtTestGLM=dt[-TrSet, c("Home_Work", "CT", "diag")]
+
+  diaMod_GLM0=glm(diag~Home_Work+CT, data=dtTrGLM, family = "binomial")
+  cvMod[i,1:3,]=summary(diaMod_GLM0)$coefficient
+  preGLM=predict.glm(diaMod_GLM0, dtTestGLM)
+  roc_obj=roc(dtTestGLM$diag, preGLM, quiet = T)
+  cvMod[i,4,1]=roc_obj$auc
+#  cvGLM=cv.glm(dtTrGLM, diaMod_GLM0, K=5)
+}
+##score cutoff
+barplot(cvMod[,4,1], border = F, xlab="Cross-validation", ylab="ROC")
+print(cvMod[,4,1])
+rm(dtTrGLM)
+rm(dtTestGLM)
+rm(cvMod)
+
+glmFull=glm(diag~Home_Work+CT, family = "binomial", data=dt)
+print(summary(glmFull))
+```
+
+## GLM model selection
+```{r}
+yRes=dt[,22]
+dtX=dt[,c(-21, -22)]
+mod=glm(yRes~., family=binomial, data=dtX)
+fitStep=stepAIC(mod, direction="both", trace = FALSE, scope = list(upper=~., lower=~1))
+print(summary(fitStep)$coefficients)
+fitBack=stepAIC(mod, direction="backward", trace = FALSE, scope = list(upper=~., lower=~1))
+print(summary(fitBack)$coefficients)
+fitFor=stepAIC(mod, direction="forward", trace = FALSE, scope = list(upper=~., lower=~1))
+print(summary(fitFor)$coefficients)
+```
+
+
+## glmnet
+```{r glmnet}
+dtm=as.matrix(dt[,-ncol(dt)])
+dtmS=apply(dtm, 2, scale)
+glmnet.mod1=glmnet(dtmS, dt$diag, family="binomial")
+plot(glmnet.mod1)
+cvglm=cv.glmnet(dtmS, dt$diag, family="binomial")
+plot(cvglm)
+
+```
+

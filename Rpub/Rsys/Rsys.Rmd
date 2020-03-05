@@ -11,6 +11,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # R system {.tabset .tabset-fade .tabset-pills}
 
+## Sys.getlocale()
+```{r locale}
+Sys.getlocale()
+```
+
 ## System
 ```{r sys}
 Sys.info()

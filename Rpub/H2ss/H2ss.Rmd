@@ -72,14 +72,14 @@ The above result can be orgainzed in to normal equation below
 
 It is easy to find that
 
-$$\hat{\sigma}^2_g=\frac{y^T(\mathbf{\Omega}-I_N)y}{tr[\mathbf{\Omega}\mathbf{\Omega}^T]-N}$$
+$$\color{green}{\boxed{\hat{\sigma}^2_g=\frac{y^T(\mathbf{\Omega}-I_N)y}{tr[\mathbf{\Omega}\mathbf{\Omega}^T]-N}}}$$
 
 **Notes**:, the $y^T(\mathbf{\Omega}-I_N)y$ is quadratic form [wiki link](https://en.wikipedia.org/wiki/Quadratic_form_(statistics)).
 
 
 ### Link to summary statistics
 After rearrangement, it is easy to see that
-$y^T\mathbf{\Omega}y=\frac{1}{M}y^T\mathbf{SS}^Ty$, and $E(\frac{1}{M}y^T\mathbf{SS}^Ty)=NE(\chi^2_{1,h^2})=N(1+N\frac{h^2}{M_Q}\sum_{m=1}^Mr^2_{k,m})$. `**It is available as summary statistics!**`
+$y^T\mathbf{\Omega}y=\frac{1}{M}y^T\mathbf{SS}^Ty$, and $E(\frac{1}{M}y^T\mathbf{SS}^Ty)=NE(\chi^2_{1,h^2})=N(1+N\frac{h^2}{M_Q}\sum_{m=1}^Mr^2_{k,m})$. `**It is available as summary statistics!**`. If further adjustment for summary statistics is requested, a modified LSE can be used to ajust summary statistics (see LSE phenome).
 
 It is easy to see $E(y^TI_Ny)=N$, so the expectation of the numerator is $N^2\frac{h^2}{M_q}\sum^{M_{q}}_{m=1}r^2_{k,m}=N^2h^2E(\bar{r}^2)$, in which $M_q$ is the number of causal variants.
 
@@ -132,7 +132,7 @@ $\mathbf{\Omega}$ is a Hermitian matrix (symetric), and the diagonal element is 
 $E(s_{ii}^2)=diag(\Omega_{ii})=1$, interpreting that an individual is identical to himself under random mating (no inbred, otherwise $1+F$).
 
 \begin{align}
-\Omega_{ii}^2 &= \frac{1}{M^2}[\color{red} {\sum_{k=1}^M s_{ik}^4}+\color{green}{\sum_{k_1}\sum_{k_1 \ne k_2} s_{i,k_1}^2s_{i,k_2}^2}] \\
+E(\Omega_{ii}^2) &= \frac{1}{M^2}[\color{red} {\sum_{k=1}^M s_{ik}^4}+\color{green}{\sum_{k_1}\sum_{k_1 \ne k_2} s_{i,k_1}^2s_{i,k_2}^2}] \\
  &=\frac{1}{M^2}\{\color{red} {\sum_{k=1}^M \frac{1}{2p_kq_k}}+\color{green}{\sum_{k_1}\sum_{k_1 \ne k_2} [(1+\rho^2_{k_1,k_2})+\frac{\rho_{k_1,k_2}(p_{k_1}-q_{k_1})(p_{k_2}-q_{k_2})}{2\sqrt{p_{k_1}q_{k_1}p_{k_2}q_{k_2}}}]}\} 
 \end{align}
 
@@ -141,7 +141,7 @@ Under large sample and many loci, $E(\frac{\rho_{k_1,k_2}(p_{k_1}-q_{k_1})(p_{k_
 So, we have
 
 \begin{align}
-\Omega_{ii}^2&=\frac{1}{M^2}[M\frac{1}{E(\sigma_k^2)}+M(M-1)(1+E(\rho^2_{k_1k_2}))]\\
+E(\Omega_{ii}^2)&=\frac{1}{M^2}[M\frac{1}{E(\sigma_k^2)}+M(M-1)(1+E(\rho^2_{k_1k_2}))]\\
 &=\frac{1}{E(\sigma_k^2)}\frac{1}{M}+\frac{M-1}{M}[1+\color{red}{E(\rho^2_{k_1k_2})}]
 \end{align}
 
@@ -284,7 +284,7 @@ There is connection of the regression coefficients between simple linear regress
 
 in which $\hat{b}_{[i]}=\frac{cov(y, x_i)}{var(x_i)}=\rho_{y,x_i}\frac{\sigma_y}{\sigma_{x_i}}$, estimated from the simple linear regression from $y=a+b_ix_i+e$.
 
-And similarly, $\hat{\sigma}^2_{\beta}=\frac{y^Ty-\hat{\mathbf{\beta}}^T\mathbf{\Lambda}\hat{b}}{n-m}$
+And similarly, $\hat{\sigma}^2_{\beta}=(\frac{y^Ty-\hat{\mathbf{\beta}}^T\mathbf{\Lambda}\hat{b}}{n-m})(\mathbf{X}^T\mathbf{X})^{-1}$
 
 ## Quadratic form statistics
 Let $x$ be a vector for $n$ random variables, and $A$ be a $n\times n$ symmetric matrix, the scalar quantity $xAx$ is known as quadratic form.

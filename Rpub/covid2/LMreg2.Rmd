@@ -1,0 +1,194 @@
+---
+title: "LMreg2"
+author: "gc5k"
+date: "3/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(pROC) #Roc
+library(MASS) #stepAIC
+library(psych) #pairs, pairs.panel
+library(glmnet) #lasso
+library(lmvar) #cv.lm, does not allow missing data
+library(boot) #cv.glm
+library(randomForest) #
+library(mice) #md.pattern
+library(leaps) #best subset
+library(varhandle) #numeric check:
+source("~/R/MyLib/shotgun.R")
+
+```
+
+# COVID-19 {.tabset .tabset-fade .tabset-pills}
+
+## Read data & QC
+```{r readdata}
+DatOrg=read.csv("./data2/covID2019zj.cgb1.csv", header = T)
+#dat=dat[dat[,22]!=0.5,] #delete missing value
+dat=DatOrg
+md.na=md.pattern(dat) #check missing value pattern
+rmNA=which(apply(is.na(dat), 1, any)) #remove
+dat=DatOrg
+
+if(length(rmNA) > 0) {
+  dt=data.frame(dat[-rmNA,])
+  print(paste("Remove", length(rmNA), "records due to missing."))
+  print(paste(nrow(dt), "samples remained."))
+} else {
+  dt=dat
+}
+
+#check whether numeric
+for(i in 2:ncol(dt)) {
+  isNum=which(!varhandle::check.numeric(dt[,i]))
+  if(length(isNum) > 0) {
+    print(colnames(dt)[i])
+    print(isNum)
+  }
+}
+
+cl=which(apply(dt, 2, var)==0)
+print(paste("removed", names(dt)[cl], "for no variation"))
+dt=dt[,-1*unique(c(1, 37, cl))] #remove ID and DaiScore
+```
+
+## Feature selection
+We evaluate ROC for each associated clinical measure. As seem below, it is nearly equivalent to logistic model analysis. We also conducted simple linear regression for "clinical score" that summarises all clinical measures.
+
+```{r ROC, prompt=FALSE}
+#feature selection using AUC
+aucMat=matrix(0, ncol(dt)-1, 1)
+rownames(aucMat)=colnames(dt)[1:nrow(aucMat)]
+for(i in 1:nrow(aucMat)) {
+  rocObj=roc(dt$diag, dt[,i], quiet = T)
+  aucMat[i,1]=rocObj$auc
+}
+
+par(las=2)
+layout(matrix(c(1,1,3,2,2,3), byrow=T, 2, 3))
+barplot(main="COVID ROC", aucMat[,1], beside = T, border = F, col="green")
+
+#######simple linear regression
+respose=dt[,c("diag")]
+fm=c("binomial")
+
+sReg=array(1, dim=c(ncol(dt)-1, 7))
+rownames(sReg)=colnames(dt)[-ncol(dt)]
+for(j in 1:nrow(sReg)) {
+    lm1=glm(respose~dt[,j], family=fm, data=dt)
+    sReg[j,1:4]=summary(lm1)$coefficient[2,]
+    sReg[j,5]=lm1$null.deviance
+    sReg[j,6]=lm1$deviance
+}
+
+par(mar=c(6,4,2,2))
+logP=-log10(sReg[,4])
+barplot(logP, angle = 45, beside = T, horiz = F, border = F, ylab="-log10(p)", col=c("green"), main="Feature selection")
+abline(h=c(8,10), col=c("red", "blue"), lty=2)
+legend("topleft", legend = c("KitDiag"), pch=15, col=c("green"), bty = 'n')
+
+plot(aucMat[,1], logP)
+```
+
+## glm Cross-validation
+$p=\frac{1}{1+e^{xb}}$
+```{r glmR}
+sink("cv.txt")
+pcut=c(1, 3, 5, 10, 15)
+Ksize=5
+KF=sample(KFold(Ksize, nrow(dt)), nrow(dt))
+aucFull=array(0, dim=length(pcut))
+aucV=matrix(0, nrow=length(pcut), ncol=Ksize)
+
+for(i in 1:length(pcut)) {
+  xName=c(rownames(sReg)[which(-log10(sReg[,4])>pcut[i])], "diag")
+#  print(xName)
+  dtFull=dt[, xName]
+  glmFull=glm(diag~., data=dtFull, family = "binomial")
+  pre=1/(1+exp(glmFull$fitted.values))
+  aucObjFul=roc(dtFull$diag, pre, quiet=T)
+  aucFull[i]=aucObjFul$auc
+  print(paste("============Mode ", i))
+  print(glmFull$coefficients)
+  print(paste("Full model AUC:", aucObjFul$auc))
+  print(ci(aucObjFul))
+  for(j in 1:Ksize) {
+    dtTr=dt[KF!=j, xName]
+    dtT=dt[KF==j, xName]
+
+    glmTr=glm(diag~., data=dtTr, family = "binomial")
+    xP=cbind(matrix(rep(1, nrow(dtT)), nrow=nrow(dtT), 1),
+             as.matrix(dtT[,-ncol(dtT)]))
+
+    betaTr=matrix(glmTr$coefficients, ncol=1)
+    preT=xP%*%betaTr
+    aucObjT=roc(dtT$diag, preT[,1], quiet=T)
+    aucV[i,j] = aucObjT$auc
+    
+    print(paste("=Cross-validation ", j, "/", Ksize))
+#  print(glmFull$coefficients)
+    print(paste("Test model AUC:", aucObjT$auc))
+    print(ci(aucObjT))
+  }
+  print("")
+}
+
+aucBd=cbind(aucFull, aucV)
+rownames(aucBd)=pcut
+barplot(t(aucBd), beside = T, xlab="-log10(p-cut)", border = F, col=c("red", rep("grey",Ksize)), ylim=c(0,1))
+abline(h=0.9)
+```
+
+## Dai Cross-validation
+$p=\frac{1}{1+e^{xb}}$
+```{r dai-glmR}
+sink("dai-cv.txt")
+Ksize=5
+KF=sample(KFold(Ksize, nrow(dt)), nrow(dt))
+aucFull=array(0, dim=1)
+aucV=matrix(0, nrow=1, ncol=Ksize)
+
+xName=c("TravelWuhan", "SickWuhan", "SickOther", "DiseaseCluster", "Fatigue", "ShortBreath", "SoreMuscle", "WhiteCellCnt", "CT", "diag")
+for(i in 1:1) {
+  dtFull=dt[, xName]
+  glmFull=glm(diag~., data=dtFull, family = "binomial")
+  pre=1/(1+exp(glmFull$fitted.values))
+  aucObjFul=roc(dtFull$diag, pre, quiet=T)
+  aucFull[i]=aucObjFul$auc
+  cat("============Full Mode ", i, "\n")
+  print(summary(glmFull)$coefficients)
+  cat(paste("Full model AUC:", aucObjFul$auc, "\n"))
+  print(ci(aucObjT))
+  cat('\n\n')
+  for(j in 1:Ksize) {
+    print(paste("=Cross-validation ", j, "/", Ksize))
+    dtTr=dt[KF!=j, xName]
+    dtT=dt[KF==j, xName]
+
+    glmTr=glm(diag~., data=dtTr, family = "binomial")
+    print(summary(glmTr)$coefficients)
+    xP=cbind(matrix(rep(1, nrow(dtT)), nrow=nrow(dtT), 1),
+             as.matrix(dtT[,-ncol(dtT)]))
+
+    betaTr=matrix(glmTr$coefficients, ncol=1)
+    preT=xP%*%betaTr
+    aucObjT=roc(dtT$diag, preT[,1], quiet=T)
+    aucV[i,j] = aucObjT$auc
+    
+#    print(glmFull$coefficients)
+    cat(paste("Test model AUC:", aucObjT$auc, "\n"))
+    print(ci(aucObjT))
+    cat("\n\n")
+  }
+}
+
+cat(paste("mean:", mean(aucV), "sd:", sd(aucV)))
+aucBd=cbind(aucFull, aucV)
+rownames(aucBd)="Full"
+barplot(t(aucBd), beside = T, xlab="-log10(p-cut)", border = F, col=c("red", rep("grey",Ksize)), ylim=c(0,1))
+abline(h=0.9)
+sink()
+```
+
