@@ -230,6 +230,50 @@ cov(s_{ii,k_1}^2,s_{ii,k_2}^2)&=E(s_{i,k_1}^2s_{i,k_2}^2)-E^2(s_{i,k_1})E^2(s_{i
 When $k_1 = k_2$, it is obviously that $\rho_{k_1,k_2}=1, p_{k_1}=p_{k_2}$, and
 $$cov(s_{ii,k_1}^2,s_{ii,k_2}^2)=1+1\times\frac{(p_{k}-q_{k})^2}{2p_{k}q_{k}}=1+\frac{1-4p_{k}q_{k}}{2p_{k}q_{k}}=\frac{1}{2p_{k}q_{k}}-1=var(s_{ii,k}^2)$$
 
+## ME
+UKB cohorts test,
+"/public/home/xuhm/gc5k/UKB_cohort/cohort/grm/sub"
+
+```{r me}
+
+ukMe=read.table("~/manuscript/Linkage_Association/h2ss/meMarker.txt", as.is = T)
+me=ukMe[,-1]
+rownames(me)=ukMe[,1]
+layout(matrix(1:3, 3, 1))
+
+me1=me[, 1:10]
+MeS1=matrix(c(apply(me1, 1, mean), apply(me1, 1, sd)), nrow(me1), 2, byrow = F)
+barplot(t(as.matrix(me1)), beside = T)
+
+me2=me[,11:20]
+MeS2=matrix(c(apply(me2, 1, mean), apply(me2, 1, sd)), nrow(me2), 2, byrow = F)
+barplot(t(as.matrix(me2)), beside = T)
+
+me3=me[,21:30]
+MeS3=matrix(c(apply(me3, 1, mean), apply(me3, 1, sd)), nrow(me3), 2, byrow = F)
+barplot(t(as.matrix(me3)), beside = T)
+
+MeMean=matrix(0, nrow=nrow(me), 3)
+MeMean[,1]=apply(me1, 1, mean)
+MeMean[,2]=apply(me2, 1, mean)
+MeMean[,3]=apply(me3, 1, mean)
+
+MeSd=matrix(0, nrow=nrow(me), 3)
+MeSd[,1]=apply(me1, 1, sd)
+MeSd[,2]=apply(me2, 1, sd)
+MeSd[,3]=apply(me3, 1, sd)
+
+MeSd=matrix(0, nrow=nrow(me), 3)
+MeSd[,1]=apply(me1, 1, sd)
+MeSd[,2]=apply(me2, 1, sd)
+MeSd[,3]=apply(me3, 1, sd)
+
+layout(matrix(1,1,1))
+barP=barplot(MeMean, beside = T, ylim=c(0, 60000))
+segments(barP, MeMean-MeSd*2, barP, MeMean+MeSd*2)
+```
+
+
 ## LSE (Phenome)
 For a linear model $\mathbf{y}=\mathbf{X\beta}+e$,
 
