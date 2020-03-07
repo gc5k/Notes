@@ -2,7 +2,7 @@
 n=1000 #sample size
 m=10000 #marker
 h2=0.3 #heritability
-SM=50 #simulation
+SM=1 #simulation
 BS=30 #randomization factor
 b=rnorm(m, 0, sqrt(h2/m)) #effect
 
@@ -25,7 +25,7 @@ Tstart=proc.time()
 
 for(i in 1:SM) {
   y=sx%*%b+rnorm(n, 0, sqrt(1-h2))
-
+  ys=scale(y)
   Lb=0
   for(j in 1:BS) {
     z=matrix(rnorm(n), n, 1)
@@ -41,8 +41,8 @@ for(i in 1:SM) {
   m2[1,2]=n
   m2[2,1]=n
   m2[2,2]=n
-  wy=t(sx)%*%y
-  yVec=matrix(c(sum(wy^2)/m, t(y)%*%y), 2, 1)
+  wy=t(sx)%*%ys
+  yVec=matrix(c(sum(wy^2)/m, t(ys)%*%ys), 2, 1)
   B2=solve(m2)%*%yVec
   H2[i,2]=B2[1,1]/(B2[1,1]+B2[2,1])
 }
