@@ -88,8 +88,8 @@ The denominator can be derived that $tr[\mathbf{\Omega}^2]=N^2E^2(\rho)+N$, in w
 
 Or, $$\frac{[E(\sum_i^M\chi^2_1)-1]N}{N^2/M_e}$$
 
-**** See a simulation test
-```{r road-test}
+#### See a simulation example
+```{r road-test, echo=FALSE}
 n=500 #sample size
 m=1000 #marker
 h2=0.3 #heritability
@@ -150,6 +150,55 @@ A realized example please refer to `/public/home/xuhm/gc5k/UKB_cohort/ss`
 |Reading	| 25886	| 58027.4726	|		1.109	| 0.247|
 |Sheffield	| 27745	| 55244.0052	|		1.145	| 0.293|
 |Stoke	| 18211	| 51302.5758		|	1.114	| 0.326|
+
+
+### Oxford
+`/public/home/xuhm/gc5k/UKB_cohort/ss_chr`
+|$M_e$	|$\chi^2_1$	|$h^2$|
+|:----:|:-----:|:----:|
+|7204.5646	| 1.0755	| 0.0448 |
+|6403.3527	| 1.0321	| 0.0170 |
+|5839.5143	| 1.0861	| 0.0414 |
+|5632.8855	| 1.0545	| 0.0253 |
+|5368.6945	| 1.0443	| 0.0196 |
+|857.1236	| 1.3061	| 0.0217 |
+|5020.425	| 1.0346	| 0.01433 |
+|3909.6782	| 1.0736	| 0.0237 |
+|4277.3328	| 1.0470	| 0.0166 |
+|4328.9556	| 1.0324	| 0.0116 |
+|3269.6384	| 1.0349	| 0.0094 |
+|4213.4118	| 1.0714	| 0.0248 |
+|3508.2313	| 1.0363	| 0.0105 |
+|3106.6733	| 1.0716	| 0.0183 |
+|2872.9585	| 1.0998	| 0.0236 |
+|3146.7089	| 1.0180	| 0.0047 |
+|1796.0199	| 1.0360	| 0.0053 |
+|3243.4674	| 1.0560	| 0.0150 |
+|2346.5845	| 1.0938	| 0.0182 |
+|2683.5395	| 1.0824	| 0.0182 |
+|2683.5395	| 1.0076	| 0.0017 |
+|1597.1183	| 1.0161	| 0.0021 |
+
+```{r, shiny, echo=FALSE, eval=FALSE}
+library(shiny)
+shinyApp(
+
+  ui = fluidPage(
+    selectInput("region", "Region:",
+                choices = colnames(WorldPhones)),
+    plotOutput("phonePlot")
+  ),
+
+  server = function(input, output) {
+    output$phonePlot = renderPlot({
+      barplot(WorldPhones[,input$region]*1000,
+              ylab = "Number of Telephones", xlab = "Year")
+    })
+  },
+
+  options = list(height = 500)
+)
+```
 
 ## 2 Basic Tables
 
@@ -394,6 +443,98 @@ There is connection of the regression coefficients between simple linear regress
 in which $\hat{b}_{[i]}=\frac{cov(y, x_i)}{var(x_i)}=\rho_{y,x_i}\frac{\sigma_y}{\sigma_{x_i}}$, estimated from the simple linear regression from $y=a+b_ix_i+e$.
 
 And similarly, $\hat{\sigma}^2_{\beta}=(\frac{y^Ty-\hat{\mathbf{\beta}}^T\mathbf{\Lambda}\hat{b}}{n-m})(\mathbf{X}^T\mathbf{X})^{-1}$
+
+```{r, g3, echo=FALSE}
+set.seed(2016)
+
+M = 3 #covariates
+N = 200 #sample size
+COL = c("red", "pink", "blue", "green")
+#simu cov and phe
+X = matrix(rnorm(M * N), nrow = N, ncol = M) #cov
+Y = matrix(rnorm(N), nrow = N, ncol = 1) #phenotype
+#standardization
+X = apply(X, MARGIN = 2, scale)
+Y = scale(Y)
+mn=c("s={1}", "s={2}", "s={3}", "s={1,2}", "s={1,3}", "s={2,3}", "s={1,2,3}")
+
+#simu loci
+LC = 1
+frq = runif(LC, 0, 0.5)
+mk = matrix(0, nrow = N, ncol = LC)
+for (i in 1:LC)
+{
+  mk[,i] = rbinom(N, 2, frq[i])
+}
+
+layout(matrix(c(1:8), 2, 4))
+par(mai=c(0.75,0.75,0.3,0.3), ps=10)
+
+#OATH vs sgwas
+for (IDX in 1:LC)
+{
+  #make Phi matrix (Naive summary statistics)
+  Phi = cov(cbind(Y,mk[,IDX], X))
+  varMK = var(mk[,IDX])
+
+  #locus-specific nss
+  mmod = lm(Y ~ mk[,IDX])
+
+  #A
+  b_ = c(summary(mmod)$coefficient[2,1],
+        Phi[1,3] / Phi[3,3], Phi[1,4] / Phi[4,4], Phi[1,5] / Phi[5,5])
+
+  #Omega matrix
+  Omega = Phi[-1, -1]
+  #Lambda matrix
+  Lambda = diag(diag(Omega), nrow=nrow(Omega), ncol=ncol(Omega))
+
+  cnt=1
+  for (i in 1:M)
+  {
+    md = combn(M, i)
+    for (j in 1:ncol(md))
+    {
+      xx = X[, md[,j]]
+
+      #individual-level data model
+      smod = lm(Y ~ mk[,IDX] + xx)
+      Sreg = summary(smod)$coefficients[2:(length(md[,j]) + 2),1] #partial reg coef
+      Ssd = summary(smod)$coefficients[2:(length(md[,j]) + 2),2] #partial reg coef sd
+
+      #joint estimate via OATH
+      Lambda_s = Omega[c(1, md[,j]+1), c(1, md[,j]+1)]
+      Omega_s = Lambda[c(1, md[,j]+1), c(1, md[,j]+1)]
+      b_s = b_[c(1, md[,j]+1)]
+      B = solve(Lambda_s) %*% Omega_s %*% b_s
+      SigmaB = sqrt(diag((Phi[1,1] - t(B) %*% Omega_s %*% b_s)[1,1] * solve(Lambda_s) / (N - nrow(Lambda_s))))
+
+      ####data illustration
+      #compare coef
+      plot(B, Sreg, xlab = "OATH", ylab = "Individal-level data", bty =
+          'n', main = mn[cnt], col=COL[c(1, md[,j]+1)], pch =
+          16, cex = 2, xlim=c(-0.2, 0.2), ylim=c(-0.2, 0.2))
+
+      #compare coef sd
+      for (k in 1:nrow(B))
+      {
+        lines(x = c(B[k,1] - SigmaB[k], B[k,1] + SigmaB[k]), y = c(B[k,1], B[k,1]))
+      }
+      for (k in 1:nrow(B))
+      {
+        lines(y = c(Sreg[k] - Ssd[k], Sreg[k] + Ssd[k]), x = c(Sreg[k], Sreg[k]))
+      }
+
+      #reference line
+      abline(a = 0, b = 1, lty = 2)
+      cnt=cnt+1
+    }
+  }
+}
+plot.new()
+legend("topleft", legend = c("Locus", "Cov 1", "Cov 2", "Cov 3"), col = COL, pch =16, bty = 'n')
+```
+
 
 ## Quadratic form statistics
 Let $x$ be a vector for $n$ random variables, and $A$ be a $n\times n$ symmetric matrix, the scalar quantity $xAx$ is known as quadratic form.
