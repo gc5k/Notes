@@ -1,3 +1,11 @@
+H2ss <- function(fl, me) {
+  sFile=read.table(fl, as.is = T)
+  ss=mean(sFile$V11^2, na.rm = T)
+  sz=mean(sFile$V8, na.rm = T)
+  h2=(ss-1)/(sz/me)
+  h2
+}
+
 MeVarK <-function(sn, G) {
   m=ncol(G)
   SP=sample(nrow(G), sn)

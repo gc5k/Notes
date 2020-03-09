@@ -86,6 +86,71 @@ It is easy to see $E(y^TI_Ny)=N$, so the expectation of the numerator is $N^2\fr
 ### Link to the reference population
 The denominator can be derived that $tr[\mathbf{\Omega}^2]=N^2E^2(\rho)+N$, in which $$E^2(\rho)=\frac{\sum_{k_1=1}^M\sum_{k_2=1}^M \rho^2_{k_1k_2}}{M^2} = \frac{\sum_{k=1}^M1+\sum_{k_1=1}^M\sum_{k_2 \ne k_1}^M \rho^2_{k_1k_2}}{M^2} \geq \frac{1}{M}$$
 
+Or, $$\frac{[E(\sum_i^M\chi^2_1)-1]N}{N^2/M_e}$$
+
+**** See a simulation test
+```{r road-test}
+n=500 #sample size
+m=1000 #marker
+h2=0.3 #heritability
+b=rnorm(m, 0, sqrt(h2/m)) #effect
+SIMU=5
+
+
+#simu g
+fq=runif(m, 0.1, 0.5)
+x=matrix(0, n, m)
+for(i in 1:m) {
+  x[,i]=rbinom(n, 2, fq[i])
+}
+sx=apply(x, 2, scale)
+
+K=sx%*%t(sx)/m
+me=var(K[col(K)<row(K)])
+
+#simu y
+H2=array(0, dim=SIMU)
+for(i in 1:SIMU) {
+  y=sx%*%b+rnorm(n, 0, sqrt(1-h2))
+
+
+  ss=matrix(0, m, 5)
+  for(j in 1:m) {
+    mod=lm(y~x[,j])
+    ss[j,1:4]=summary(mod)$coefficient[2,]
+  }
+  ss[,5]=ss[,3]^2
+  H2[i]=((mean(ss[,5])-1)*n)/(n*n*me)
+}
+barplot(H2)
+abline(h=h2)
+```
+
+### UKB case
+A realized example please refer to `/public/home/xuhm/gc5k/UKB_cohort/ss`
+
+|Cohort	| $N$ |	$M_e$	|	$\chi^2_1$ | $h^2$|
+|:---:|:---:|:---:|:---:|:---:|
+|Barts	| 7699	| 51935.9967	|		1.116	| 0.794 |
+|Birmingham |	19529	| 55594.9216	|		1.100	| 0.287|
+|Bristol	| 39172	| 56774.8416	|		1.218	| 0.320|
+|Bury	| 25404	| 55092.4145		|	1.154	| 0.338|
+|Cardiff	| 16226	| 52069.3896	|		1.111 |	0.361|
+|Croydon	| 18475	| 57405.4722	|		1.107	| 0.337|
+|Edinburgh	| 15441	| 53041.7932	|		1.111	| 0.386|
+|Glasgow	| 16299	| 51940.1701	|		1.156	| 0.502|
+|Hounslow	| 18420	| 56773.3298	|		1.133	| 0.414|
+|Leeds	| 39651	| 56474.8288		|	1.242	| 0.349|
+|Liverpool	| 29604	| 54490.4477		|	1.183	| 0.341|
+|Manchester	| 11502	| 53621.5281		|	1.099	| 0.468|
+|Middlesborough	| 19819	| 53409.7873	|		1.133	| 0.362|
+|Newcastle	| 34663	| 54675.7131	|		1.179	| 0.286|
+|Nottingham	| 30760	| 56132.0762	|		1.173	| 0.319|
+|Oxford	| 12260	| 55143.1405	|		1.072	| 0.328|
+|Reading	| 25886	| 58027.4726	|		1.109	| 0.247|
+|Sheffield	| 27745	| 55244.0052	|		1.145	| 0.293|
+|Stoke	| 18211	| 51302.5758		|	1.114	| 0.326|
+
 ## 2 Basic Tables
 
 ### Haplotype for a pair of biallelic loci
@@ -230,7 +295,7 @@ cov(s_{ii,k_1}^2,s_{ii,k_2}^2)&=E(s_{i,k_1}^2s_{i,k_2}^2)-E^2(s_{i,k_1})E^2(s_{i
 When $k_1 = k_2$, it is obviously that $\rho_{k_1,k_2}=1, p_{k_1}=p_{k_2}$, and
 $$cov(s_{ii,k_1}^2,s_{ii,k_2}^2)=1+1\times\frac{(p_{k}-q_{k})^2}{2p_{k}q_{k}}=1+\frac{1-4p_{k}q_{k}}{2p_{k}q_{k}}=\frac{1}{2p_{k}q_{k}}-1=var(s_{ii,k}^2)$$
 
-## ME
+## 6 ME
 UKB cohorts test,
 "/public/home/xuhm/gc5k/UKB_cohort/cohort/grm/sub"
 
@@ -382,4 +447,8 @@ However, Isserlis Theorem works for normal distribution only, but it is not "nor
 #### Cumulant
 Another possible method is "Cumulant", see its [ Wiki](https://en.wikipedia.org/wiki/Cumulant). Or for "joint Cumulant" if covariance exists beween two vectors, see [Joint Cumulant](https://en.wikipedia.org/wiki/Law_of_total_cumulance).
 
+## R sess
+```{r session}
+sessionInfo()
+```
 
