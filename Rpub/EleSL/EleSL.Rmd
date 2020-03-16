@@ -1,0 +1,23 @@
+---
+title: "EleSL"
+author: "gc5k"
+date: "3/16/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+print(Sys.time())
+```
+# Statistical Learning {.tabset .tabset-fade .tabset-pills}
+```{r st}
+print(Sys.time())
+```
+
+## KNN
+K-nearest neighbour algorithm for classification and regression [wiki](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm), and an introduction paper [Altman, Am Stat, 1992, 46:175-85](https://www.tandfonline.com/doi/abs/10.1080/00031305.1992.10475879). Not confused with [K-means clustering](https://en.wikipedia.org/wiki/K-means_clustering). 
+```{r KNN}
+library(kknn)
+
+```
+

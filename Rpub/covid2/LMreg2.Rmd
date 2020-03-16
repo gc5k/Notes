@@ -22,6 +22,10 @@ source("~/R/MyLib/shotgun.R")
 ```
 
 # COVID-19 {.tabset .tabset-fade .tabset-pills}
+```{r, st}
+print(Sys.time())
+
+```
 
 ## Read data & QC
 ```{r readdata}
