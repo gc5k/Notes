@@ -17,6 +17,9 @@ library(randomForest) #
 library(mice) #md.pattern
 library(leaps) #best subset
 library(varhandle) #numeric check:
+library(maps)
+library(mapdata)
+library(ggmap)
 source("~/R/MyLib/shotgun.R")
 
 ```
@@ -29,8 +32,9 @@ print(Sys.time())
 
 ## Read data & QC
 ```{r readdata}
-DatOrg=read.csv("./data2/covID2019zj.cgb1.csv", header = T)
+DatOrg=read.csv("./data2/covID2019_Mar16.csv", header = T)
 #dat=dat[dat[,22]!=0.5,] #delete missing value
+
 dat=DatOrg
 md.na=md.pattern(dat) #check missing value pattern
 rmNA=which(apply(is.na(dat), 1, any)) #remove
@@ -55,8 +59,37 @@ for(i in 2:ncol(dt)) {
 
 cl=which(apply(dt, 2, var)==0)
 print(paste("removed", names(dt)[cl], "for no variation"))
-dt=dt[,-1*unique(c(1, 37, cl))] #remove ID and DaiScore
+dt_gis=dt[,c(39,40)]
+dt=dt[,-1*unique(c(1, 37, cl, 39, 40))] #remove ID and DaiScore, and gis score
+
+table(dt_gis[,c(1,2)])
 ```
+
+## Map
+How to draw map in R [link](https://cosx.org/2013/01/drawing-map-in-r-era/)
+
+Get GIS information for cities [link](http://www.gpsspg.com/latitude-and-longitude.htm)
+```{r map}
+library(maps)
+library(mapdata)
+library(ggmap)
+
+
+mapLoc=read.csv("./data2/map.csv", as.is = T, header = T)
+MetroTab=table(dt_gis$Metro)
+MetroMax=max(MetroTab)
+
+map("china", col = "blue", ylim = c(12, 54), xlim=c(72, 135), panel.first = grid(), mar=c(0.5,0.5,0.5,0.5))
+points(mapLoc$BaiduLon[1], mapLoc$BaiduLat[1], cex=5, col="red")
+
+
+map("china", col = "blue", ylim = c(27, 33), xlim=c(115, 125), panel.first = grid(), mar=c(0.5,0.5,0.5,0.5))
+
+for(i in 1:nrow(mapLoc)) {
+  points(mapLoc$BaiduLon[i], mapLoc$BaiduLat[i], col="red", cex=ifelse(MetroTab[mapLoc$City[i]], (MetroTab[mapLoc$City[i]])/MetroMax, -1)*5, pch=16)
+}
+```
+
 
 ## Feature selection
 We evaluate ROC for each associated clinical measure. As seem below, it is nearly equivalent to logistic model analysis. We also conducted simple linear regression for "clinical score" that summarises all clinical measures.
