@@ -105,7 +105,8 @@ for(i in 1:nrow(aucMat)) {
 
 par(las=2)
 layout(matrix(c(1,1,3,2,2,3), byrow=T, 2, 3))
-barplot(main="COVID ROC", aucMat[,1], beside = T, border = F, col="green")
+od1=order(aucMat[,1])
+barplot(main="COVID ROC", aucMat[od1,1], beside = T, border = F, col="green")
 
 #######simple linear regression
 respose=dt[,c("diag")]
@@ -121,12 +122,13 @@ for(j in 1:nrow(sReg)) {
 }
 
 par(mar=c(6,4,2,2))
-logP=-log10(sReg[,4])
+od2=order(-log10(sReg[,4]))
+logP=-log10(sReg[od2,4])
 barplot(logP, angle = 45, beside = T, horiz = F, border = F, ylab="-log10(p)", col=c("green"), main="Feature selection")
 abline(h=c(8,10), col=c("red", "blue"), lty=2)
 legend("topleft", legend = c("KitDiag"), pch=15, col=c("green"), bty = 'n')
 
-plot(aucMat[,1], logP)
+plot(aucMat[od1,1], logP[od1], xlab = "ROC", ylab = "-log10(p)")
 ```
 
 ## glm Cross-validation
@@ -230,6 +232,29 @@ barplot(t(aucBd), beside = T, xlab="-log10(p-cut)", border = F, col=c("red", rep
 abline(h=0.9)
 sink()
 ```
+
+## Randomforest
+
+```{r RF}
+library(randomForest)
+
+datOrg=read.csv("./data2/covID2019_Mar16.csv", as.is = T, header = T)
+rmNA=which(apply(is.na(datOrg), 1, any)) #remove
+datWk=datOrg[-rmNA,]
+cl=which(apply(datWk, 2, var)==0)
+datWk=datWk[,-c(1,cl,37,39,40)]
+
+covID2019.rs <- randomForest(diag~., data=datWk, proximity=TRUE)
+varImpPlot(covID2019.rs)
+abline(v=10, col="red")
+covID.mds <- cmdscale(1-covID2019.rs$proximity, eig = T)
+VarID=which(covID2019.rs$importance > 10)
+pairs(cbind(datWk[,VarID], covID.mds$points), cex=0.6, gap=0,
+      col=c("red", "blue")[as.numeric(datWk$diag)+1],
+      main="CovID 2019")
+
+```
+
 
 ## Session Information
 ```{r Rsys}
