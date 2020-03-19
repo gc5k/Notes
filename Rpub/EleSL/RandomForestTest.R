@@ -15,6 +15,19 @@ pairs(cbind(datWk[,VarID], covID.mds$points), cex=0.6, gap=0,
       col=c("red", "blue")[as.numeric(datWk$diag)+1],
       main="CovID 2019")
 
+#traing-test
+tr_set=sample(nrow(datWk), ceiling(nrow(datWk)*0.8))
+datWk_tr=datWk[tr_set,-ncol(datWk)]
+datWk_trY=datWk[tr_set,ncol(datWk)]
+datWk_test=datWk[-tr_set,-ncol(datWk)]
+datWk_testY=datWk[-tr_set,ncol(datWk)]
+
+covID2019.rs.tr <-randomForest(datWk_tr, datWk_trY, proximity=TRUE)
+covPre=(predict(covID2019.rs.tr, datWk_test))
+library(pROC)
+aucObj=roc(datWk_testY, covPre)
+plot(aucObj)
+
 ## Classification:
 ##data(iris)
 set.seed(71)
