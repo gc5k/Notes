@@ -439,14 +439,18 @@ $$\hat{\sigma}_{\beta}^2=\frac{SSE}{n-m}(\mathbf{X}^T\mathbf{X})^{-1}=\hat{\sigm
 
 There is connection of the regression coefficients between simple linear regresssion and multiple linear regrression.
 
-\begin{align}
-\hat{\mathbf{\beta}}&=(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}\mathbf{y}\\
-&=(\mathbf{X}^T\mathbf{X})^{-1}\Lambda\hat{b}
+$$\begin{align}
+\hat{\mathbf{\beta}}&=&(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}\\
+&=&(\Lambda_{\sigma_X}\Sigma\Lambda_{\sigma_X})^{-1}\rho_{Xy}\Lambda_{\sigma_X}\sigma_y\\
+&=&\Lambda_{\sigma_X}^{-1}\Sigma^{-1}\Lambda_{\sigma_X}^{-1}\rho_{Xy}\Lambda_{\sigma_X}\sigma_y\\
+&=&\Lambda_{\sigma_X}^{-1}\Sigma^{-1}\rho_{Xy}\sigma_y\\
+&=&\Sigma^{-1}\hat{b}_{Xy}\\
 \end{align}
+$$
 
 in which $\hat{b}_{[i]}=\frac{cov(y, x_i)}{var(x_i)}=\rho_{y,x_i}\frac{\sigma_y}{\sigma_{x_i}}$, estimated from the simple linear regression from $y=a+b_ix_i+e$.
 
-And similarly, $\hat{\sigma}^2_{\beta}=(\frac{y^Ty-\hat{\mathbf{\beta}}^T\mathbf{\Lambda}\hat{b}}{n-m})(\mathbf{X}^T\mathbf{X})^{-1}$
+And similarly, $\hat{\sigma}^2_{\beta}=(\frac{y^Ty-\hat{\mathbf{\beta}}^T\hat{b}}{n-m})(\mathbf{\Lambda_{\sigma_X}\Sigma\Lambda_{\sigma_X}})^{-1}$
 
 ```{r, g3, echo=FALSE}
 set.seed(2016)
