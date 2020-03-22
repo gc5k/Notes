@@ -1,0 +1,91 @@
+---
+title: "CCsimu"
+author: "gc5k"
+date: "3/22/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Quantitative
+```{r}
+SimuQt <- function(gMat, locIdx=c(1), gFun=c(1), intercept=0, gbeta=1, cBeta=NULL, rsq=0.5) {
+  bs=10^c((length(locIdx)-1):0)
+  gStack=gMat[,locIdx]%*% matrix(bs, nrow=length(bs), 1)
+  bv=(gStack %in% gFun)*gbeta
+  cMat=matrix(1, nrow=nrow(gMat), 1)
+  cB=c(intercept)
+  if(!is.null(cBeta)) {
+    cMat=cbind(cMat, matrix(rnorm(length(bv)*length(cBeta)), length(bv), length(cBeta)))
+    cB=c(cB, cBeta)
+  }
+
+  bv=bv+cMat%*%matrix(cB, nrow=length(cB), 1)
+  y=bv+rnorm(length(bv), sd=sqrt(var(bv)/rsq * (1-rsq)))
+  dat=list("bv"=bv, "y"=y, "X"=cMat)
+}
+
+```
+
+```{r cc}
+SimuCC <- function(frq, csN, ctrlN, locIdx=c(1), gFun=c(1), intercept=-4.5, gbeta=1, cBeta=NULL) {
+  bs=10^c((length(locIdx)-1):0)
+  csn=0
+  ctrln=0
+
+  Y=array(0, dim=csN+ctrlN)
+  gMat=matrix(0, nrow=csN+ctrlN, ncol=length(frq))
+  cMat=matrix(1, nrow=csN+ctrlN, 1)
+  cB=c(intercept)
+  if(!is.null(cBeta)) {
+    cMat=cbind(cMat, matrix(0, csN+ctrlN, length(cBeta)))
+    cB=c(cB, cBeta)
+  }
+
+  cnt=0
+  cnTotal=0
+  while((cnt)<(csN+ctrlN)) {
+    cnTotal=cnTotal+1
+    g=rbinom(length(frq), 2, frq)
+    bv=intercept
+    if(!is.null(cBeta)) {
+      x=rnorm(length(cBeta))
+      bv=bv+x*cBeta
+    }
+
+    if(g[locIdx] %in% gFun) {
+      bv=bv+gbeta
+    }
+    pv=exp(bv)/(1+exp(bv))
+    ind=rbinom(1, 1, pv)
+
+    if(ind == 1) {
+      if(csn < csN) {
+        csn=csn+1
+        cnt=cnt+1
+        if(!is.null(cBeta)) {
+          cMat[csn,2:ncol(cMat)]=x
+          gMat[csn,]=g
+        }
+        Y[csn]=1
+      }
+    } else {
+      if(ctrln < ctrlN) {
+        ctrln=ctrln+1
+        cnt=cnt+1
+        if(!is.null(cBeta)) {
+          cMat[ctrln+csN,2:ncol(cMat)]=x
+          gMat[ctrln+csN,]=g
+        }
+        Y[ctrlN+csN]=0
+      }
+    }
+  }
+  dat=list("Y"=Y, "gMat"=gMat, "X"=cMat, "cT"=cnTotal)
+}
+```
+
+
+
