@@ -80,6 +80,45 @@ $$\color{green}{\boxed{\hat{\sigma}^2_g=\frac{y^T(\mathbf{\Omega}-I_N)y}{tr[\mat
 **Notes**:, the $y^T(\mathbf{\Omega}-I_N)y$ is quadratic form [wiki link](https://en.wikipedia.org/wiki/Quadratic_form_(statistics)).
 
 
+$y^T(\mathbf{\Omega}-I_N)y=2tr[H(\mathbf{\Omega}-I_N)H(\mathbf{\Omega}-I_N)]$
+
+in which $H$ can be replaced by the expected correlation matrix for $y$, I. So, 
+
+$y^T(\mathbf{\Omega}-I_N)y=2tr[(\mathbf{\Omega}-I_N)(\mathbf{\Omega}-I_N)]$
+
+```{r yty}
+sourceCpp("~/git/Notes/R/RLib/Shotgun.cpp")
+M=10000
+N=200
+frq=runif(M, 0.2, 0.8)
+Dp=c(runif(M/2, -0.95, -0.5), runif(M/2, 0.5, 0.95))
+Dp=Dp[1:(M-1)]
+
+Amat=matrix(0, 100, 2)
+gMat=GenerateGenoDprimeRcpp(frq, N=N, Dp = Dp)
+
+sG=scale(gMat)
+K=sG%*%t(sG)/(M-1)
+I=diag(1, N, N)
+
+KI=K-I
+
+for(i in 1:100) {
+  y=scale(rnorm(N))
+  yy=y%*%t(y)
+  yy_KI=yy%*%KI
+
+  Amat[i,1]=t(y)%*%KI%*%y
+  ss=I%*%KI%*%I%*%KI
+#  ss=KI%*%KI
+  Amat[i,2]=2*sum(diag(ss))
+}
+colMeans(Amat)
+var(Amat[,1])
+
+```
+
+
 ### Link to summary statistics
 After rearrangement, it is easy to see that
 $y^T\mathbf{\Omega}y=\frac{1}{M}y^T\mathbf{SS}^Ty$, and $E(\frac{1}{M}y^T\mathbf{SS}^Ty)=NE(\chi^2_{1,h^2})=N(1+N\frac{h^2}{M_Q}\sum_{m=1}^Mr^2_{k,m})$. `**It is available as summary statistics!**`. If further adjustment for summary statistics is requested, a modified LSE can be used to ajust summary statistics (see LSE phenome).
@@ -245,6 +284,29 @@ $\mathbf{\Omega}=\mathbf{s^Ts}$, in which $\mathbf{s}$ as defined in the last pa
 $\Omega_{ij}=\frac{1}{M}\sum_{k=1}^Ms_{i,k}s_{j,k}=\frac{1}{M}\sum_{k=1}^Ms_{i,k}s_{j,k}$
 
 $\mathbf{\Omega}$ is a Hermitian matrix (symetric), and the diagonal element is $\Omega_{ii}=\frac{1}{M}\sum_{k=1}^Ms_{i,k}^2$.
+
+It exist simple relationship that $M_e=var(\Omega_{off-diag})=\frac{M+\sum_{i \ne j}r_{ij}}{M^2}=$, and $E(V(M_e))=\frac{2M_e}{n^2}$
+```{r me_test}
+sourceCpp("~/git/Notes/R/RLib/Shotgun.cpp")
+M=1000
+N=100
+frq=runif(M, 0.2, 0.8)
+Dp=c(runif(M/2, -0.95, -0.5), runif(M/2, 0.5, 0.95))
+Dp=Dp[1:(M-1)]
+
+Amat=matrix(0, 100, 2)
+
+MeMat=matrix(0, 100, 1)
+for(i in 1:100) {
+gMat=GenerateGenoDprimeRcpp(frq, N=N, Dp = Dp)
+
+sG=scale(gMat)
+K=sG%*%t(sG)/(M-1)
+MeMat[i,1]=1/var(K[row(K)>col(K)])
+}
+print(paste("Me:", mean(MeMat)))
+print(paste("V(Me):", sd(MeMat), "E[V(Me)]:", (2/N*mean(MeMat))))
+```
 
 ### Diagonal elements
 $E(s_{ii}^2)=diag(\Omega_{ii})=1$, interpreting that an individual is identical to himself under random mating (no inbred, otherwise $1+F$).
