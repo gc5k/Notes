@@ -80,11 +80,11 @@ $$\color{green}{\boxed{\hat{\sigma}^2_g=\frac{y^T(\mathbf{\Omega}-I_N)y}{tr[\mat
 **Notes**:, the $y^T(\mathbf{\Omega}-I_N)y$ is quadratic form [wiki link](https://en.wikipedia.org/wiki/Quadratic_form_(statistics)).
 
 
-$y^T(\mathbf{\Omega}-I_N)y=2tr[H(\mathbf{\Omega}-I_N)H(\mathbf{\Omega}-I_N)]$
+$var[y^T(\mathbf{\Omega}-I_N)y]=2tr[H(\mathbf{\Omega}-I_N)H(\mathbf{\Omega}-I_N)]$
 
 in which $H$ can be replaced by the expected correlation matrix for $y$, I. So, 
 
-$y^T(\mathbf{\Omega}-I_N)y=2tr[(\mathbf{\Omega}-I_N)(\mathbf{\Omega}-I_N)]$
+$var[y^T(\mathbf{\Omega}-I_N)y]=2tr[(\mathbf{\Omega}-I_N)(\mathbf{\Omega}-I_N)]$
 
 ```{r yty}
 sourceCpp("~/git/Notes/R/RLib/Shotgun.cpp")
@@ -285,7 +285,7 @@ $\Omega_{ij}=\frac{1}{M}\sum_{k=1}^Ms_{i,k}s_{j,k}=\frac{1}{M}\sum_{k=1}^Ms_{i,k
 
 $\mathbf{\Omega}$ is a Hermitian matrix (symetric), and the diagonal element is $\Omega_{ii}=\frac{1}{M}\sum_{k=1}^Ms_{i,k}^2$.
 
-It exist simple relationship that $M_e=var(\Omega_{off-diag})=\frac{M+\sum_{i \ne j}r_{ij}}{M^2}=$, and $E(V(M_e))=\frac{2M_e}{n^2}$
+It exist simple relationship that $M_e=var(\Omega_{off-diag})=\frac{M+\sum_{l_1 \ne l_2}r_{l_1l_2}^2}{M^2}=$, and $E(V(M_e))=\frac{2M_e}{n^2}$
 ```{r me_test}
 sourceCpp("~/git/Notes/R/RLib/Shotgun.cpp")
 M=1000
