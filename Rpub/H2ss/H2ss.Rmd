@@ -16,7 +16,9 @@ output:
 print(Sys.time())
 ```
 
-## MoM
+## 1 VC-MoM
+
+### Additive model
 
 $y|e,\mathbf{\beta}=\mathbf{X}\beta+e$
 
@@ -26,65 +28,64 @@ $\beta|\sigma^2_g~N(\frac{\sigma^2_g}{M},I_M)$
 
 $y$ is centered.
 
+$$
 \begin{align}
 cov(y)&=\mathbb{E}(yy^T)-\mathbb{y}\mathbb{y}^T\\
-&=\sigma^2_g\mathbf{\Omega}+\sigma^2_eI_N
+&=\sigma^2_a\mathbf{\Omega}_a+\sigma^2_eI_N
 \end{align}
-
-
-### OLS
+$$
 
 The target to be minimized is 
 
-$Q=argmin_{(\sigma^2_g,\sigma^2_e)}|| yy^T-(\sigma^2_g\mathbf{\Omega}+\sigma^2_eI_N)||_F^2$
+$Q=argmin_{(\sigma^2_a,\sigma^2_e)}|| yy^T-(\sigma^2_a\mathbf{\Omega}+\sigma^2_eI_N)||_F^2$
 
-Here $_{F}$ is for Frobenius norm of a matrix $A$, $||A||_F=\sqrt{tr(AA^T)}$. 
+Here the subscript $_{F}$ is for [Frobenius norm](https://en.wikipedia.org/wiki/Matrix_norm) of a matrix $\mathbf{A}$, $||\mathbf{A}||_F=\sqrt{tr(\mathbf{AA}^T)}$. 
 
-
+$$
 \begin{align}
-Q&=argmin_{(\sigma^2_g,\sigma^2_e)}|| yy^T-(\sigma^2_g\mathbf{\Omega}+\sigma^2_eI_N)||_F^2\\
-&=tr[yy^T-(\sigma^2_g\mathbf{\Omega}+\sigma^2_gI)][yy^T-(\sigma^2_g\mathbf{\Omega}+\sigma^2_gI)]^T
+Q&=argmin_{(\sigma^2_a,\sigma^2_e)}|| yy^T-(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_eI_N)||_F^2\\
+&=tr\{[yy^T-(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_eI_N)][yy^T-(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_eI_N)]^T\}
 \end{align}
+$$
 
 An ordinary least squares (OLS) problem of $Q$ is as below
 
-\[
+$$
 \left\{
  \begin{array}{lll}
-  \frac{\partial{Q}}{\partial{\sigma^2_g}} & =tr\{\frac{yy^Tyy^T-(\sigma^2_g\mathbf{\Omega}+\sigma^2_eI_N)+(\sigma^2_g\mathbf{\Omega}+\sigma^2_eI_N)^2}{\partial{\sigma^2_g}}\}&=tr\{\sigma^2_g\mathbf{\Omega}\mathbf{\Omega}^T+\sigma^2_e\mathbf{\Omega}-yy^T\mathbf{\Omega}\}=0\\
-  \frac{\partial{Q}}{\partial{\sigma^2_e}} & =tr\{\frac{yy^Tyy^T-(\sigma^2_g\mathbf{\Omega}+\sigma^2_eI_N)+(\sigma^2_g\mathbf{\Omega}+\sigma^2_eI_N)^2}{\partial{\sigma^2_e}}\}&=tr\{\sigma^2_g\mathbf{\Omega}+\sigma^2_e\mathbf{I}-yy^T\mathbf{I}\}=0
+  \frac{\partial{Q}}{\partial{\sigma^2_a}} & =tr\{\frac{yy^Tyy^T-2(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_eI_N)yy^T+(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_eI_N)^2}{\partial{\sigma^2_a}}\}&=tr\{\sigma^2_a\mathbf{\Omega}_a\mathbf{\Omega}_a^T+\sigma^2_e\mathbf{\Omega}_a-yy^T\mathbf{\Omega}_a\}=0\\
+  \frac{\partial{Q}}{\partial{\sigma^2_e}} & =tr\{\frac{yy^Tyy^T-2(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_eI_N)yy^T+(\sigma^2_g\mathbf{\Omega}_a+\sigma^2_eI_N)^2}{\partial{\sigma^2_e}}\}&=tr\{\sigma^2_a\mathbf{\Omega}_a+\sigma^2_e\mathbf{I}_N-yy^T\mathbf{I}_N\}=0
  \end{array}
 \right.
-\]
+$$
 
-\[
+$$
 \left\{
  \begin{array}{lll}
-tr\{\sigma^2_g\mathbf{\Omega}\mathbf{\Omega}^T+\sigma^2_e\mathbf{\Omega}\}=tr\{yy^T\mathbf{\Omega}\}=tr\{y^T\mathbf{\Omega}y\}\\
-tr\{\sigma^2_g\mathbf{\Omega}+\sigma^2_e\mathbf{I}\}=tr\{yy^T\mathbf{I}\}=tr\{y^T\mathbf{I}y\}
+tr\{\sigma^2_a\mathbf{\Omega}_a\mathbf{\Omega}_a^T+\sigma^2_e\mathbf{\Omega}_a\}=tr\{yy^T\mathbf{\Omega}_a\}=tr\{y^T\mathbf{\Omega}_ay\}\\
+tr\{\sigma^2_a\mathbf{\Omega}_a+\sigma^2_e\mathbf{I}_N\}=tr\{yy^T\mathbf{I}_N\}=tr\{y^T\mathbf{I}_Ny\}
  \end{array}
 \right.
-\]
+$$
 The last step uses cycling property of [$trace$](https://en.wikipedia.org/wiki/Trace_(linear_algebra)).
 
 The above result can be orgainzed in to normal equation below
 
-\[
-\begin{bmatrix} tr[\mathbf{\Omega}\mathbf{\Omega}^T] & tr[\mathbf{\Omega}] \\ tr[\mathbf{\Omega}] & N \end{bmatrix} \left[ \begin{array}{c} \hat{\sigma}^2_g \\ \hat{\sigma}^2_e \end{array} \right] = \left[ \begin{array}{c} tr[y^T\mathbf{\Omega}y] \\ tr[y^TI_Ny] \end{array} \right] 
-\]
+$$
+\begin{bmatrix} tr[\mathbf{\Omega}_a\mathbf{\Omega}_a^T] & tr[\mathbf{\Omega}_a] \\ tr[\mathbf{\Omega}_a] & N \end{bmatrix} \left[ \begin{array}{c} \hat{\sigma}^2_a \\ \hat{\sigma}^2_e \end{array} \right] = \left[ \begin{array}{c} tr[y^T\mathbf{\Omega}_ay] \\ tr[y^TI_Ny] \end{array} \right] 
+$$
 
 It is easy to find that
 
-$$\color{green}{\boxed{\hat{\sigma}^2_g=\frac{y^T(\mathbf{\Omega}-I_N)y}{tr[\mathbf{\Omega}\mathbf{\Omega}^T]-N}}}$$
+$$\color{green}{\boxed{\hat{\sigma}^2_a=\frac{y^T(\mathbf{\Omega}_a-I_N)y}{tr[\mathbf{\Omega}_a\mathbf{\Omega}_a^T]-N}}}$$
 
 **Notes**:, the $y^T(\mathbf{\Omega}-I_N)y$ is quadratic form [wiki link](https://en.wikipedia.org/wiki/Quadratic_form_(statistics)).
 
+$var[y^T(\mathbf{\Omega}_a-I_N)y]=2tr[H(\mathbf{\Omega}_a-I_N)H(\mathbf{\Omega}_a-I_N)]$
 
-$var[y^T(\mathbf{\Omega}-I_N)y]=2tr[H(\mathbf{\Omega}-I_N)H(\mathbf{\Omega}-I_N)]$
+in which $H$ can be replaced by the expected correlation matrix for $y$, here is $I_N$ for unrelated individuals. So,
 
-in which $H$ can be replaced by the expected correlation matrix for $y$, I. So, 
-
-$var[y^T(\mathbf{\Omega}-I_N)y]=2tr[(\mathbf{\Omega}-I_N)(\mathbf{\Omega}-I_N)]$
+$var[y^T(\mathbf{\Omega}_a-I_N)y]=2tr[(\mathbf{\Omega}_a-I_N)(\mathbf{\Omega}_a-I_N)]$
 
 ```{r yty}
 sourceCpp("~/git/Notes/R/RLib/Shotgun.cpp")
@@ -118,6 +119,97 @@ var(Amat[,1])
 
 ```
 
+
+### Dominance VC
+
+$y|e,\mathbf{\beta}=\mathbf{X}_a\beta_a+\mathbf{X}_d\beta_d+e$
+
+$e|\sigma^2_e~N(0,\sigma^2I_N)$
+
+$\beta_a|\sigma^2_a~N(\frac{\sigma^2_a}{M},I_M)$
+
+$\beta_d|\sigma^2_d~N(\frac{\sigma^2_d}{M},I_M)$
+
+$y$ is centered.
+
+$$
+\begin{align}
+cov(y)&=\mathbb{E}(yy^T)-\mathbb{y}\mathbb{y}^T\\
+&=\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N
+\end{align}
+$$
+
+When include dominace variance component, the target to be minimized is 
+
+$Q=argmin_{(\sigma^2_g,\sigma^2_d,\sigma^2_e)}|| yy^T-(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)||_F^2$
+
+To minimize the target function below
+
+$$
+\begin{align}
+Q&=argmin_{(\sigma^2_a,\sigma^2_d,\sigma^2_e)}|| yy^T-(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)||_F^2\\
+&=tr\{[yy^T-(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)][yy^T-(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)]^T\}
+\end{align}
+$$
+After taking deriation in repect to each component, we have
+$$
+\left\{
+ \begin{array}{lll}
+  \frac{\partial{Q}}{\partial{\sigma^2_a}} & =tr\{\frac{yy^Tyy^T-2(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)yy^T+(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)^2}{\partial{\sigma^2_a}}\}&=tr\{\sigma^2_a\mathbf{\Omega}_a\mathbf{\Omega}_a^T+\sigma^2_d\mathbf{\Omega}_a\mathbf{\Omega}_d^T+\sigma^2_e\mathbf{\Omega}_a-yy^T\mathbf{\Omega}_a\}=0\\
+  \frac{\partial{Q}}{\partial{\sigma^2_d}} & =tr\{\frac{yy^Tyy^T-2(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)yy^T+(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)^2}{\partial{\sigma^2_d}}\}&=tr\{\sigma^2_d\mathbf{\Omega}_d\mathbf{\Omega}_a^T+\sigma^2_d\mathbf{\Omega}_d\mathbf{\Omega}_d^T+\sigma^2_e\mathbf{\Omega}_a-yy^T\mathbf{\Omega}_d\}=0\\
+  \frac{\partial{Q}}{\partial{\sigma^2_e}} & =tr\{\frac{yy^Tyy^T-2(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)yy^T+(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)^2}{\partial{\sigma^2_e}}\}&=tr\{\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_e\mathbf{I}_N-yy^T\mathbf{I}_N\}=0
+ \end{array}
+\right.
+$$
+then
+$$
+\left\{
+ \begin{array}{lll}
+tr\{\sigma^2_a\mathbf{\Omega}_a\mathbf{\Omega}_a^T+\sigma^2_a\mathbf{\Omega}_a\mathbf{\Omega}_d^T+\sigma^2_e\mathbf{\Omega}_a\}=tr\{yy^T\mathbf{\Omega}_a\}=tr\{y^T\mathbf{\Omega}_ay\}\\
+tr\{\sigma^2_d\mathbf{\Omega}_d\mathbf{\Omega}_a^T+\sigma^2_d\mathbf{\Omega}_d\mathbf{\Omega}_d^T+\sigma^2_e\mathbf{\Omega}_d\}=tr\{yy^T\mathbf{\Omega}_d\}=tr\{y^T\mathbf{\Omega}_dy\}\\
+tr\{\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_e\mathbf{I}_N\}=tr\{yy^T\mathbf{I}_N\}=tr\{y^T\mathbf{I}_Ny\}
+ \end{array}
+\right.
+$$
+
+We need to solve the equation below
+$$
+\begin{bmatrix} 
+tr[\mathbf{\Omega}_a\mathbf{\Omega}_a^T] & tr[\mathbf{\Omega}_a\mathbf{\Omega}_d^T]& tr[\mathbf{\Omega}_a] \\
+tr[\mathbf{\Omega}_d\mathbf{\Omega}_a^T] & tr[\mathbf{\Omega}_d\mathbf{\Omega}_d^T] & tr[\mathbf{\Omega}_d] \\
+tr[\mathbf{\Omega}_a] & tr[\mathbf{\Omega}_d] & N \end{bmatrix} \left[ \begin{array}{c} \hat{\sigma}^2_a \\ 
+\hat{\sigma}^2_d \\
+\hat{\sigma}^2_e \end{array} \right] = 
+\left[ \begin{array}{c} tr[y^T\mathbf{\Omega}_ay] \\ tr[y^T\mathbf{\Omega}_dy]\\tr[y^TI_Ny] \end{array} \right] 
+$$
+Of note, $E[tr(\mathbf{\Omega})_a]=E[tr(\mathbf{\Omega})_d]=N$.
+
+$$
+\left[ \begin{array}{c}
+\hat{\sigma}^2_a \\
+\hat{\sigma}^2_d \\
+\hat{\sigma}^2_e \\
+\end{array}
+\right ]=\Lambda^{-1}
+\left[ \begin{array}{c} y^T\mathbf{\Omega}_ay \\ y^T\mathbf{\Omega}_dy\\ y^TI_Ny \end{array} \right] 
+$$
+
+In particular, 
+$$
+\begin{align}
+\hat{\sigma}^2_a&=&\frac{(ei-fh)y^T\mathbf{\Omega}_ay-(bi-ch)y^T\mathbf{\Omega}_dy+(bf-ce)y^TI_Ny}{det(\mathbf{\Lambda})}\\
+&=&\frac{1}{det(\mathbf{\Lambda})}\{[Ntr(\mathbf \Omega^2_d)-N^2]y^T\mathbf{\Omega}_ay-[Ntr(\mathbf \Omega^2_d)-N^2]y^TI_Ny\}\\
+&=&\frac{1}{det(\mathbf{\Lambda})}\{[Ntr(\mathbf \Omega^2_d)-N^2]y^T(\mathbf{\Omega}_a-I_N)y\}
+\end{align}
+$$,
+
+
+in which $det(\mathbf{A})=abd+bfg+cdh-ceg-fha-ibd=\color{red}{tr(\mathbf{\Omega}^2_a}\color{blue}{\mathbf{\Omega}^2_d})N+N^3+N^3-N^2tr(\mathbf{\Omega}^2_a)-N^2tr(\mathbf{\Omega}^2_d)-N^3=N[\color{red}{tr(\mathbf{\Omega^2}_a} \color{blue}{\mathbf{\Omega^2}_d)}-tr(\mathbf{\Omega^2}_a)N-tr(\mathbf{\Omega}^2_d)N+N^2]$.
+
+Under orthogonal coding for additive and dominance scheme,
+$\color  {red}{tr(\mathbf{\Omega}_a}\color{blue}{\mathbf{\Omega}_d)}=\color  {red}{tr(\mathbf{\Omega}_a)}\color{blue}{tr{(\mathbf{\Omega}_d)}}$, and $det(\mathbf {A})=N[\color{red}{tr(\mathbf{\Omega}_a)}-N][\color{blue}{tr(\mathbf{\Omega}_d)}-N]$
+
+Then, $\hat{\sigma}^2_a=\frac{y^T[\mathbf{\Omega}_a-I_N]y}{tr(\mathbf{\Omega}^2_a)-N)}$
 
 ### Link to summary statistics
 After rearrangement, it is easy to see that
@@ -243,42 +335,9 @@ shinyApp(
 )
 ```
 
-## 2 Basic Tables
-
-### Haplotype for a pair of biallelic loci
-
-----
-
-| |$a_l$|$A_l$| |
-|:---:|:---:|:---:|:---:|
-|$a_k$| $r_{kl}=q_l+\frac{D_{kl}}{q_k}$ | $\bar{r}_{kl}=q_l+\frac{D_{kl}}{q_k}$ | $q_k$|
-|$A_k$| $\bar{R}_{kl}=q_l+\frac{D_{kl}}{p_{kl}}$| $R_{kl}=p_l+\frac{D_{kl}}{p_{kl}}$| $p_k$|
-||$q_l$|$p_l$||
-
------
-
-$p_k$ and $p_l$ are minor allelic frequencies of the two loci, respectively.
-It exists the transformation as $D_{kl}=\rho_{kl}\sqrt{p_kq_kp_lq_l}$. 
-Of note, $D_{kl}$ is restrained as `min`($p_kq_l$, $q_kp_l$), and consequently
-$\rho_{kl}=\sqrt{\frac{p_kq_l}{p_lq_k}}<1$.
-
-### **Frequencies for a pair of loci for the $i^{th}$ individual**
-
-------
-
-|| | | | | Locus $l$ | |
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-||Geno | | |$a_la_l$ | $a_lA_l$|$A_lA_l$ |
-|| | Standardized geno | |$s_{il}=\frac{-2p_l}{\sqrt{2p_lq_l}}$ | $s_{il}=\frac{q_l-p_l}{\sqrt{2p_lq_l}}$|$s_{il}=\frac{2q_l}{\sqrt{2p_lq_l}}$ |
-|| | | Frequency |$q_l^2$ | $2p_lq_l$|$p_l^2$ |
-||$a_ka_k$|$s_{ik}=\frac{-2p_k}{\sqrt{2p_kq_k}}$ | $q_k^2$|$r_{kl}^2$ |$2r_{kl}\bar{r}_{kl}$ | $\bar{r}_{kl}^2$ |
-|Locus $k$|$a_ka_k$|$s_{ik}=\frac{q_k-p_k}{\sqrt{2p_kq_k}}$ | $q_k^2$ |$r_{kl}\bar{R}_{kl}$| $r_{kl}\bar{R}_{kl}+\bar{r}_{kl}R_{kl}$ | $\bar{r}_{kl}R_{kl}$ |
-||$A_kA_k$|$s_{ik}=\frac{2q_k}{\sqrt{2p_kq_k}}$ |$p_k^2$ | $\bar{R}_{kl}^2$ | $2R_{kl}\bar{R}_{kl}$ | $R_{kl}^2$ |
-
-----
 
 
-## 3 GRM statistics $\mathbf{\Omega}$
+## 2 GRM statistics $\mathbf{\Omega}_a$
 
 $\mathbf{\Omega}=\mathbf{s^Ts}$, in which $\mathbf{s}$ as defined in the last page. In particular, for a pair of individuals $i$ and $j$, their relatedness is
 $\Omega_{ij}=\frac{1}{M}\sum_{k=1}^Ms_{i,k}s_{j,k}=\frac{1}{M}\sum_{k=1}^Ms_{i,k}s_{j,k}$
@@ -340,9 +399,9 @@ So
 
 $$E(\mathbf{\Omega}_{ij}^2)=\frac{1}{M}+\frac{M-1}{M}\color{green}{E^2(\rho_{k_1k_2})}$$
 
-## 4 $E(s^2_{ii,k}),E(s^4_{ii,k}), var(s_{ii}^2)$
+### $E(s^2_{ii,k}),E(s^4_{ii,k}), var(s_{ii}^2)$
 
-### Some useful identities for $s$.
+#### Some useful identities for $s$.
 
 $$E(s^2_{ii,k})=1$$
 
@@ -388,7 +447,8 @@ K=1/M * s %*% t(s)
 
 ```
 
-## 5 $E(s_{ii,k_1}^2s_{ii,k_2}^2), cov(s_{ii,k_1}^2,s_{ii,k_2}^2)$
+
+## 3 $E(s_{ii,k_1}^2s_{ii,k_2}^2), cov(s_{ii,k_1}^2,s_{ii,k_2}^2)$
 
 \begin{align}
 E(\color{green}{s_{ii,k_1}^2s_{ii,k_2}^2})&= \color{purple}{q^2_{k_1}\frac{4p_{k_1}^2}{2p_{k_1}q_{k_1}} [\frac{4p_{k_2}^2r^2_{k_1k_2}+(q_{k_2}-p_{k_2})^2 2r_{k_1k_2}\bar{r}_{k_1k_2} + 4q_{k_2}^2\bar{r}_{k_1k_2}^2}{2p_{k_2}q_{k_2}}]}\\
@@ -410,7 +470,7 @@ cov(s_{ii,k_1}^2,s_{ii,k_2}^2)&=E(s_{i,k_1}^2s_{i,k_2}^2)-E^2(s_{i,k_1})E^2(s_{i
 When $k_1 = k_2$, it is obviously that $\rho_{k_1,k_2}=1, p_{k_1}=p_{k_2}$, and
 $$cov(s_{ii,k_1}^2,s_{ii,k_2}^2)=1+1\times\frac{(p_{k}-q_{k})^2}{2p_{k}q_{k}}=1+\frac{1-4p_{k}q_{k}}{2p_{k}q_{k}}=\frac{1}{2p_{k}q_{k}}-1=var(s_{ii,k}^2)$$
 
-## 6 ME
+## 4 $M_{E_a}$
 UKB cohorts test,
 "/public/home/xuhm/gc5k/UKB_cohort/cohort/grm/sub"
 
@@ -452,6 +512,8 @@ layout(matrix(1,1,1))
 barP=barplot(MeMean, beside = T, ylim=c(0, 60000))
 segments(barP, MeMean-MeSd*2, barP, MeMean+MeSd*2)
 ```
+
+## GRM $\mathbf{\Omega}_d$
 
 
 ## LSE (Phenome)
@@ -683,6 +745,57 @@ However, Isserlis Theorem works for normal distribution only, but it is not "nor
 
 #### Cumulant
 Another possible method is "Cumulant", see its [ Wiki](https://en.wikipedia.org/wiki/Cumulant). Or for "joint Cumulant" if covariance exists beween two vectors, see [Joint Cumulant](https://en.wikipedia.org/wiki/Law_of_total_cumulance).
+
+
+## Inversion
+
+### $2 \times 2$
+$$\mathbf{A}^{-1}=
+\begin{bmatrix} a & b \\ c & d \end{bmatrix} ^{-1} = \frac{1}{ad-bc}\begin{bmatrix} d & a \\ -b & -c \end{bmatrix}$$
+
+
+### $3 \times 3$
+$$\mathbf{A}^{-1}=
+\begin{bmatrix} a & b &c \\ d & e & f \\g&h&i \end{bmatrix} ^{-1} = \frac{1}{det(\mathbf{A})}\begin{bmatrix} A & D &G \\B&E&H \\C & F &I \end{bmatrix}$$
+in which ($A$ is scalar not a matrix as above)
+$A=(ei-fh)$, $B=-(di-fg)$, $C=(dh-eg)$, 
+$D=-(bi-ch)$, $E=(ai-cg)$, $F=-(ah-bg)$, 
+$G=(bf-ce)$, $H=-(af-cd)$, $I=(ae-bd)$.
+
+## Conditional probability
+
+### Haplotype for a pair of biallelic loci
+
+----
+
+| |$a_l$|$A_l$| |
+|:---:|:---:|:---:|:---:|
+|$a_k$| $r_{kl}=q_l+\frac{D_{kl}}{q_k}$ | $\bar{r}_{kl}=q_l+\frac{D_{kl}}{q_k}$ | $q_k$|
+|$A_k$| $\bar{R}_{kl}=q_l+\frac{D_{kl}}{p_{kl}}$| $R_{kl}=p_l+\frac{D_{kl}}{p_{kl}}$| $p_k$|
+||$q_l$|$p_l$||
+
+-----
+
+$p_k$ and $p_l$ are minor allelic frequencies of the two loci, respectively.
+It exists the transformation as $D_{kl}=\rho_{kl}\sqrt{p_kq_kp_lq_l}$. 
+Of note, $D_{kl}$ is restrained as `min`($p_kq_l$, $q_kp_l$), and consequently
+$\rho_{kl}=\sqrt{\frac{p_kq_l}{p_lq_k}}<1$.
+
+### **Frequencies for a pair of loci for the $i^{th}$ individual**
+
+------
+
+|| | | | | Locus $l$ | |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+||Geno | | |$a_la_l$ | $a_lA_l$|$A_lA_l$ |
+|| | Standardized geno | |$s_{il}=\frac{-2p_l}{\sqrt{2p_lq_l}}$ | $s_{il}=\frac{q_l-p_l}{\sqrt{2p_lq_l}}$|$s_{il}=\frac{2q_l}{\sqrt{2p_lq_l}}$ |
+|| | | Frequency |$q_l^2$ | $2p_lq_l$|$p_l^2$ |
+||$a_ka_k$|$s_{ik}=\frac{-2p_k}{\sqrt{2p_kq_k}}$ | $q_k^2$|$r_{kl}^2$ |$2r_{kl}\bar{r}_{kl}$ | $\bar{r}_{kl}^2$ |
+|Locus $k$|$a_ka_k$|$s_{ik}=\frac{q_k-p_k}{\sqrt{2p_kq_k}}$ | $q_k^2$ |$r_{kl}\bar{R}_{kl}$| $r_{kl}\bar{R}_{kl}+\bar{r}_{kl}R_{kl}$ | $\bar{r}_{kl}R_{kl}$ |
+||$A_kA_k$|$s_{ik}=\frac{2q_k}{\sqrt{2p_kq_k}}$ |$p_k^2$ | $\bar{R}_{kl}^2$ | $2R_{kl}\bar{R}_{kl}$ | $R_{kl}^2$ |
+
+----
+
 
 ## R sess
 ```{r session}
