@@ -204,12 +204,14 @@ $$
 $$,
 
 
-in which $det(\mathbf{A})=abd+bfg+cdh-ceg-fha-ibd=\color{red}{tr(\mathbf{\Omega}^2_a}\color{blue}{\mathbf{\Omega}^2_d})N+N^3+N^3-N^2tr(\mathbf{\Omega}^2_a)-N^2tr(\mathbf{\Omega}^2_d)-N^3=N[\color{red}{tr(\mathbf{\Omega^2}_a} \color{blue}{\mathbf{\Omega^2}_d)}-tr(\mathbf{\Omega^2}_a)N-tr(\mathbf{\Omega}^2_d)N+N^2]$.
+in which $det(\mathbf{\Lambda})=abd+bfg+cdh-ceg-fha-ibd=\color{red}{tr(\mathbf{\Omega}^2_a}\color{blue}{\mathbf{\Omega}^2_d})N+N^3+N^3-N^2tr(\mathbf{\Omega}^2_a)-N^2tr(\mathbf{\Omega}^2_d)-N^3=N[\color{red}{tr(\mathbf{\Omega^2}_a} \color{blue}{\mathbf{\Omega^2}_d)}-tr(\mathbf{\Omega^2}_a)N-tr(\mathbf{\Omega}^2_d)N+N^2]$.
 
 Under orthogonal coding for additive and dominance scheme,
-$\color  {red}{tr(\mathbf{\Omega}_a}\color{blue}{\mathbf{\Omega}_d)}=\color  {red}{tr(\mathbf{\Omega}_a)}\color{blue}{tr{(\mathbf{\Omega}_d)}}$, and $det(\mathbf {A})=N[\color{red}{tr(\mathbf{\Omega}_a)}-N][\color{blue}{tr(\mathbf{\Omega}_d)}-N]$
+$\color{red}{tr(\mathbf{\Omega}^2_a}\color{blue}{\mathbf{\Omega}^2_d)}=\color{red}{tr(\mathbf{\Omega}^2_a)}\color{blue}{tr{(\mathbf{\Omega}^2_d)}}$, and $det(\mathbf {\Lambda})=N[\color{red}{tr(\mathbf{\Omega}^2_a)}-N][\color{blue}{tr(\mathbf{\Omega}^2_d)}-N]$
 
-Then, $\hat{\sigma}^2_a=\frac{y^T[\mathbf{\Omega}_a-I_N]y}{tr(\mathbf{\Omega}^2_a)-N)}$
+Then, $\hat{\sigma}^2_a=\frac{y^T[\mathbf{\Omega}_a-I_N]y}{tr(\mathbf{\Omega}^2_a)-N)}$.
+
+Similarly for, $\hat{\sigma}^2_d=\frac{y^T[\mathbf{\Omega}_d-I_N]y}{tr(\mathbf{\Omega}^2_d)-N)}$.
 
 ### Link to summary statistics
 After rearrangement, it is easy to see that
@@ -229,7 +231,6 @@ m=1000 #marker
 h2=0.3 #heritability
 b=rnorm(m, 0, sqrt(h2/m)) #effect
 SIMU=5
-
 
 #simu g
 fq=runif(m, 0.1, 0.5)
@@ -514,6 +515,11 @@ segments(barP, MeMean-MeSd*2, barP, MeMean+MeSd*2)
 ```
 
 ## GRM $\mathbf{\Omega}_d$
+For $AA$, $Aa$, and $aa$, the corresponding coding scheme for domiance is $x_{d_{AA}}=0$, $x_{d_{Aa}}=2p$, and $x_{d_{aa}}=4p-2$. $E(x_d)=2p^2$, and $var(x_d)=4p^2(1-p)^2$. For a pair of individuals, their relatedness in terms of dominance effect is 
+$$
+\Omega_{d_{ij}}=\frac{1}{M}\sum_{k=1}^M\frac{(x_{d_{i,k}}-2p_k^2)(x_{d_{j,k}}-2p_k^2)}{4p_k^2(1-p_k)^2}
+$$
+The effective number of markers is $E(m_{e_d})=\frac{M^2}{\sum_{l_1=1}^M\sum_{l_2=1}^M\rho_{l_1l_2}^4}$.
 
 
 ## LSE (Phenome)
