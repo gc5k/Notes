@@ -204,7 +204,14 @@ $$
 $$,
 
 
-in which $det(\mathbf{\Lambda})=abd+bfg+cdh-ceg-fha-ibd=\color{red}{tr(\mathbf{\Omega}^2_a}\color{blue}{\mathbf{\Omega}^2_d})N+N^3+N^3-N^2tr(\mathbf{\Omega}^2_a)-N^2tr(\mathbf{\Omega}^2_d)-N^3=N[\color{red}{tr(\mathbf{\Omega^2}_a} \color{blue}{\mathbf{\Omega^2}_d)}-tr(\mathbf{\Omega^2}_a)N-tr(\mathbf{\Omega}^2_d)N+N^2]$.
+in which 
+$$
+\begin{align}
+det(\mathbf{\Lambda})&=&abd+bfg+cdh-ceg-fha-ibd\\
+&=&\color{red}{tr(\mathbf{\Omega}^2_a}\color{blue}{\mathbf{\Omega}^2_d})N+N^3+N^3-N^2tr(\mathbf{\Omega}^2_a)-N^2tr(\mathbf{\Omega}^2_d)-N^3\\
+&=&N[\color{red}{tr(\mathbf{\Omega^2}_a} \color{blue}{\mathbf{\Omega^2}_d)}-tr(\mathbf{\Omega^2}_a)N-tr(\mathbf{\Omega}^2_d)N+N^2]
+\end{align}
+$$.
 
 Under orthogonal coding for additive and dominance scheme,
 $\color{red}{tr(\mathbf{\Omega}^2_a}\color{blue}{\mathbf{\Omega}^2_d)}=\color{red}{tr(\mathbf{\Omega}^2_a)}\color{blue}{tr{(\mathbf{\Omega}^2_d)}}$, and $det(\mathbf {\Lambda})=N[\color{red}{tr(\mathbf{\Omega}^2_a)}-N][\color{blue}{tr(\mathbf{\Omega}^2_d)}-N]$
@@ -264,56 +271,24 @@ abline(h=h2)
 ### UKB case
 A realized example please refer to $\color{red} {/public/home/xuhm/gc5k/UKB\_cohort/ss}$, $\color{green} {/public/home/xuhm/gc5k/UKB\_cohort/ss\_adj}$
 
-|Cohort	| $N$ |	$M_e$	|	$\color{red}{\chi^2_1}$ | $\color{red}{h^2}$|$\color{green}{\chi^2_1}$	 |$\color{green}{h^2(y=snp+sex)}$ |
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|Barts	| 7699	| 51935.9967	|		1.116	| 0.794 |1.2230	| 1.5222 |
-|Birmingham |	19529	| 55594.9216	|		1.100	| 0.287|1.2102 |	0.6050 |
-|Bristol	| 39172	| 56774.8416	|		1.218	| 0.320|1.4353	| 0.6380 |
-|Bury	| 25404	| 55092.4145		|	1.154	| 0.338|1.3046 |	0.6686 |
-|Cardiff	| 16226	| 52069.3896	|		1.111 |	0.361|1.2325	| 0.7549 |
-|Croydon	| 18475	| 57405.4722	|		1.107	| 0.337|1.2260 |	0.7099|
-|Edinburgh	| 15441	| 53041.7932	|		1.111	| 0.386|1.2156 |	0.7490 |
-|Glasgow	| 16299	| 51940.1701	|		1.156	| 0.502|1.2900 |	0.9351 |
-|Hounslow	| 18420	| 56773.3298	|		1.133	| 0.414|1.2382|	0.7427 |
-|Leeds	| 39651	| 56474.8288		|	1.242	| 0.349|1.4597|	0.6623|
-|Liverpool	| 29604	| 54490.4477		|	1.183	| 0.341|1.3665	| 0.6826|
-|Manchester	| 11502	| 53621.5281		|	1.099	| 0.468|1.1650 |	0.7782|
-|Middlesborough	| 19819	| 53409.7873	|		1.133	| 0.362|1.2228 |	0.6074|
-|Newcastle	| 34663	| 54675.7131	|		1.179	| 0.286|1.3564 |	0.5686|
-|Nottingham	| 30760	| 56132.0762	|		1.173	| 0.319|1.3407 |	0.6287|
-|Oxford	| 12260	| 55143.1405	|		1.072	| 0.328|1.1345|	0.6112|
-|Reading	| 25886	| 58027.4726	|		1.109	| 0.247|1.2400|	0.5440|
-|Sheffield	| 27745	| 55244.0052	|		1.145	| 0.293|1.3013|	0.6069|
-|Stoke	| 18211	| 51302.5758		|	1.114	| 0.326|1.2534|	0.7220|
+```{r, cohorth2}
+library("knitr")
+ch2=read.table("cohortH2.txt", as.is = T, header = T)
+knitr::kable(ch2, caption = "cohort h2")
+
+```
 
 
 ### Oxford
 `/public/home/xuhm/gc5k/UKB_cohort/ss_chr`
 
-|Chr|M|$M_e$	|$\chi^2_1$	|$h^2$|
-|:---:|:---:|:----:|:-----:|:----:|
-|1|32913|7204.5646	| 1.0755	| 0.0448 |
-|2|33622|6403.3527	| 1.0321	| 0.0170 |
-|3|28040|5839.5143	| 1.0861	| 0.0414 |
-|4|26836|5632.8855	| 1.0545	| 0.0253 |
-|5|25243|5368.6945	| 1.0443	| 0.0196 |
-|$\color{red}{6}$|$\color{red}{30405}$|$\color{red}{857.1236}$	| $\color{red}{1.3061}$	| $\color{red}{0.0217}$ |
-|7|23260|5020.425	| 1.0346	| 0.01433 |
-|8|21530|3909.6782	| 1.0736	| 0.0237 |
-|9|18799|4277.3328	| 1.0470	| 0.0166 |
-|10|21313|4328.9556	| 1.0324	| 0.0116 |
-|11|20746|3269.6384	| 1.0349	| 0.0094 |
-|12|20194|4213.4118	| 1.0714	| 0.0248 |
-|13|14769|3508.2313	| 1.0363	| 0.0105 |
-|14|13741|3106.6733	| 1.0716	| 0.0183 |
-|15|13502|2872.9585	| 1.0998	| 0.0236 |
-|16|14848|3146.7089	| 1.0180	| 0.0047 |
-|17|14267|1796.0199	| 1.0360	| 0.0053 |
-|18|12880|3243.4674	| 1.0560	| 0.0150 |
-|19|12394|2346.5845	| 1.0938	| 0.0182 |
-|20|11181|2683.5395	| 1.0824	| 0.0182 |
-|21|6532|2683.5395	| 1.0076	| 0.0017 |
-|22|7087|1597.1183	| 1.0161	| 0.0021 |
+```{r oxChr}
+library("knitr")
+ch2=read.table("oxChr.txt", as.is = T, header = T)
+knitr::kable(ch2, caption = "Oxford h2")
+```
+
+
 
 ```{r, shiny, echo=FALSE, eval=FALSE}
 library(shiny)
