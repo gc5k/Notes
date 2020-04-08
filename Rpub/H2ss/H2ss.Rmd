@@ -85,7 +85,8 @@ $var[y^T(\mathbf{\Omega}_a-I_N)y]=2tr[H(\mathbf{\Omega}_a-I_N)H(\mathbf{\Omega}_
 
 in which $H$ can be replaced by the expected correlation matrix for $y$, here is $I_N$ for unrelated individuals. So,
 
-$var[y^T(\mathbf{\Omega}_a-I_N)y]=2tr[(\mathbf{\Omega}_a-I_N)(\mathbf{\Omega}_a-I_N)]$
+$var[y^T(\mathbf{\Omega}_a-I_N)y]=2tr[(\mathbf{\Omega}_a-I_N)(\mathbf{\Omega}_a-I_N)]=2tr[\mathbf{\Omega}^2_a-2\mathbf{\Omega}_aI_N-I_N^2]=2[tr(\mathbf{\Omega}_a^2)-N]=2N^2M_e$.
+In addition, $E[y^T(\mathbf{\Omega}_a-I_N)y]=[tr(\mathbf{\Omega}_a^2)-N]\sigma^2_a$.
 
 ```{r yty}
 sourceCpp("~/git/Notes/R/RLib/Shotgun.cpp")
@@ -100,6 +101,7 @@ gMat=GenerateGenoDprimeRcpp(frq, N=N, Dp = Dp)
 
 sG=scale(gMat)
 K=sG%*%t(sG)/(M-1)
+Me=1/var(K[row(K)<col(K)])
 I=diag(1, N, N)
 
 KI=K-I
@@ -115,7 +117,7 @@ for(i in 1:100) {
   Amat[i,2]=2*sum(diag(ss))
 }
 colMeans(Amat)
-var(Amat[,1])
+print(paste("Obs v:", var(Amat[,1]), ", Exp v:", (2*N^2/Me)))
 
 ```
 
@@ -564,7 +566,18 @@ segments(barP, MeMean-MeSd*2, barP, MeMean+MeSd*2)
 ```
 
 ## GRM $\mathbf{\Omega}_d$
-For $AA$, $Aa$, and $aa$, the corresponding coding scheme for domiance is $x_{d_{AA}}=0$, $x_{d_{Aa}}=2p$, and $x_{d_{aa}}=4p-2$. $E(x_d)=2p^2$, and $var(x_d)=4p^2(1-p)^2$. For a pair of individuals, their relatedness in terms of dominance effect is 
+
+: Coding for genotypes
+
+|Genotype|$aa$|$Aa$|$AA$|
+|:---:|:---:|:----:|:---:|
+|Additive $x_A$|0|1|2|
+|Dominance $x_d$|0|$2p$|$4p-2$|
+|Frequency|$q^2$|$2pq$|$p^2$|
+
+We have $E(x_A)=2p$, $E(x_d)=2p^2$, and $E(x_ax_d)=4p^2q+8p^3-4p^2=4p^3$, and consequently, $cov(x_a, x_d)=E(x_ax_d)-E(x_a)E(x_d)=0$.
+
+For a pair of individuals, their relatedness in terms of dominance effect is 
 $$
 \Omega_{d_{ij}}=\frac{1}{M}\sum_{k=1}^M\frac{(x_{d_{i,k}}-2p_k^2)(x_{d_{j,k}}-2p_k^2)}{4p_k^2(1-p_k)^2}
 $$
