@@ -92,11 +92,12 @@ In addition, $E[y^T(\mathbf{\Omega}_a-I_N)y]=[tr(\mathbf{\Omega}_a^2)-N]\sigma^2
 sourceCpp("~/git/Notes/R/RLib/Shotgun.cpp")
 M=10000
 N=200
+SIMU=50
 frq=runif(M, 0.2, 0.8)
 Dp=c(runif(M/2, -0.95, -0.5), runif(M/2, 0.5, 0.95))
 Dp=Dp[1:(M-1)]
 
-Amat=matrix(0, 100, 2)
+Amat=matrix(0, SIMU, 2)
 gMat=GenerateGenoDprimeRcpp(frq, N=N, Dp = Dp)
 
 sG=scale(gMat)
@@ -106,18 +107,18 @@ I=diag(1, N, N)
 
 KI=K-I
 
-for(i in 1:100) {
+for(i in 1:SIMU) {
   y=scale(rnorm(N))
   yy=y%*%t(y)
   yy_KI=yy%*%KI
-
+  
   Amat[i,1]=t(y)%*%KI%*%y
   ss=I%*%KI%*%I%*%KI
-#  ss=KI%*%KI
+  #  ss=KI%*%KI
   Amat[i,2]=2*sum(diag(ss))
 }
-colMeans(Amat)
-print(paste("Obs v:", var(Amat[,1]), ", Exp v:", (2*N^2/Me)))
+print(paste("Obs mean:", mean(Amat[,1]), " vs expected mean 0"))
+print(paste("Obs var:", var(Amat[,1]), "vs expected var:", mean(Amat[,2]), "vs expected var (eq2):", N^2/Me*2))
 
 ```
 
@@ -238,9 +239,9 @@ $$
 In particular, 
 $$
 \begin{align}
-\hat{\sigma}^2_a&=&\frac{(ei-fh)y^T\mathbf{\Omega}_ay-(bi-ch)y^T\mathbf{\Omega}_dy+(bf-ce)y^TI_Ny}{det(\mathbf{\Lambda})}\\
-&=&\frac{1}{det(\mathbf{\Lambda})}\{[Ntr(\mathbf \Omega^2_d)-N^2]y^T\mathbf{\Omega}_ay-[Ntr(\mathbf \Omega^2_d)-N^2]y^TI_Ny\}\\
-&=&\frac{1}{det(\mathbf{\Lambda})}\{[Ntr(\mathbf \Omega^2_d)-N^2]y^T(\mathbf{\Omega}_a-I_N)y\}
+\hat{\sigma}^2_a&=\frac{(ei-fh)y^T\mathbf{\Omega}_ay-(bi-ch)y^T\mathbf{\Omega}_dy+(bf-ce)y^TI_Ny}{det(\mathbf{\Lambda})}\\
+&=\frac{1}{det(\mathbf{\Lambda})}\{[Ntr(\mathbf \Omega^2_d)-N^2]y^T\mathbf{\Omega}_ay-[Ntr(\mathbf \Omega^2_d)-N^2]y^TI_Ny\}\\
+&=\frac{1}{det(\mathbf{\Lambda})}\{[Ntr(\mathbf \Omega^2_d)-N^2]y^T(\mathbf{\Omega}_a-I_N)y\}
 \end{align}
 $$,
 
@@ -248,9 +249,9 @@ $$,
 in which 
 $$
 \begin{align}
-det(\mathbf{\Lambda})&=&abd+bfg+cdh-ceg-fha-ibd\\
-&=&\color{red}{tr(\mathbf{\Omega}^2_a}\color{blue}{\mathbf{\Omega}^2_d})N+N^3+N^3-N^2tr(\mathbf{\Omega}^2_a)-N^2tr(\mathbf{\Omega}^2_d)-N^3\\
-&=&N[\color{red}{tr(\mathbf{\Omega^2}_a} \color{blue}{\mathbf{\Omega^2}_d)}-tr(\mathbf{\Omega^2}_a)N-tr(\mathbf{\Omega}^2_d)N+N^2]
+det(\mathbf{\Lambda})&=abd+bfg+cdh-ceg-fha-ibd\\
+&=\color{red}{tr(\mathbf{\Omega}^2_a}\color{blue}{\mathbf{\Omega}^2_d})N+N^3+N^3-N^2tr(\mathbf{\Omega}^2_a)-N^2tr(\mathbf{\Omega}^2_d)-N^3\\
+&=N[\color{red}{tr(\mathbf{\Omega^2}_a} \color{blue}{\mathbf{\Omega^2}_d)}-tr(\mathbf{\Omega^2}_a)N-tr(\mathbf{\Omega}^2_d)N+N^2]
 \end{align}
 $$.
 
@@ -740,27 +741,16 @@ legend("topleft", legend = c("Locus", "Cov 1", "Cov 2", "Cov 3"), col = COL, pch
 
 '/public/home/xuhm/gc5k/UKB_cohort/ss_adj'
 
-|cohort|$gender$|$ht$|$cor$|
-|:---:|:---:|:---:|:---:|
-|Barts |1 |1 |-0.6918|
-|Birmingham | 1 |1| -0.7139|
-|Bristol | 1 |1 |-0.7183|
-|Bury | 1 |1| -0.7131|
-|Cardiff | 1 |1| -0.7244|
-|Croydon | 1 | 1| -0.7133|
-|Edinburgh | 1 | 1| -0.7114|
-|Glasgow | 1| 1| -0.7160|
-|Hounslow | 1 |1| -0.7170|
-|Leeds | 1 |1| -0.7136|
-|Liverpool | 1 |1| -0.7170|
-|Manchester | 1 |1| -0.6995|
-|Middlesborough | 1 |1| -0.7199|
-|Newcastle | 1 |1 |-0.7173|
-|Nottingham | 1 |1 |-0.7177|
-|Oxford | 1 |1 |-0.7153|
-|Reading | 1| 1| -0.7252|
-|Sheffield | 1| 1| -0.7180|
-|Stoke | 1| 1| -0.7164|
+```{r, UKcor}
+library("knitr")
+library("kableExtra")
+
+ch2=read.table("CorUK.txt", as.is = T, header = T)
+knitr::kable(ch2, caption = "cohort h2") %>%
+kable_styling("striped", full_width = T) %>%
+row_spec(row=16:16, color="white", background="red")
+```
+
 
 ## Quadratic form statistics
 Let $x$ be a vector for $n$ random variables, and $A$ be a $n\times n$ symmetric matrix, the scalar quantity $xAx$ is known as quadratic form.
@@ -908,15 +898,18 @@ $$
 
 The sampling variance is
 
-$$\begin{align}
-var(L_B)&=&\mathbb{E}\{[L_{B}-tr(\mathbf{KK}^T)]^2\}\\
-&=&var(\frac{1}{B}\sum_{b=1}^Bz_b^T\mathbf{KK}^Tz_b)\\
-&=&\frac{1}{B^2}var(\sum_{b=1}^Bz_b^T\mathbf{KK}^Tz_b) \\
-&&\text{For quadric forms that } var(z^T\mathbf{A}z)=2tr(\Sigma_z\mathbf{A}\Sigma_z\mathbf{A}))+4\mu_z\mathbf{A}\Sigma\mathbf{A}\mu_z\\
-&=&\frac{1}{B^2}\sum_{b=1}^B2tr(\Sigma_z\mathbf{KK}^T\Sigma_z\mathbf{KK}^T)\\
-&&\text{because }z\sim~MVN(0, I_N)\\
-&=&\frac{2}{B}tr(\mathbf{KK}^T\mathbf{KK}^T)
-\end{align}$$
+$$\begin{aligned}
+var(L_B)&=\mathbb{E}\{[L_{B}-tr(\mathbf{KK}^T)]^2\}\\
+&=var(\frac{1}{B}\sum_{b=1}^Bz_b^T\mathbf{KK}^Tz_b)\\
+&=\frac{1}{B^2}var(\sum_{b=1}^Bz_b^T\mathbf{KK}^Tz_b) \\
+&\text{For quadric forms that } var(z^T\mathbf{A}z)=2tr(\Sigma_z\mathbf{A}\Sigma_z\mathbf{A}))+4\mu_z\mathbf{A}\Sigma\mathbf{A}\mu_z\\
+&=\frac{1}{B^2}\sum_{b=1}^B2tr(\Sigma_z\mathbf{KK}^T\Sigma_z\mathbf{KK}^T)\\
+&\text{because }z\sim~MVN(0, I_N)\\
+&=\frac{2}{B}tr(\mathbf{KK}^T\mathbf{KK}^T)\\
+&=\frac{1}{B}\sum_{l_1}\sum_{l_2}\mathcal{K}^2_{l_1,l_2}
+\end{aligned}$$
+
+in which $\mathcal{K}^2=\mathbf{KK}^T$.
 
 An example
 ```{r Lb}
@@ -937,6 +930,8 @@ k=sx%*%t(sx)/m
 ksq=k^2
 k2=k%*%t(k)
 k4=k2%*%t(k2)
+k4Alt=k2^2
+print(paste("sum(diag(K4))=", sum(diag(k4)), "sum[(kkT)^2]=k4Alt"))
 #evaluate LB
 
 LK=array(0, SM)
@@ -953,6 +948,84 @@ for(i in 1:SM) {
 print(paste("Obs mean", mean(LK), "vs expected mean", n^2/m+n)) 
 print(paste("obs var", var(LK), " vs expected var", 2*sum(diag(k4))/BS))
 print(paste("incorrected var in Wu's paper", (n^2/m+n)/BS))
+```
+
+
+## $\Omega_w$
+
+$$\Omega_w=\frac{\sum_{k=1}^M(x_{i,k}-2p_k)(x_{j,k}-2p_k)}{\sum_{k=1}^M2p_kq_k}$$
+$Me_w$ can be defined accordingly.
+```{r OmegaW}
+n=500 #sample size
+m=1000 #marker
+h2=0.3 #heritability
+h2d=0.3
+b=rnorm(m, 0, sqrt(h2/m)) #effect
+d=rnorm(m, 0, sqrt(h2d/m))
+SIMU=5
+
+#simu g
+fq=runif(m, 0.3, 0.5)
+x=matrix(0, n, m)
+for(i in 1:m) {
+  x[,i]=rbinom(n, 2, fq[i])
+}
+FQ=colMeans(x)/2
+sA=apply(x, 2, scale)
+K=sA%*%t(sA)/m
+me=var(K[col(K)<row(K)])
+
+sW=x-2*FQ
+Kw=sW%*%t(sW)/sum(2*FQ*(1-FQ))
+meW=var(Kw[col(Kw)<row(Kw)])
+
+##dominance
+xd=matrix(0, n, m)
+
+for(i in 1:m) {
+  cd=c(0, 2*FQ[i], 4*FQ[i]-2)
+  xd[,i]=cd[x[,i]+1]
+}
+dCt=matrix(rep(2*FQ^2, n), n, m, byrow = T)
+dV=matrix(rep(sqrt(4*FQ^2*(1-FQ)^2), n), n, m, byrow = T)
+sD=(xd-dCt)/dV
+Kd=sD%*%t(sD)/m
+med=var(Kd[col(K)<row(K)])
+
+Dm=ifelse(x==1, 1, 0)
+#simu y
+H2=matrix(0, SIMU, 4)
+H2w=matrix(0, SIMU, 2)
+for(i in 1:SIMU) {
+  y=x%*%b+Dm%*%d
+  vy=var(y)
+  y=y+rnorm(n, 0, sqrt(vy/(h2+h2d)*(1-h2-h2d)))
+  y=scale(y)
+  yy=y%*%t(y)
+  h2Mod=lm(yy[col(yy)<row(yy)]~K[col(yy)<row(yy)]+Kd[col(yy)<row(yy)])
+  H2[i,1]=summary(h2Mod)$coefficients[2,1]
+  H2[i,2]=summary(h2Mod)$coefficients[3,1]
+  ss=matrix(0, m, 5)
+  ssd=matrix(0, m, 5)
+  for(j in 1:m) {
+    mod=lm(y~sA[,j]+sD[,j])
+    ss[j,1:4]=summary(mod)$coefficient[2,]
+    ssd[j,1:4]=summary(mod)$coefficient[3,]
+  }
+  ss[,5]=ss[,3]^2
+  H2[i,3]=((mean(ss[,5])-1)*n)/(n*n*me)
+  ssd[,5]=ssd[,3]^2
+  H2[i,4]=((mean(ssd[,5])-1)*n)/(n*n*med)
+  
+  h2wMod=lm(yy[col(yy)<row(yy)]~Kw[col(yy)<row(yy)])
+  H2w[i,1]=summary(h2wMod)$coefficients[2,1]
+  chiW=ss[,5]*2*FQ*(1-FQ)
+  H2w[i,2]=((mean(chiW)/mean(2*FQ*(1-FQ))-1)*n)/(n*n*meW)
+}
+barplot(t(H2), beside = T)
+abline(h=c(h2, h2d))
+barplot(t(H2w), beside = T)
+
 ```
 
 ## R sess
