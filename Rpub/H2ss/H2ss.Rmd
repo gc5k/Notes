@@ -864,6 +864,96 @@ $\rho_{kl}=\sqrt{\frac{p_kq_l}{p_lq_k}}<1$.
 
 ----
 
+## Liability scale
+See Eq 23 in Am J Hum Genet, 2011, 88:294-305.
+
+$$h^2_l=h^2_o\frac{K(1-K)}{z^2}\frac{K(1-K)}{P(1-P)}$$
+in which $K$ is the prevalence of the disease (binary), and $P$ is the proportion of cases in the sample.
+
+See a simple example below
+```{r hl}
+K=0.01
+P=0.5
+ho2=0.5
+z=dnorm(qnorm(K))
+
+hl2=ho2*K*(1-K)*K*(1-K)/z^2/(P*(1-P))
+print(paste("Observed scale", ho2))
+print(paste("Liability scale", hl2))
+```
+
+## Projected PC
+Algorithm. It is a simple linear regression but against eigenvecot.
+
+1.1 Sample $N_c$ individuals from the whole population
+
+1.2 Generate eigenvectors from the $pc$
+
+1.3 $\beta_k=\frac{cov(pc,x_k)}{var(x_k)}$
+
+2.1 $\tilde{pc}=\sum_{k=1}^M\hat{\beta}_kx_k$. 
+
+However, there is two technical issues here about snp strand or the switch of the minor allele. See summary [here]
+(https://github.com/gc5k/Notes/blob/master/StG/TechNotes/PalindromeLoci.pdf)
+
+
+## A note on $L_B$
+$$
+\begin{align}
+L_B&=&tr(KK^T)=\frac{1}{B}\sum_{b=1}^Bz_b^T\mathbf{KK}^Tz_b\\
+&=&\frac{1}{B}\frac{1}{M^2}\sum_{b=1}^Bz_b^T\mathbf{XX}^T\mathbf{XX}^Tz_b\\
+&=&\frac{1}{B}\frac{1}{M^2}\sum_{b=1}^B||\mathbf{XX}^Tz_b||_2^2\\
+\end{align}
+$$
+
+The sampling variance is
+
+$$\begin{align}
+var(L_B)&=&\mathbb{E}\{[L_{B}-tr(\mathbf{KK}^T)]^2\}\\
+&=&var(\frac{1}{B}\sum_{b=1}^Bz_b^T\mathbf{KK}^Tz_b)\\
+&=&\frac{1}{B^2}var(\sum_{b=1}^Bz_b^T\mathbf{KK}^Tz_b) \\
+&&\text{For quadric forms that } var(z^T\mathbf{A}z)=2tr(\Sigma_z\mathbf{A}\Sigma_z\mathbf{A}))+4\mu_z\mathbf{A}\Sigma\mathbf{A}\mu_z\\
+&=&\frac{1}{B^2}\sum_{b=1}^B2tr(\Sigma_z\mathbf{KK}^T\Sigma_z\mathbf{KK}^T)\\
+&&\text{because }z\sim~MVN(0, I_N)\\
+&=&\frac{2}{B}tr(\mathbf{KK}^T\mathbf{KK}^T)
+\end{align}$$
+
+An example
+```{r Lb}
+n=200 #sample size
+m=500 #marker
+SM=50 #simulation
+BS=25 #randomization factor
+
+LK=0
+
+fq=runif(m, 0.1, 0.5)
+x=matrix(0, n, m)
+for(i in 1:m) {
+  x[,i]=rbinom(n, 2, fq[i])
+}
+sx=apply(x, 2, scale)
+k=sx%*%t(sx)/m
+ksq=k^2
+k2=k%*%t(k)
+k4=k2%*%t(k2)
+#evaluate LB
+
+LK=array(0, SM)
+for(i in 1:SM) {
+  Lb=array(0, BS)
+  for(j in 1:BS) {
+    z=matrix(rnorm(n), n, 1)
+    x1=t(sx)%*%z
+    x2=sx%*%x1
+    Lb[j]=(t(x2)%*%x2)[1,1]
+  }
+  LK[i]=sum(Lb)/(BS*m^2)
+}
+print(paste("Obs mean", mean(LK), "vs expected mean", n^2/m+n)) 
+print(paste("obs var", var(LK), " vs expected var", 2*sum(diag(k4))/BS))
+print(paste("incorrected var in Wu's paper", (n^2/m+n)/BS))
+```
 
 ## R sess
 ```{r session}

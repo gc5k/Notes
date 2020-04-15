@@ -1,0 +1,1358 @@
+\PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provides euro and other symbols
+\else % if luatex or xelatex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\usepackage{hyperref}
+\hypersetup{
+            pdftitle={H2ss},
+            pdfauthor={gc5k},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs}
+% Fix footnotes in tables (requires footnote package)
+\IfFileExists{footnote.sty}{\usepackage{footnote}\makesavenoteenv{longtable}}{}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+
+\title{H2ss}
+\author{gc5k}
+\date{2/27/2020}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\hypertarget{toc}{%
+\section{TOC}\label{toc}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(}\KeywordTok{Sys.time}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2020-04-10 15:42:22 CST"
+\end{verbatim}
+
+\hypertarget{vc-mom}{%
+\subsection{1 VC-MoM}\label{vc-mom}}
+
+\hypertarget{additive-model}{%
+\subsubsection{Additive model}\label{additive-model}}
+
+\(y|e,\mathbf{\beta}=\mathbf{X}\beta+e\)
+
+\(e|\sigma^2_e~N(0,\sigma^2I_N)\)
+
+\(\beta|\sigma^2_g~N(\frac{\sigma^2_g}{M},I_M)\)
+
+\(y\) is centered.
+
+\[
+\begin{align}
+cov(y)&=\mathbb{E}(yy^T)-\mathbb{y}\mathbb{y}^T\\
+&=\sigma^2_a\mathbf{\Omega}_a+\sigma^2_eI_N
+\end{align}
+\]
+
+The target to be minimized is
+
+\(Q=argmin_{(\sigma^2_a,\sigma^2_e)}|| yy^T-(\sigma^2_a\mathbf{\Omega}+\sigma^2_eI_N)||_F^2\)
+
+Here the subscript \(_{F}\) is for
+\href{https://en.wikipedia.org/wiki/Matrix_norm}{Frobenius norm} of a
+matrix \(\mathbf{A}\), \(||\mathbf{A}||_F=\sqrt{tr(\mathbf{AA}^T)}\).
+
+\[
+\begin{align}
+Q&=argmin_{(\sigma^2_a,\sigma^2_e)}|| yy^T-(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_eI_N)||_F^2\\
+&=tr\{[yy^T-(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_eI_N)][yy^T-(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_eI_N)]^T\}
+\end{align}
+\]
+
+An ordinary least squares (OLS) problem of \(Q\) is as below
+
+\[
+\left\{
+ \begin{array}{lll}
+  \frac{\partial{Q}}{\partial{\sigma^2_a}} & =tr\{\frac{yy^Tyy^T-2(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_eI_N)yy^T+(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_eI_N)^2}{\partial{\sigma^2_a}}\}&=tr\{\sigma^2_a\mathbf{\Omega}_a\mathbf{\Omega}_a^T+\sigma^2_e\mathbf{\Omega}_a-yy^T\mathbf{\Omega}_a\}=0\\
+  \frac{\partial{Q}}{\partial{\sigma^2_e}} & =tr\{\frac{yy^Tyy^T-2(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_eI_N)yy^T+(\sigma^2_g\mathbf{\Omega}_a+\sigma^2_eI_N)^2}{\partial{\sigma^2_e}}\}&=tr\{\sigma^2_a\mathbf{\Omega}_a+\sigma^2_e\mathbf{I}_N-yy^T\mathbf{I}_N\}=0
+ \end{array}
+\right.
+\]
+
+\[
+\left\{
+ \begin{array}{lll}
+tr\{\sigma^2_a\mathbf{\Omega}_a\mathbf{\Omega}_a^T+\sigma^2_e\mathbf{\Omega}_a\}=tr\{yy^T\mathbf{\Omega}_a\}=tr\{y^T\mathbf{\Omega}_ay\}\\
+tr\{\sigma^2_a\mathbf{\Omega}_a+\sigma^2_e\mathbf{I}_N\}=tr\{yy^T\mathbf{I}_N\}=tr\{y^T\mathbf{I}_Ny\}
+ \end{array}
+\right.
+\] The last step uses cycling property of
+\href{https://en.wikipedia.org/wiki/Trace_(linear_algebra)}{\(trace\)}.
+
+The above result can be orgainzed in to normal equation below
+
+\[
+\begin{bmatrix} tr[\mathbf{\Omega}_a\mathbf{\Omega}_a^T] & tr[\mathbf{\Omega}_a] \\ tr[\mathbf{\Omega}_a] & N \end{bmatrix} \left[ \begin{array}{c} \hat{\sigma}^2_a \\ \hat{\sigma}^2_e \end{array} \right] = \left[ \begin{array}{c} tr[y^T\mathbf{\Omega}_ay] \\ tr[y^TI_Ny] \end{array} \right] 
+\]
+
+It is easy to find that
+
+\[\color{green}{\boxed{\hat{\sigma}^2_a=\frac{y^T(\mathbf{\Omega}_a-I_N)y}{tr[\mathbf{\Omega}_a\mathbf{\Omega}_a^T]-N}}}\]
+
+\textbf{Notes}:, the \(y^T(\mathbf{\Omega}-I_N)y\) is quadratic form
+\href{https://en.wikipedia.org/wiki/Quadratic_form_(statistics)}{wiki
+link}.
+
+\(var[y^T(\mathbf{\Omega}_a-I_N)y]=2tr[H(\mathbf{\Omega}_a-I_N)H(\mathbf{\Omega}_a-I_N)]\)
+
+in which \(H\) can be replaced by the expected correlation matrix for
+\(y\), here is \(I_N\) for unrelated individuals. So,
+
+\(var[y^T(\mathbf{\Omega}_a-I_N)y]=2tr[(\mathbf{\Omega}_a-I_N)(\mathbf{\Omega}_a-I_N)]=2tr[\mathbf{\Omega}^2_a-2\mathbf{\Omega}_aI_N-I_N^2]=2[tr(\mathbf{\Omega}_a^2)-N]=2N^2M_e\).
+In addition,
+\(E[y^T(\mathbf{\Omega}_a-I_N)y]=[tr(\mathbf{\Omega}_a^2)-N]\sigma^2_a\).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sourceCpp}\NormalTok{(}\StringTok{"~/git/Notes/R/RLib/Shotgun.cpp"}\NormalTok{)}
+\NormalTok{M=}\DecValTok{10000}
+\NormalTok{N=}\DecValTok{200}
+\NormalTok{frq=}\KeywordTok{runif}\NormalTok{(M, }\FloatTok{0.2}\NormalTok{, }\FloatTok{0.8}\NormalTok{)}
+\NormalTok{Dp=}\KeywordTok{c}\NormalTok{(}\KeywordTok{runif}\NormalTok{(M}\OperatorTok{/}\DecValTok{2}\NormalTok{, }\FloatTok{-0.95}\NormalTok{, }\FloatTok{-0.5}\NormalTok{), }\KeywordTok{runif}\NormalTok{(M}\OperatorTok{/}\DecValTok{2}\NormalTok{, }\FloatTok{0.5}\NormalTok{, }\FloatTok{0.95}\NormalTok{))}
+\NormalTok{Dp=Dp[}\DecValTok{1}\OperatorTok{:}\NormalTok{(M}\DecValTok{-1}\NormalTok{)]}
+
+\NormalTok{Amat=}\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{100}\NormalTok{, }\DecValTok{2}\NormalTok{)}
+\NormalTok{gMat=}\KeywordTok{GenerateGenoDprimeRcpp}\NormalTok{(frq, }\DataTypeTok{N=}\NormalTok{N, }\DataTypeTok{Dp =}\NormalTok{ Dp)}
+
+\NormalTok{sG=}\KeywordTok{scale}\NormalTok{(gMat)}
+\NormalTok{K=sG}\OperatorTok{%*%}\KeywordTok{t}\NormalTok{(sG)}\OperatorTok{/}\NormalTok{(M}\DecValTok{-1}\NormalTok{)}
+\NormalTok{Me=}\DecValTok{1}\OperatorTok{/}\KeywordTok{var}\NormalTok{(K[}\KeywordTok{row}\NormalTok{(K)}\OperatorTok{<}\KeywordTok{col}\NormalTok{(K)])}
+\NormalTok{I=}\KeywordTok{diag}\NormalTok{(}\DecValTok{1}\NormalTok{, N, N)}
+
+\NormalTok{KI=K}\OperatorTok{-}\NormalTok{I}
+
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\DecValTok{100}\NormalTok{) \{}
+\NormalTok{  y=}\KeywordTok{scale}\NormalTok{(}\KeywordTok{rnorm}\NormalTok{(N))}
+\NormalTok{  yy=y}\OperatorTok{%*%}\KeywordTok{t}\NormalTok{(y)}
+\NormalTok{  yy_KI=yy}\OperatorTok{%*%}\NormalTok{KI}
+
+\NormalTok{  Amat[i,}\DecValTok{1}\NormalTok{]=}\KeywordTok{t}\NormalTok{(y)}\OperatorTok{%*%}\NormalTok{KI}\OperatorTok{%*%}\NormalTok{y}
+\NormalTok{  ss=I}\OperatorTok{%*%}\NormalTok{KI}\OperatorTok{%*%}\NormalTok{I}\OperatorTok{%*%}\NormalTok{KI}
+\CommentTok{#  ss=KI%*%KI}
+\NormalTok{  Amat[i,}\DecValTok{2}\NormalTok{]=}\DecValTok{2}\OperatorTok{*}\KeywordTok{sum}\NormalTok{(}\KeywordTok{diag}\NormalTok{(ss))}
+\NormalTok{\}}
+\KeywordTok{colMeans}\NormalTok{(Amat)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] -0.6477451 15.4409693
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(}\KeywordTok{paste}\NormalTok{(}\StringTok{"Obs v:"}\NormalTok{, }\KeywordTok{var}\NormalTok{(Amat[,}\DecValTok{1}\NormalTok{]), }\StringTok{", Exp v:"}\NormalTok{, (}\DecValTok{2}\OperatorTok{*}\NormalTok{N}\OperatorTok{^}\DecValTok{2}\OperatorTok{/}\NormalTok{Me)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Obs v: 13.4777957244701 , Exp v: 13.4109808880952"
+\end{verbatim}
+
+\hypertarget{see-a-simulation-example-additive}{%
+\paragraph{See a simulation example
+(additive)}\label{see-a-simulation-example-additive}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{n=}\DecValTok{500} \CommentTok{#sample size}
+\NormalTok{m=}\DecValTok{1000} \CommentTok{#marker}
+\NormalTok{h2=}\FloatTok{0.3} \CommentTok{#heritability}
+\NormalTok{b=}\KeywordTok{rnorm}\NormalTok{(m, }\DecValTok{0}\NormalTok{, }\KeywordTok{sqrt}\NormalTok{(h2}\OperatorTok{/}\NormalTok{m)) }\CommentTok{#effect}
+\NormalTok{SIMU=}\DecValTok{5}
+
+\CommentTok{#simu g}
+\NormalTok{fq=}\KeywordTok{runif}\NormalTok{(m, }\FloatTok{0.1}\NormalTok{, }\FloatTok{0.5}\NormalTok{)}
+\NormalTok{x=}\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, n, m)}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{m) \{}
+\NormalTok{  x[,i]=}\KeywordTok{rbinom}\NormalTok{(n, }\DecValTok{2}\NormalTok{, fq[i])}
+\NormalTok{\}}
+\NormalTok{sx=}\KeywordTok{apply}\NormalTok{(x, }\DecValTok{2}\NormalTok{, scale)}
+
+\NormalTok{K=sx}\OperatorTok{%*%}\KeywordTok{t}\NormalTok{(sx)}\OperatorTok{/}\NormalTok{m}
+\NormalTok{me=}\KeywordTok{var}\NormalTok{(K[}\KeywordTok{col}\NormalTok{(K)}\OperatorTok{<}\KeywordTok{row}\NormalTok{(K)])}
+
+\CommentTok{#simu y}
+\NormalTok{H2=}\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, SIMU, }\DecValTok{2}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{SIMU) \{}
+\NormalTok{  y=sx}\OperatorTok{%*%}\NormalTok{b}\OperatorTok{+}\KeywordTok{rnorm}\NormalTok{(n, }\DecValTok{0}\NormalTok{, }\KeywordTok{sqrt}\NormalTok{(}\DecValTok{1}\OperatorTok{-}\NormalTok{h2))}
+
+\NormalTok{  yy=y}\OperatorTok{%*%}\KeywordTok{t}\NormalTok{(y)}
+\NormalTok{  h2Mod=}\KeywordTok{lm}\NormalTok{(yy[}\KeywordTok{col}\NormalTok{(yy)}\OperatorTok{<}\KeywordTok{row}\NormalTok{(yy)]}\OperatorTok{~}\NormalTok{K[}\KeywordTok{col}\NormalTok{(yy)}\OperatorTok{<}\KeywordTok{row}\NormalTok{(yy)])}
+\NormalTok{  H2[i,}\DecValTok{1}\NormalTok{]=}\KeywordTok{summary}\NormalTok{(h2Mod)}\OperatorTok{$}\NormalTok{coefficients[}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{]}
+\NormalTok{  ss=}\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, m, }\DecValTok{5}\NormalTok{)}
+  \ControlFlowTok{for}\NormalTok{(j }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{m) \{}
+\NormalTok{    mod=}\KeywordTok{lm}\NormalTok{(y}\OperatorTok{~}\NormalTok{x[,j])}
+\NormalTok{    ss[j,}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{]=}\KeywordTok{summary}\NormalTok{(mod)}\OperatorTok{$}\NormalTok{coefficient[}\DecValTok{2}\NormalTok{,]}
+\NormalTok{  \}}
+\NormalTok{  ss[,}\DecValTok{5}\NormalTok{]=ss[,}\DecValTok{3}\NormalTok{]}\OperatorTok{^}\DecValTok{2}
+\NormalTok{  H2[i,}\DecValTok{2}\NormalTok{]=((}\KeywordTok{mean}\NormalTok{(ss[,}\DecValTok{5}\NormalTok{])}\OperatorTok{-}\DecValTok{1}\NormalTok{)}\OperatorTok{*}\NormalTok{n)}\OperatorTok{/}\NormalTok{(n}\OperatorTok{*}\NormalTok{n}\OperatorTok{*}\NormalTok{me)}
+\NormalTok{\}}
+\KeywordTok{barplot}\NormalTok{(}\KeywordTok{t}\NormalTok{(H2), }\DataTypeTok{beside =}\NormalTok{ T)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{h=}\NormalTok{h2)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{H2ss_files/figure-latex/road-test-1.pdf}
+
+\hypertarget{dominance-vc}{%
+\subsubsection{Dominance VC}\label{dominance-vc}}
+
+\(y|e,\mathbf{\beta}=\mathbf{X}_a\beta_a+\mathbf{X}_d\beta_d+e\)
+
+\(e|\sigma^2_e~N(0,\sigma^2I_N)\)
+
+\(\beta_a|\sigma^2_a~N(\frac{\sigma^2_a}{M},I_M)\)
+
+\(\beta_d|\sigma^2_d~N(\frac{\sigma^2_d}{M},I_M)\)
+
+\(y\) is centered.
+
+\[
+\begin{align}
+cov(y)&=\mathbb{E}(yy^T)-\mathbb{y}\mathbb{y}^T\\
+&=\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N
+\end{align}
+\]
+
+When include dominace variance component, the target to be minimized is
+
+\(Q=argmin_{(\sigma^2_g,\sigma^2_d,\sigma^2_e)}|| yy^T-(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)||_F^2\)
+
+To minimize the target function below
+
+\[
+\begin{align}
+Q&=argmin_{(\sigma^2_a,\sigma^2_d,\sigma^2_e)}|| yy^T-(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)||_F^2\\
+&=tr\{[yy^T-(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)][yy^T-(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)]^T\}
+\end{align}
+\] After taking deriation in repect to each component, we have \[
+\left\{
+ \begin{array}{lll}
+  \frac{\partial{Q}}{\partial{\sigma^2_a}} & =tr\{\frac{yy^Tyy^T-2(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)yy^T+(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)^2}{\partial{\sigma^2_a}}\}&=tr\{\sigma^2_a\mathbf{\Omega}_a\mathbf{\Omega}_a^T+\sigma^2_d\mathbf{\Omega}_a\mathbf{\Omega}_d^T+\sigma^2_e\mathbf{\Omega}_a-yy^T\mathbf{\Omega}_a\}=0\\
+  \frac{\partial{Q}}{\partial{\sigma^2_d}} & =tr\{\frac{yy^Tyy^T-2(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)yy^T+(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)^2}{\partial{\sigma^2_d}}\}&=tr\{\sigma^2_d\mathbf{\Omega}_d\mathbf{\Omega}_a^T+\sigma^2_d\mathbf{\Omega}_d\mathbf{\Omega}_d^T+\sigma^2_e\mathbf{\Omega}_a-yy^T\mathbf{\Omega}_d\}=0\\
+  \frac{\partial{Q}}{\partial{\sigma^2_e}} & =tr\{\frac{yy^Tyy^T-2(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)yy^T+(\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_eI_N)^2}{\partial{\sigma^2_e}}\}&=tr\{\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_e\mathbf{I}_N-yy^T\mathbf{I}_N\}=0
+ \end{array}
+\right.
+\] then \[
+\left\{
+ \begin{array}{lll}
+tr\{\sigma^2_a\mathbf{\Omega}_a\mathbf{\Omega}_a^T+\sigma^2_a\mathbf{\Omega}_a\mathbf{\Omega}_d^T+\sigma^2_e\mathbf{\Omega}_a\}=tr\{yy^T\mathbf{\Omega}_a\}=tr\{y^T\mathbf{\Omega}_ay\}\\
+tr\{\sigma^2_d\mathbf{\Omega}_d\mathbf{\Omega}_a^T+\sigma^2_d\mathbf{\Omega}_d\mathbf{\Omega}_d^T+\sigma^2_e\mathbf{\Omega}_d\}=tr\{yy^T\mathbf{\Omega}_d\}=tr\{y^T\mathbf{\Omega}_dy\}\\
+tr\{\sigma^2_a\mathbf{\Omega}_a+\sigma^2_d\mathbf{\Omega}_d+\sigma^2_e\mathbf{I}_N\}=tr\{yy^T\mathbf{I}_N\}=tr\{y^T\mathbf{I}_Ny\}
+ \end{array}
+\right.
+\]
+
+We need to solve the equation below \[
+\begin{bmatrix} 
+tr[\mathbf{\Omega}_a\mathbf{\Omega}_a^T] & tr[\mathbf{\Omega}_a\mathbf{\Omega}_d^T]& tr[\mathbf{\Omega}_a] \\
+tr[\mathbf{\Omega}_d\mathbf{\Omega}_a^T] & tr[\mathbf{\Omega}_d\mathbf{\Omega}_d^T] & tr[\mathbf{\Omega}_d] \\
+tr[\mathbf{\Omega}_a] & tr[\mathbf{\Omega}_d] & N \end{bmatrix} \left[ \begin{array}{c} \hat{\sigma}^2_a \\ 
+\hat{\sigma}^2_d \\
+\hat{\sigma}^2_e \end{array} \right] = 
+\left[ \begin{array}{c} tr[y^T\mathbf{\Omega}_ay] \\ tr[y^T\mathbf{\Omega}_dy]\\tr[y^TI_Ny] \end{array} \right] 
+\] Of note, \(E[tr(\mathbf{\Omega})_a]=E[tr(\mathbf{\Omega})_d]=N\).
+
+\[
+\left[ \begin{array}{c}
+\hat{\sigma}^2_a \\
+\hat{\sigma}^2_d \\
+\hat{\sigma}^2_e \\
+\end{array}
+\right ]=\Lambda^{-1}
+\left[ \begin{array}{c} y^T\mathbf{\Omega}_ay \\ y^T\mathbf{\Omega}_dy\\ y^TI_Ny \end{array} \right] 
+\]
+
+In particular, \[
+\begin{align}
+\hat{\sigma}^2_a&=&\frac{(ei-fh)y^T\mathbf{\Omega}_ay-(bi-ch)y^T\mathbf{\Omega}_dy+(bf-ce)y^TI_Ny}{det(\mathbf{\Lambda})}\\
+&=&\frac{1}{det(\mathbf{\Lambda})}\{[Ntr(\mathbf \Omega^2_d)-N^2]y^T\mathbf{\Omega}_ay-[Ntr(\mathbf \Omega^2_d)-N^2]y^TI_Ny\}\\
+&=&\frac{1}{det(\mathbf{\Lambda})}\{[Ntr(\mathbf \Omega^2_d)-N^2]y^T(\mathbf{\Omega}_a-I_N)y\}
+\end{align}
+\],
+
+in which \[
+\begin{align}
+det(\mathbf{\Lambda})&=&abd+bfg+cdh-ceg-fha-ibd\\
+&=&\color{red}{tr(\mathbf{\Omega}^2_a}\color{blue}{\mathbf{\Omega}^2_d})N+N^3+N^3-N^2tr(\mathbf{\Omega}^2_a)-N^2tr(\mathbf{\Omega}^2_d)-N^3\\
+&=&N[\color{red}{tr(\mathbf{\Omega^2}_a} \color{blue}{\mathbf{\Omega^2}_d)}-tr(\mathbf{\Omega^2}_a)N-tr(\mathbf{\Omega}^2_d)N+N^2]
+\end{align}
+\].
+
+Under orthogonal coding for additive and dominance scheme,
+\(\color{red}{tr(\mathbf{\Omega}^2_a}\color{blue}{\mathbf{\Omega}^2_d)}=\color{red}{tr(\mathbf{\Omega}^2_a)}\color{blue}{tr{(\mathbf{\Omega}^2_d)}}\),
+and
+\(det(\mathbf {\Lambda})=N[\color{red}{tr(\mathbf{\Omega}^2_a)}-N][\color{blue}{tr(\mathbf{\Omega}^2_d)}-N]\)
+
+Then,
+\(\hat{\sigma}^2_a=\frac{y^T[\mathbf{\Omega}_a-I_N]y}{tr(\mathbf{\Omega}^2_a)-N)}\).
+
+Similarly for,
+\(\hat{\sigma}^2_d=\frac{y^T[\mathbf{\Omega}_d-I_N]y}{tr(\mathbf{\Omega}^2_d)-N)}\).
+
+\hypertarget{see-a-dominace-example}{%
+\subsubsection{See a dominace example}\label{see-a-dominace-example}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{n=}\DecValTok{500} \CommentTok{#sample size}
+\NormalTok{m=}\DecValTok{1000} \CommentTok{#marker}
+\NormalTok{h2=}\FloatTok{0.3} \CommentTok{#heritability}
+\NormalTok{h2d=}\FloatTok{0.3}
+\NormalTok{b=}\KeywordTok{rnorm}\NormalTok{(m, }\DecValTok{0}\NormalTok{, }\KeywordTok{sqrt}\NormalTok{(h2}\OperatorTok{/}\NormalTok{m)) }\CommentTok{#effect}
+\NormalTok{d=}\KeywordTok{rnorm}\NormalTok{(m, }\DecValTok{0}\NormalTok{, }\KeywordTok{sqrt}\NormalTok{(h2d}\OperatorTok{/}\NormalTok{m))}
+\NormalTok{SIMU=}\DecValTok{5}
+
+\CommentTok{#simu g}
+\NormalTok{fq=}\KeywordTok{runif}\NormalTok{(m, }\FloatTok{0.3}\NormalTok{, }\FloatTok{0.5}\NormalTok{)}
+\NormalTok{x=}\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, n, m)}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{m) \{}
+\NormalTok{  x[,i]=}\KeywordTok{rbinom}\NormalTok{(n, }\DecValTok{2}\NormalTok{, fq[i])}
+\NormalTok{\}}
+\NormalTok{FQ=}\KeywordTok{colMeans}\NormalTok{(x)}\OperatorTok{/}\DecValTok{2}
+\NormalTok{sA=}\KeywordTok{apply}\NormalTok{(x, }\DecValTok{2}\NormalTok{, scale)}
+
+\NormalTok{K=sA}\OperatorTok{%*%}\KeywordTok{t}\NormalTok{(sA)}\OperatorTok{/}\NormalTok{m}
+\NormalTok{me=}\KeywordTok{var}\NormalTok{(K[}\KeywordTok{col}\NormalTok{(K)}\OperatorTok{<}\KeywordTok{row}\NormalTok{(K)])}
+
+
+\CommentTok{##dominance}
+\NormalTok{xd=}\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, n, m)}
+
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{m) \{}
+\NormalTok{  cd=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{2}\OperatorTok{*}\NormalTok{FQ[i], }\DecValTok{4}\OperatorTok{*}\NormalTok{FQ[i]}\OperatorTok{-}\DecValTok{2}\NormalTok{)}
+\NormalTok{  xd[,i]=cd[x[,i]}\OperatorTok{+}\DecValTok{1}\NormalTok{]}
+\NormalTok{\}}
+\NormalTok{dCt=}\KeywordTok{matrix}\NormalTok{(}\KeywordTok{rep}\NormalTok{(}\DecValTok{2}\OperatorTok{*}\NormalTok{FQ}\OperatorTok{^}\DecValTok{2}\NormalTok{, n), n, m, }\DataTypeTok{byrow =}\NormalTok{ T)}
+\NormalTok{dV=}\KeywordTok{matrix}\NormalTok{(}\KeywordTok{rep}\NormalTok{(}\KeywordTok{sqrt}\NormalTok{(}\DecValTok{4}\OperatorTok{*}\NormalTok{FQ}\OperatorTok{^}\DecValTok{2}\OperatorTok{*}\NormalTok{(}\DecValTok{1}\OperatorTok{-}\NormalTok{FQ)}\OperatorTok{^}\DecValTok{2}\NormalTok{), n), n, m, }\DataTypeTok{byrow =}\NormalTok{ T)}
+\NormalTok{sD=(xd}\OperatorTok{-}\NormalTok{dCt)}\OperatorTok{/}\NormalTok{dV}
+\NormalTok{Kd=sD}\OperatorTok{%*%}\KeywordTok{t}\NormalTok{(sD)}\OperatorTok{/}\NormalTok{m}
+\NormalTok{med=}\KeywordTok{var}\NormalTok{(Kd[}\KeywordTok{col}\NormalTok{(K)}\OperatorTok{<}\KeywordTok{row}\NormalTok{(K)])}
+
+\NormalTok{Dm=}\KeywordTok{ifelse}\NormalTok{(x}\OperatorTok{==}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{)}
+\CommentTok{#simu y}
+\NormalTok{H2=}\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, SIMU, }\DecValTok{4}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{SIMU) \{}
+\NormalTok{  y=x}\OperatorTok{%*%}\NormalTok{b}\OperatorTok{+}\NormalTok{Dm}\OperatorTok{%*%}\NormalTok{d}
+\NormalTok{  vy=}\KeywordTok{var}\NormalTok{(y)}
+\NormalTok{  y=y}\OperatorTok{+}\KeywordTok{rnorm}\NormalTok{(n, }\DecValTok{0}\NormalTok{, }\KeywordTok{sqrt}\NormalTok{(vy}\OperatorTok{/}\NormalTok{(h2}\OperatorTok{+}\NormalTok{h2d)}\OperatorTok{*}\NormalTok{(}\DecValTok{1}\OperatorTok{-}\NormalTok{h2}\OperatorTok{-}\NormalTok{h2d)))}
+\NormalTok{  y=}\KeywordTok{scale}\NormalTok{(y)}
+\NormalTok{  yy=y}\OperatorTok{%*%}\KeywordTok{t}\NormalTok{(y)}
+\NormalTok{  h2Mod=}\KeywordTok{lm}\NormalTok{(yy[}\KeywordTok{col}\NormalTok{(yy)}\OperatorTok{<}\KeywordTok{row}\NormalTok{(yy)]}\OperatorTok{~}\NormalTok{K[}\KeywordTok{col}\NormalTok{(yy)}\OperatorTok{<}\KeywordTok{row}\NormalTok{(yy)]}\OperatorTok{+}\NormalTok{Kd[}\KeywordTok{col}\NormalTok{(yy)}\OperatorTok{<}\KeywordTok{row}\NormalTok{(yy)])}
+\NormalTok{  H2[i,}\DecValTok{1}\NormalTok{]=}\KeywordTok{summary}\NormalTok{(h2Mod)}\OperatorTok{$}\NormalTok{coefficients[}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{]}
+\NormalTok{  H2[i,}\DecValTok{2}\NormalTok{]=}\KeywordTok{summary}\NormalTok{(h2Mod)}\OperatorTok{$}\NormalTok{coefficients[}\DecValTok{3}\NormalTok{,}\DecValTok{1}\NormalTok{]}
+\NormalTok{  ss=}\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, m, }\DecValTok{5}\NormalTok{)}
+\NormalTok{  ssd=}\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, m, }\DecValTok{5}\NormalTok{)}
+  \ControlFlowTok{for}\NormalTok{(j }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{m) \{}
+\NormalTok{    mod=}\KeywordTok{lm}\NormalTok{(y}\OperatorTok{~}\NormalTok{sA[,j]}\OperatorTok{+}\NormalTok{sD[,j])}
+\NormalTok{    ss[j,}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{]=}\KeywordTok{summary}\NormalTok{(mod)}\OperatorTok{$}\NormalTok{coefficient[}\DecValTok{2}\NormalTok{,]}
+\NormalTok{    ssd[j,}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{]=}\KeywordTok{summary}\NormalTok{(mod)}\OperatorTok{$}\NormalTok{coefficient[}\DecValTok{3}\NormalTok{,]}
+\NormalTok{  \}}
+\NormalTok{  ss[,}\DecValTok{5}\NormalTok{]=ss[,}\DecValTok{3}\NormalTok{]}\OperatorTok{^}\DecValTok{2}
+\NormalTok{  H2[i,}\DecValTok{3}\NormalTok{]=((}\KeywordTok{mean}\NormalTok{(ss[,}\DecValTok{5}\NormalTok{])}\OperatorTok{-}\DecValTok{1}\NormalTok{)}\OperatorTok{*}\NormalTok{n)}\OperatorTok{/}\NormalTok{(n}\OperatorTok{*}\NormalTok{n}\OperatorTok{*}\NormalTok{me)}
+\NormalTok{  ssd[,}\DecValTok{5}\NormalTok{]=ssd[,}\DecValTok{3}\NormalTok{]}\OperatorTok{^}\DecValTok{2}
+\NormalTok{  H2[i,}\DecValTok{4}\NormalTok{]=((}\KeywordTok{mean}\NormalTok{(ssd[,}\DecValTok{5}\NormalTok{])}\OperatorTok{-}\DecValTok{1}\NormalTok{)}\OperatorTok{*}\NormalTok{n)}\OperatorTok{/}\NormalTok{(n}\OperatorTok{*}\NormalTok{n}\OperatorTok{*}\NormalTok{med)}
+\NormalTok{\}}
+\KeywordTok{barplot}\NormalTok{(}\KeywordTok{t}\NormalTok{(H2), }\DataTypeTok{beside =}\NormalTok{ T)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{h=}\KeywordTok{c}\NormalTok{(h2, h2d))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{H2ss_files/figure-latex/dom-1.pdf}
+
+\hypertarget{link-to-summary-statistics}{%
+\subsubsection{Link to summary
+statistics}\label{link-to-summary-statistics}}
+
+After rearrangement, it is easy to see that
+\(y^T\mathbf{\Omega}y=\frac{1}{M}y^T\mathbf{SS}^Ty\), and
+\(E(\frac{1}{M}y^T\mathbf{SS}^Ty)=NE(\chi^2_{1,h^2})=N(1+N\frac{h^2}{M_Q}\sum_{m=1}^Mr^2_{k,m})\).
+\texttt{**It\ is\ available\ as\ summary\ statistics!**}. If further
+adjustment for summary statistics is requested, a modified LSE can be
+used to ajust summary statistics (see LSE phenome).
+
+It is easy to see \(E(y^TI_Ny)=N\), so the expectation of the numerator
+is \(N^2\frac{h^2}{M_q}\sum^{M_{q}}_{m=1}r^2_{k,m}=N^2h^2E(\bar{r}^2)\),
+in which \(M_q\) is the number of causal variants.
+
+\hypertarget{link-to-the-reference-population}{%
+\subsubsection{Link to the reference
+population}\label{link-to-the-reference-population}}
+
+The denominator can be derived that
+\(tr[\mathbf{\Omega}^2]=N^2E^2(\rho)+N\), in which
+\[E^2(\rho)=\frac{\sum_{k_1=1}^M\sum_{k_2=1}^M \rho^2_{k_1k_2}}{M^2} = \frac{\sum_{k=1}^M1+\sum_{k_1=1}^M\sum_{k_2 \ne k_1}^M \rho^2_{k_1k_2}}{M^2} \geq \frac{1}{M}\]
+
+Or, \[\frac{[E(\sum_i^M\chi^2_1)-1]N}{N^2/M_e}\]
+
+\hypertarget{ukb-case}{%
+\subsubsection{UKB case}\label{ukb-case}}
+
+A realized example please refer to
+\(\color{red} {/public/home/xuhm/gc5k/UKB\_cohort/ss}\),
+\(\color{green} {/public/home/xuhm/gc5k/UKB\_cohort/ss\_adj}\)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(}\StringTok{"knitr"}\NormalTok{)}
+\KeywordTok{library}\NormalTok{(}\StringTok{"kableExtra"}\NormalTok{)}
+
+\NormalTok{ch2=}\KeywordTok{read.table}\NormalTok{(}\StringTok{"cohortH2.txt"}\NormalTok{, }\DataTypeTok{as.is =}\NormalTok{ T, }\DataTypeTok{header =}\NormalTok{ T)}
+\NormalTok{knitr}\OperatorTok{::}\KeywordTok{kable}\NormalTok{(ch2, }\DataTypeTok{caption =} \StringTok{"cohort h2"}\NormalTok{) }\OperatorTok{%>%}
+\KeywordTok{kable_styling}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\DataTypeTok{full_width =}\NormalTok{ T) }\OperatorTok{%>%}
+\KeywordTok{row_spec}\NormalTok{(}\DataTypeTok{row=}\DecValTok{16}\OperatorTok{:}\DecValTok{16}\NormalTok{, }\DataTypeTok{color=}\StringTok{"white"}\NormalTok{, }\DataTypeTok{background=}\StringTok{"red"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+
+\caption{\label{tab:cohorth2}cohort h2}
+\centering
+\begin{tabu} to \linewidth {>{\raggedright}X>{\raggedleft}X>{\raggedleft}X>{\raggedleft}X>{\raggedleft}X>{\raggedleft}X>{\raggedleft}X}
+\hline
+Cohort & N & Me & chisq & h2 & chisq.1 & h2.adjust\_sex.\\
+\hline
+Barts & 7699 & 51936.00 & 1.116 & 0.794 & 1.2230 & 1.5222\\
+\hline
+Birmingham & 19529 & 55594.92 & 1.100 & 0.287 & 1.2102 & 0.6050\\
+\hline
+Bristol & 39172 & 56774.84 & 1.218 & 0.320 & 1.4353 & 0.6380\\
+\hline
+Bury & 25404 & 55092.41 & 1.154 & 0.338 & 1.3046 & 0.6686\\
+\hline
+Cardiff & 16226 & 52069.39 & 1.111 & 0.361 & 1.2325 & 0.7549\\
+\hline
+Croydon & 18475 & 57405.47 & 1.107 & 0.337 & 1.2260 & 0.7099\\
+\hline
+Edinburgh & 15441 & 53041.79 & 1.111 & 0.386 & 1.2156 & 0.7490\\
+\hline
+Glasgow & 16299 & 51940.17 & 1.156 & 0.502 & 1.2900 & 0.9351\\
+\hline
+Hounslow & 18420 & 56773.33 & 1.133 & 0.414 & 1.2382 & 0.7427\\
+\hline
+Leeds & 39651 & 56474.83 & 1.242 & 0.349 & 1.4597 & 0.6623\\
+\hline
+Liverpool & 29604 & 54490.45 & 1.183 & 0.341 & 1.3665 & 0.6826\\
+\hline
+Manchester & 11502 & 53621.53 & 1.099 & 0.468 & 1.1650 & 0.7782\\
+\hline
+Middlesborough & 19819 & 53409.79 & 1.133 & 0.362 & 1.2228 & 0.6074\\
+\hline
+Newcastle & 34663 & 54675.71 & 1.179 & 0.286 & 1.3564 & 0.5686\\
+\hline
+Nottingham & 30760 & 56132.08 & 1.173 & 0.319 & 1.3407 & 0.6287\\
+\hline
+\rowcolor{red}  \textcolor{white}{Oxford} & \textcolor{white}{12260} & \textcolor{white}{55143.14} & \textcolor{white}{1.072} & \textcolor{white}{0.328} & \textcolor{white}{1.1345} & \textcolor{white}{0.6112}\\
+\hline
+Reading & 25886 & 58027.47 & 1.109 & 0.247 & 1.2400 & 0.5440\\
+\hline
+Sheffield & 27745 & 55244.01 & 1.145 & 0.293 & 1.3013 & 0.6069\\
+\hline
+Stoke & 18211 & 51302.58 & 1.114 & 0.326 & 1.2534 & 0.7220\\
+\hline
+\end{tabu}
+\end{table}
+
+\hypertarget{oxford}{%
+\subsubsection{Oxford}\label{oxford}}
+
+\texttt{/public/home/xuhm/gc5k/UKB\_cohort/ss\_chr}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(}\StringTok{"knitr"}\NormalTok{)}
+\KeywordTok{library}\NormalTok{(}\StringTok{"kableExtra"}\NormalTok{)}
+\NormalTok{ch2=}\KeywordTok{read.table}\NormalTok{(}\StringTok{"oxChr.txt"}\NormalTok{, }\DataTypeTok{as.is =}\NormalTok{ T, }\DataTypeTok{header =}\NormalTok{ T)}
+\NormalTok{knitr}\OperatorTok{::}\KeywordTok{kable}\NormalTok{(ch2, }\DataTypeTok{caption =} \StringTok{"Oxford h2"}\NormalTok{) }\OperatorTok{%>%}
+\KeywordTok{kable_styling}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\DataTypeTok{full_width =}\NormalTok{ T) }\OperatorTok{%>%}
+\KeywordTok{row_spec}\NormalTok{(}\DataTypeTok{row=}\DecValTok{6}\OperatorTok{:}\DecValTok{6}\NormalTok{, }\DataTypeTok{bold=}\NormalTok{T, }\DataTypeTok{color =} \StringTok{"white"}\NormalTok{, }\DataTypeTok{background =} \StringTok{"red"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+
+\caption{\label{tab:oxChr}Oxford h2}
+\centering
+\begin{tabu} to \linewidth {>{\raggedleft}X>{\raggedleft}X>{\raggedleft}X>{\raggedleft}X>{\raggedleft}X}
+\hline
+Chr & M & Me & chisq & h2\\
+\hline
+1 & 32913 & 7204.5646 & 1.0755 & 0.04480\\
+\hline
+2 & 33622 & 6403.3527 & 1.0321 & 0.01700\\
+\hline
+3 & 28040 & 5839.5143 & 1.0861 & 0.04140\\
+\hline
+4 & 26836 & 5632.8855 & 1.0545 & 0.02530\\
+\hline
+5 & 25243 & 5368.6945 & 1.0443 & 0.01960\\
+\hline
+\rowcolor{red}  \textcolor{white}{\textbf{6}} & \textcolor{white}{\textbf{30405}} & \textcolor{white}{\textbf{857.1236}} & \textcolor{white}{\textbf{1.3061}} & \textcolor{white}{\textbf{0.02170}}\\
+\hline
+7 & 23260 & 5020.4250 & 1.0346 & 0.01433\\
+\hline
+8 & 21530 & 3909.6782 & 1.0736 & 0.02370\\
+\hline
+9 & 18799 & 4277.3328 & 1.0470 & 0.01660\\
+\hline
+10 & 21313 & 4328.9556 & 1.0324 & 0.01160\\
+\hline
+11 & 20746 & 3269.6384 & 1.0349 & 0.00940\\
+\hline
+12 & 20194 & 4213.4118 & 1.0714 & 0.02480\\
+\hline
+13 & 14769 & 3508.2313 & 1.0363 & 0.01050\\
+\hline
+14 & 13741 & 3106.6733 & 1.0716 & 0.01830\\
+\hline
+15 & 13502 & 2872.9585 & 1.0998 & 0.02360\\
+\hline
+16 & 14848 & 3146.7089 & 1.0180 & 0.00470\\
+\hline
+17 & 14267 & 1796.0199 & 1.0360 & 0.00530\\
+\hline
+18 & 12880 & 3243.4674 & 1.0560 & 0.01500\\
+\hline
+19 & 12394 & 2346.5845 & 1.0938 & 0.01820\\
+\hline
+20 & 11181 & 2683.5395 & 1.0824 & 0.01820\\
+\hline
+21 & 6532 & 2683.5395 & 1.0076 & 0.00170\\
+\hline
+22 & 7087 & 1597.1183 & 1.0161 & 0.00210\\
+\hline
+\end{tabu}
+\end{table}
+
+\hypertarget{grm-statistics-mathbfomega_a}{%
+\subsection{\texorpdfstring{2 GRM statistics
+\(\mathbf{\Omega}_a\)}{2 GRM statistics \textbackslash{}mathbf\{\textbackslash{}Omega\}\_a}}\label{grm-statistics-mathbfomega_a}}
+
+\(\mathbf{\Omega}=\mathbf{s^Ts}\), in which \(\mathbf{s}\) as defined in
+the last page. In particular, for a pair of individuals \(i\) and \(j\),
+their relatedness is
+\(\Omega_{ij}=\frac{1}{M}\sum_{k=1}^Ms_{i,k}s_{j,k}=\frac{1}{M}\sum_{k=1}^Ms_{i,k}s_{j,k}\)
+
+\(\mathbf{\Omega}\) is a Hermitian matrix (symetric), and the diagonal
+element is \(\Omega_{ii}=\frac{1}{M}\sum_{k=1}^Ms_{i,k}^2\).
+
+It exist simple relationship that
+\(M_e=var(\Omega_{off-diag})=\frac{M+\sum_{l_1 \ne l_2}r_{l_1l_2}^2}{M^2}=\),
+and \(E(V(M_e))=\frac{2M_e}{n^2}\)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sourceCpp}\NormalTok{(}\StringTok{"~/git/Notes/R/RLib/Shotgun.cpp"}\NormalTok{)}
+\NormalTok{M=}\DecValTok{1000}
+\NormalTok{N=}\DecValTok{100}
+\NormalTok{frq=}\KeywordTok{runif}\NormalTok{(M, }\FloatTok{0.2}\NormalTok{, }\FloatTok{0.8}\NormalTok{)}
+\NormalTok{Dp=}\KeywordTok{c}\NormalTok{(}\KeywordTok{runif}\NormalTok{(M}\OperatorTok{/}\DecValTok{2}\NormalTok{, }\FloatTok{-0.95}\NormalTok{, }\FloatTok{-0.5}\NormalTok{), }\KeywordTok{runif}\NormalTok{(M}\OperatorTok{/}\DecValTok{2}\NormalTok{, }\FloatTok{0.5}\NormalTok{, }\FloatTok{0.95}\NormalTok{))}
+\NormalTok{Dp=Dp[}\DecValTok{1}\OperatorTok{:}\NormalTok{(M}\DecValTok{-1}\NormalTok{)]}
+
+\NormalTok{Amat=}\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{100}\NormalTok{, }\DecValTok{2}\NormalTok{)}
+
+\NormalTok{MeMat=}\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{100}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\DecValTok{100}\NormalTok{) \{}
+\NormalTok{gMat=}\KeywordTok{GenerateGenoDprimeRcpp}\NormalTok{(frq, }\DataTypeTok{N=}\NormalTok{N, }\DataTypeTok{Dp =}\NormalTok{ Dp)}
+
+\NormalTok{sG=}\KeywordTok{scale}\NormalTok{(gMat)}
+\NormalTok{K=sG}\OperatorTok{%*%}\KeywordTok{t}\NormalTok{(sG)}\OperatorTok{/}\NormalTok{(M}\DecValTok{-1}\NormalTok{)}
+\NormalTok{MeMat[i,}\DecValTok{1}\NormalTok{]=}\DecValTok{1}\OperatorTok{/}\KeywordTok{var}\NormalTok{(K[}\KeywordTok{row}\NormalTok{(K)}\OperatorTok{>}\KeywordTok{col}\NormalTok{(K)])}
+\NormalTok{\}}
+\KeywordTok{print}\NormalTok{(}\KeywordTok{paste}\NormalTok{(}\StringTok{"Me:"}\NormalTok{, }\KeywordTok{mean}\NormalTok{(MeMat)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Me: 605.431044673586"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{print}\NormalTok{(}\KeywordTok{paste}\NormalTok{(}\StringTok{"V(Me):"}\NormalTok{, }\KeywordTok{sd}\NormalTok{(MeMat), }\StringTok{"E[V(Me)]:"}\NormalTok{, (}\DecValTok{2}\OperatorTok{/}\NormalTok{N}\OperatorTok{*}\KeywordTok{mean}\NormalTok{(MeMat))))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "V(Me): 12.9599221762403 E[V(Me)]: 12.1086208934717"
+\end{verbatim}
+
+\hypertarget{diagonal-elements}{%
+\subsubsection{Diagonal elements}\label{diagonal-elements}}
+
+\(E(s_{ii}^2)=diag(\Omega_{ii})=1\), interpreting that an individual is
+identical to himself under random mating (no inbred, otherwise \(1+F\)).
+
+\begin{align}
+E(\Omega_{ii}^2) &= \frac{1}{M^2}[\color{red} {\sum_{k=1}^M s_{ik}^4}+\color{green}{\sum_{k_1}\sum_{k_1 \ne k_2} s_{i,k_1}^2s_{i,k_2}^2}] \\
+ &=\frac{1}{M^2}\{\color{red} {\sum_{k=1}^M \frac{1}{2p_kq_k}}+\color{green}{\sum_{k_1}\sum_{k_1 \ne k_2} [(1+\rho^2_{k_1,k_2})+\frac{\rho_{k_1,k_2}(p_{k_1}-q_{k_1})(p_{k_2}-q_{k_2})}{2\sqrt{p_{k_1}q_{k_1}p_{k_2}q_{k_2}}}]}\} 
+\end{align}
+
+Under large sample and many loci,
+\(E(\frac{\rho_{k_1,k_2}(p_{k_1}-q_{k_1})(p_{k_2}-q_{k_2})}{2\sqrt{p_{k_1}q_{k_1}p_{k_2}q_{k_2}}})=0\)
+
+So, we have
+
+\begin{align}
+E(\Omega_{ii}^2)&=\frac{1}{M^2}[M\frac{1}{E(\sigma_k^2)}+M(M-1)(1+E(\rho^2_{k_1k_2}))]\\
+&=\frac{1}{E(\sigma_k^2)}\frac{1}{M}+\frac{M-1}{M}[1+\color{red}{E(\rho^2_{k_1k_2})}]
+\end{align}
+
+\hypertarget{off-diagonal-elements}{%
+\subsubsection{Off-diagonal elements}\label{off-diagonal-elements}}
+
+\(\Omega_{ij}=\frac{1}{M}\sum_{k=1}^Ms_{ik}s_{jk}\)
+
+and
+\(\Omega_{ij}^2=\frac{1}{M^2}[\sum_{k=1}^Ms^2_{ik}s^2_{jk}+\sum_{k_1=1}^M\sum_{k_2=1}^Ms_{ik_1}s_{ik_2}s_{jk_1}s_{jk_2}]\)
+
+in which \(E(s_{ik}^2s_{jk}^2)=E(s_{ik}^2)E(s_{jk}^2)\), if the
+individuals are not related.
+
+\(E(s_{ik_1}s_{ik_2}s_{jk_1}s_{jk_2})=E(s_{ik_1}s_{ik_2})E(s_{jk_1}s_{jk_2})=E(\rho_{i,k_1k_2})E(\rho_{j,k_1k_2})=E^2(\rho_{k_1k_2})\).
+
+So
+
+\[E(\mathbf{\Omega}_{ij}^2)=\frac{1}{M}+\frac{M-1}{M}\color{green}{E^2(\rho_{k_1k_2})}\]
+
+\hypertarget{es2_iikes4_iik-vars_ii2}{%
+\subsubsection{\texorpdfstring{\(E(s^2_{ii,k}),E(s^4_{ii,k}), var(s_{ii}^2)\)}{E(s\^{}2\_\{ii,k\}),E(s\^{}4\_\{ii,k\}), var(s\_\{ii\}\^{}2)}}\label{es2_iikes4_iik-vars_ii2}}
+
+\hypertarget{some-useful-identities-for-s.}{%
+\paragraph{\texorpdfstring{Some useful identities for
+\(s\).}{Some useful identities for s.}}\label{some-useful-identities-for-s.}}
+
+\[E(s^2_{ii,k})=1\]
+
+\[E(\color{red} {s^4_{ii,k}})=\frac{1}{2p_kq_k}\] The
+\(\color{red} {s^4_{ik} = \frac{1}{2p_kq_k}}\), in which \(2p_kq_k\) is
+the expected value of the variance of the \(k^{th}\) locus under random
+mating. \(\color{red} {s^4_{ik}}\) can be derived as below,
+
+\begin{longtable}[]{@{}cccc@{}}
+\toprule
+\begin{minipage}[b]{0.20\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[b]{0.20\columnwidth}\centering
+\(a_ka_k\)\strut
+\end{minipage} & \begin{minipage}[b]{0.24\columnwidth}\centering
+\(A_ka_k\)\strut
+\end{minipage} & \begin{minipage}[b]{0.24\columnwidth}\centering
+\(A_kA_k\)\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.20\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering
+\(q_k^2\)\strut
+\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering
+\(2p_kq_k\)\strut
+\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering
+\(p_k^2\)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.20\columnwidth}\centering
+\(\Omega_{ii}=s^2_{ii}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering
+\(\frac{4p_k^2}{2p_kq_k}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering
+\(\frac{(1-2p_k)^2}{2p_kq_k}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering
+\(\frac{4q_k^2}{2p_kq_k}\)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.20\columnwidth}\centering
+\(\Omega_{ii}^2=s^4_{ii}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering
+\(\frac{16p_k^4}{4p_k^2q_k^2}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering
+\(\frac{(q_k-p_k)^4}{4p_k^2q_k^2}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering
+\(\frac{16p_k^4}{4p_k^2q_k^2}\)\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\[var(s_{ii}^2)=E(s_{ii}^4)-E^2(s_{ii}^2)=\frac{1}{2p_kq_k}-1\]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(Rcpp)}
+\KeywordTok{sourceCpp}\NormalTok{(}\StringTok{"~/git/Notes/R/RLib/Shotgun.cpp"}\NormalTok{)}
+\KeywordTok{source}\NormalTok{(}\StringTok{"~/git/Notes/R/RLib/shotgun.R"}\NormalTok{)}
+\NormalTok{M=}\DecValTok{1000}
+\NormalTok{N=}\DecValTok{500}
+\NormalTok{frq=}\KeywordTok{runif}\NormalTok{(M, }\FloatTok{0.1}\NormalTok{, }\FloatTok{0.5}\NormalTok{)}
+\NormalTok{Dp=}\KeywordTok{sample}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\KeywordTok{runif}\NormalTok{(M}\OperatorTok{/}\DecValTok{2}\NormalTok{, }\DecValTok{0}\NormalTok{, }\FloatTok{.5}\NormalTok{), }\KeywordTok{runif}\NormalTok{(M}\OperatorTok{/}\DecValTok{2}\NormalTok{, }\FloatTok{-0.5}\NormalTok{, }\DecValTok{0}\NormalTok{)), M)}
+\NormalTok{Dp=Dp[}\OperatorTok{-}\DecValTok{1}\NormalTok{]}
+
+\NormalTok{G=}\KeywordTok{GenerateGenoDprimeRcpp}\NormalTok{(frq, Dp, N)}
+\NormalTok{s=}\KeywordTok{apply}\NormalTok{(G, }\DecValTok{2}\NormalTok{, scale)}
+\CommentTok{#Kcpp=CorMatrixRcpp(s)}
+\NormalTok{FQ=}\KeywordTok{colMeans}\NormalTok{(G)}\OperatorTok{/}\DecValTok{2}
+\NormalTok{s2=s}\OperatorTok{^}\DecValTok{2}
+\NormalTok{s4=s}\OperatorTok{^}\DecValTok{4}
+\KeywordTok{layout}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{3}\NormalTok{))}
+\KeywordTok{hist}\NormalTok{(}\DataTypeTok{main=}\StringTok{"Simulation test for s^2"}\NormalTok{, }\KeywordTok{colMeans}\NormalTok{(s2), }\DataTypeTok{xlab=}\StringTok{"E(s^2)"}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(}\DataTypeTok{main=}\StringTok{"Simulation test for s^4"}\NormalTok{, }\DecValTok{1}\OperatorTok{/}\NormalTok{(}\DecValTok{2}\OperatorTok{*}\NormalTok{FQ}\OperatorTok{*}\NormalTok{(}\DecValTok{1}\OperatorTok{-}\NormalTok{FQ)), }\KeywordTok{colMeans}\NormalTok{(s4), }\DataTypeTok{pch=}\DecValTok{16}\NormalTok{, }\DataTypeTok{cex=}\FloatTok{0.5}\NormalTok{, }\DataTypeTok{xlab=}\StringTok{"1/(2pq)"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"Simulated s^4"}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{a=}\DecValTok{0}\NormalTok{, }\DataTypeTok{b=}\DecValTok{1}\NormalTok{, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{, }\DataTypeTok{lwd=}\DecValTok{2}\NormalTok{, }\DataTypeTok{lty=}\DecValTok{2}\NormalTok{)}
+
+\NormalTok{vs2=}\KeywordTok{apply}\NormalTok{(s2, }\DecValTok{2}\NormalTok{, var)}
+\KeywordTok{plot}\NormalTok{(}\DataTypeTok{main=}\StringTok{"Siulation test for var(s^2)"}\NormalTok{,}\DecValTok{1}\OperatorTok{/}\NormalTok{(}\DecValTok{2}\OperatorTok{*}\NormalTok{FQ}\OperatorTok{*}\NormalTok{(}\DecValTok{1}\OperatorTok{-}\NormalTok{FQ))}\OperatorTok{-}\DecValTok{1}\NormalTok{, vs2, }\DataTypeTok{pch=}\DecValTok{16}\NormalTok{, }\DataTypeTok{cex=}\FloatTok{0.5}\NormalTok{, }\DataTypeTok{xlab=}\StringTok{"1/(2pq)-1"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"Simulated var(s^2)"}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{a=}\DecValTok{0}\NormalTok{, }\DataTypeTok{b=}\DecValTok{1}\NormalTok{, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{, }\DataTypeTok{lwd=}\DecValTok{2}\NormalTok{, }\DataTypeTok{lty=}\DecValTok{2}\NormalTok{)}
+
+\CommentTok{#K}
+\NormalTok{K=}\DecValTok{1}\OperatorTok{/}\NormalTok{M }\OperatorTok{*}\StringTok{ }\NormalTok{s }\OperatorTok{%*%}\StringTok{ }\KeywordTok{t}\NormalTok{(s)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{es_iik_12s_iik_22-covs_iik_12s_iik_22}{%
+\subsection{\texorpdfstring{3
+\(E(s_{ii,k_1}^2s_{ii,k_2}^2), cov(s_{ii,k_1}^2,s_{ii,k_2}^2)\)}{3 E(s\_\{ii,k\_1\}\^{}2s\_\{ii,k\_2\}\^{}2), cov(s\_\{ii,k\_1\}\^{}2,s\_\{ii,k\_2\}\^{}2)}}\label{es_iik_12s_iik_22-covs_iik_12s_iik_22}}
+
+\begin{align}
+E(\color{green}{s_{ii,k_1}^2s_{ii,k_2}^2})&= \color{purple}{q^2_{k_1}\frac{4p_{k_1}^2}{2p_{k_1}q_{k_1}} [\frac{4p_{k_2}^2r^2_{k_1k_2}+(q_{k_2}-p_{k_2})^2 2r_{k_1k_2}\bar{r}_{k_1k_2} + 4q_{k_2}^2\bar{r}_{k_1k_2}^2}{2p_{k_2}q_{k_2}}]}\\
+&+2p_{k_1k_2}\frac{(q_{k_1}-p_{k_2})^2}{2p_{k_1k_2}}[\frac{4p_{k_2}^2r_{k_1k_2}\bar{R}_{k_1k_2}+(q_{k_2}-p_{k_2})^2 (\bar{r}_{k_1k_2}\bar{R}_{k_1k_2}+r_{k_1k_2}R_{k_1k_2}) + 4q_{k_2}^2\bar{r}_{k_1k_2}R_{k_1k_2}}{2p_{k_2}q_{k_2}}]\\
+&+\color{purple}{p^2_{k_1}\frac{4q_{k_1}^2}{2p_{k_1}q_{k_1}}[\frac{4p_{k_2}^2\bar{R}^2_{k_1k_2}+(q_{k_2}-p_{k_2})^2 2R_{k_1k_2}\bar{R}_{k_1k_2} + 4q_{k_2}^2R_{k_1k_2}^2}{2p_{k_2}q_{k_2}}]}\\
+&=\color{purple}{2p_{k_1}q_{k_1}[\frac{4p^2_{k_2}(r^2_{k_1k_2}+\bar{R}_{k_1k_2})+(q_{k_2}-p_{k_2})^2(2r_{k_1k_2}\bar{r}_{k_1k_2}+2R_{k_1k_2}\bar{R}_{k_1k_2})+4q^2_{k_2}(\bar{r}^2_{k_1k_2}+R^2_{k_1k_2})}{2p_{k_2}{k_2}}]}\\
+&+(1-4p_{k_1}q_{k_1})\frac{4p^2_{k_2}r_{k_1k_2}\bar{R}_{k_1k_2}+(q_{k_2}-p_{k_2})^2(\bar{r}_{k_1}{k_2}\bar{R}_{k_1}{k_2}+r_{k_1}{k_2}R_{k_1}{k_2})}{2p_{k_2}q_{k_2}})\\
+&=1+\frac{D_{k_1k_2}[(p_{k_1}-q_{k_1})(p_{k_2}-q_{k_2})]}{2p_{k_1}q_{k_1}p_{k_2}q_{k_2}}-\frac{D^2_{k_1k_2}}{p_{k_1}q_{k_1}p_{k_2}q_{k_2}}\\
+&=1+\rho^2_{k_1k_2}+\frac{\rho_{k_1k_2}(p_{k_1}-q_{k_1})(p_{k_2}-q_{k_2})}{2\sqrt{p_{k_1}q_{k_1}p_{k_2}q_{k_2}}}
+\end{align}
+
+And consequently, we can derive \begin{align}
+cov(s_{ii,k_1}^2,s_{ii,k_2}^2)&=E(s_{i,k_1}^2s_{i,k_2}^2)-E^2(s_{i,k_1})E^2(s_{i,k_2})\\
+&=1+\rho^2_{k_1k_2}+\frac{\rho_{k_1k_2}(p_{k_1}-q_{k_1})(p_{k_2}-q_{k_2})}{2\sqrt{p_{k_1}q_{k_1}p_{k_2}q_{k_2}}}-1\\
+&=\rho^2_{k_1k_2}+\rho_{k_1k_2}\frac{(p_{k_1}-q_{k_1})(p_{k_2}-q_{k_2})}{2\sqrt{p_{k_1}q_{k_1}p_{k_2}q_{k_2}}}
+\end{align}
+
+When \(k_1 = k_2\), it is obviously that
+\(\rho_{k_1,k_2}=1, p_{k_1}=p_{k_2}\), and
+\[cov(s_{ii,k_1}^2,s_{ii,k_2}^2)=1+1\times\frac{(p_{k}-q_{k})^2}{2p_{k}q_{k}}=1+\frac{1-4p_{k}q_{k}}{2p_{k}q_{k}}=\frac{1}{2p_{k}q_{k}}-1=var(s_{ii,k}^2)\]
+
+\hypertarget{m_e_a}{%
+\subsection{\texorpdfstring{4 \(M_{E_a}\)}{4 M\_\{E\_a\}}}\label{m_e_a}}
+
+UKB cohorts test, ``/public/home/xuhm/gc5k/UKB\_cohort/cohort/grm/sub''
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ukMe=}\KeywordTok{read.table}\NormalTok{(}\StringTok{"~/manuscript/Linkage_Association/h2ss/meMarker.txt"}\NormalTok{, }\DataTypeTok{as.is =}\NormalTok{ T)}
+\NormalTok{me=ukMe[,}\OperatorTok{-}\DecValTok{1}\NormalTok{]}
+\KeywordTok{rownames}\NormalTok{(me)=ukMe[,}\DecValTok{1}\NormalTok{]}
+\KeywordTok{layout}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{, }\DecValTok{3}\NormalTok{, }\DecValTok{1}\NormalTok{))}
+
+\NormalTok{me1=me[, }\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{]}
+\NormalTok{MeS1=}\KeywordTok{matrix}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\KeywordTok{apply}\NormalTok{(me1, }\DecValTok{1}\NormalTok{, mean), }\KeywordTok{apply}\NormalTok{(me1, }\DecValTok{1}\NormalTok{, sd)), }\KeywordTok{nrow}\NormalTok{(me1), }\DecValTok{2}\NormalTok{, }\DataTypeTok{byrow =}\NormalTok{ F)}
+\KeywordTok{barplot}\NormalTok{(}\KeywordTok{t}\NormalTok{(}\KeywordTok{as.matrix}\NormalTok{(me1)), }\DataTypeTok{beside =}\NormalTok{ T)}
+
+\NormalTok{me2=me[,}\DecValTok{11}\OperatorTok{:}\DecValTok{20}\NormalTok{]}
+\NormalTok{MeS2=}\KeywordTok{matrix}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\KeywordTok{apply}\NormalTok{(me2, }\DecValTok{1}\NormalTok{, mean), }\KeywordTok{apply}\NormalTok{(me2, }\DecValTok{1}\NormalTok{, sd)), }\KeywordTok{nrow}\NormalTok{(me2), }\DecValTok{2}\NormalTok{, }\DataTypeTok{byrow =}\NormalTok{ F)}
+\KeywordTok{barplot}\NormalTok{(}\KeywordTok{t}\NormalTok{(}\KeywordTok{as.matrix}\NormalTok{(me2)), }\DataTypeTok{beside =}\NormalTok{ T)}
+
+\NormalTok{me3=me[,}\DecValTok{21}\OperatorTok{:}\DecValTok{30}\NormalTok{]}
+\NormalTok{MeS3=}\KeywordTok{matrix}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\KeywordTok{apply}\NormalTok{(me3, }\DecValTok{1}\NormalTok{, mean), }\KeywordTok{apply}\NormalTok{(me3, }\DecValTok{1}\NormalTok{, sd)), }\KeywordTok{nrow}\NormalTok{(me3), }\DecValTok{2}\NormalTok{, }\DataTypeTok{byrow =}\NormalTok{ F)}
+\KeywordTok{barplot}\NormalTok{(}\KeywordTok{t}\NormalTok{(}\KeywordTok{as.matrix}\NormalTok{(me3)), }\DataTypeTok{beside =}\NormalTok{ T)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{H2ss_files/figure-latex/me-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{MeMean=}\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DataTypeTok{nrow=}\KeywordTok{nrow}\NormalTok{(me), }\DecValTok{3}\NormalTok{)}
+\NormalTok{MeMean[,}\DecValTok{1}\NormalTok{]=}\KeywordTok{apply}\NormalTok{(me1, }\DecValTok{1}\NormalTok{, mean)}
+\NormalTok{MeMean[,}\DecValTok{2}\NormalTok{]=}\KeywordTok{apply}\NormalTok{(me2, }\DecValTok{1}\NormalTok{, mean)}
+\NormalTok{MeMean[,}\DecValTok{3}\NormalTok{]=}\KeywordTok{apply}\NormalTok{(me3, }\DecValTok{1}\NormalTok{, mean)}
+
+\NormalTok{MeSd=}\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DataTypeTok{nrow=}\KeywordTok{nrow}\NormalTok{(me), }\DecValTok{3}\NormalTok{)}
+\NormalTok{MeSd[,}\DecValTok{1}\NormalTok{]=}\KeywordTok{apply}\NormalTok{(me1, }\DecValTok{1}\NormalTok{, sd)}
+\NormalTok{MeSd[,}\DecValTok{2}\NormalTok{]=}\KeywordTok{apply}\NormalTok{(me2, }\DecValTok{1}\NormalTok{, sd)}
+\NormalTok{MeSd[,}\DecValTok{3}\NormalTok{]=}\KeywordTok{apply}\NormalTok{(me3, }\DecValTok{1}\NormalTok{, sd)}
+
+\NormalTok{MeSd=}\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DataTypeTok{nrow=}\KeywordTok{nrow}\NormalTok{(me), }\DecValTok{3}\NormalTok{)}
+\NormalTok{MeSd[,}\DecValTok{1}\NormalTok{]=}\KeywordTok{apply}\NormalTok{(me1, }\DecValTok{1}\NormalTok{, sd)}
+\NormalTok{MeSd[,}\DecValTok{2}\NormalTok{]=}\KeywordTok{apply}\NormalTok{(me2, }\DecValTok{1}\NormalTok{, sd)}
+\NormalTok{MeSd[,}\DecValTok{3}\NormalTok{]=}\KeywordTok{apply}\NormalTok{(me3, }\DecValTok{1}\NormalTok{, sd)}
+
+\KeywordTok{layout}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\NormalTok{barP=}\KeywordTok{barplot}\NormalTok{(MeMean, }\DataTypeTok{beside =}\NormalTok{ T, }\DataTypeTok{ylim=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{60000}\NormalTok{))}
+\KeywordTok{segments}\NormalTok{(barP, MeMean}\OperatorTok{-}\NormalTok{MeSd}\OperatorTok{*}\DecValTok{2}\NormalTok{, barP, MeMean}\OperatorTok{+}\NormalTok{MeSd}\OperatorTok{*}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{H2ss_files/figure-latex/me-2.pdf}
+
+\hypertarget{grm-mathbfomega_d}{%
+\subsection{\texorpdfstring{GRM
+\(\mathbf{\Omega}_d\)}{GRM \textbackslash{}mathbf\{\textbackslash{}Omega\}\_d}}\label{grm-mathbfomega_d}}
+
+\begin{longtable}[]{@{}cccc@{}}
+\caption{Coding for genotypes}\tabularnewline
+\toprule
+Genotype & \(aa\) & \(Aa\) & \(AA\)\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Genotype & \(aa\) & \(Aa\) & \(AA\)\tabularnewline
+\midrule
+\endhead
+Additive \(x_A\) & 0 & 1 & 2\tabularnewline
+Dominance \(x_d\) & 0 & \(2p\) & \(4p-2\)\tabularnewline
+Frequency & \(q^2\) & \(2pq\) & \(p^2\)\tabularnewline
+\bottomrule
+\end{longtable}
+
+We have \(E(x_A)=2p\), \(E(x_d)=2p^2\), and
+\(E(x_ax_d)=4p^2q+8p^3-4p^2=4p^3\), and consequently,
+\(cov(x_a, x_d)=E(x_ax_d)-E(x_a)E(x_d)=0\).
+
+For a pair of individuals, their relatedness in terms of dominance
+effect is \[
+\Omega_{d_{ij}}=\frac{1}{M}\sum_{k=1}^M\frac{(x_{d_{i,k}}-2p_k^2)(x_{d_{j,k}}-2p_k^2)}{4p_k^2(1-p_k)^2}
+\] The effective number of markers is
+\(E(m_{e_d})=\frac{M^2}{\sum_{l_1=1}^M\sum_{l_2=1}^M\rho_{l_1l_2}^4}\).
+
+\hypertarget{lse-phenome}{%
+\subsection{LSE (Phenome)}\label{lse-phenome}}
+
+For a linear model \(\mathbf{y}=\mathbf{X\beta}+e\),
+
+We have the target function
+\[Q=e^Te=argmin_{\mathbf{\beta}}(\mathbf{y}-\mathbf{X\beta})^T(\mathbf{y}-\mathbf{X\beta})\]
+It can be minized with OLS as below \[\begin{align}
+\frac{\partial Q}{\partial \beta}&=\frac{(\mathbf{y}-\mathbf{X\beta})^T(\mathbf{y}-\mathbf{X\beta})}{\partial \beta}\\
+&=\frac{\partial [y^Ty-\color{red}{\mathbf{\beta}^T\mathbf{X}^Ty}-\color{green}{y^T\mathbf{X\beta}}+\color{blue}{\mathbf{\beta}^T\mathbf{X}^T\mathbf{X}\beta}]}{\partial \mathbf{\beta}}\\
+&=0-\color{red}{\mathbf{Xy}^T}-\color{green}{\mathbf{X}\mathbf{y}^T}+\color{blue}{[\mathbf{X}^T\mathbf{X}+(\mathbf{X}^T\mathbf{X})^T]\mathbf{\beta}}, (side\ notes, \mathbf{X}^T\mathbf{X}=(\mathbf{X}^T\mathbf{X})^T)\\
+&=-2\mathbf{Xy}^T-2\mathbf{X^TX}\beta
+\end{align}
+\] Then, we have
+
+\[\hat{\mathbf{\beta}}=(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}\]
+
+\hypertarget{notes-for-matrix-calculus}{%
+\paragraph{Notes for matrix calculus}\label{notes-for-matrix-calculus}}
+
+\textbf{1:} more topics about matrix calculus please refer to
+\href{https://en.wikipedia.org/wiki/Matrix_calculus\#Derivatives_with_vectors}{``Matrix
+Calculus Wiki''}.
+
+\textbf{2:} Or read a gentle introduction
+\href{https://arxiv.org/abs/1802.01528}{``Matrix Calculus You Need for
+Deep Learning''}.
+
+\hypertarget{glse}{%
+\paragraph{GLSE}\label{glse}}
+
+If it is general linear model, the LSE is to \emph{minimize}
+\(Q=argmin_{\mathbf{\beta}}{(\mathbf{y}-\mathbf{X\beta})^TV^{-1}(\mathbf{y}-\mathbf{X\beta})}\),
+and its corresponding
+\(\hat{\mathbf{\beta}}=(\mathbf{X}^T\mathbf{V}^{-1}\mathbf{X})^{-1}(\mathbf{X}^T\mathbf{V}^{-1}\mathbf{y})\).
+
+\hypertarget{the-sampling-variance-of-hatmathbfbeta-is}{%
+\paragraph{\texorpdfstring{The sampling variance of
+\(\hat{\mathbf{\beta}}\)
+is}{The sampling variance of \textbackslash{}hat\{\textbackslash{}mathbf\{\textbackslash{}beta\}\} is}}\label{the-sampling-variance-of-hatmathbfbeta-is}}
+
+\begin{align}
+SSE&=\color{red}{e^T}\color{green}{e}\\
+&=\color{red}{(\mathbf{y}-\mathbf{X\hat{\beta}})^T}\color{green}{(\mathbf{y}-\mathbf{X\hat{\beta}})}\\
+&=\color{red}{[\mathbf{y}-\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^{T}\mathbf{y}]^T}\color{green}{[\mathbf{y}-\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}]}\\
+&=\color{red}{\mathbf{y}^T}\color{green}{\mathbf{y}}-\color{red}{\mathbf{y}^T}\color{green}{\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}}-\color{red}{\mathbf{y}{\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T}}\color{green}{\mathbf{y}}+\color{red}{\mathbf{y}^T\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^{T}}\color{green}{\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^{T}\mathbf{y}}\\
+&=\mathbf{y}^T\mathbf{y}-\mathbf{y}^T\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}\\
+&=\mathbf{y}^T(I-\mathbf{P}_{\mathbf{X}})\mathbf{y}
+\end{align}
+
+Notes:
+\(\mathbf{P}_{\mathbf{X}}=\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\)
+is
+\href{https://en.wikipedia.org/wiki/Projection_(linear_algebra)}{projection
+matrix wiki}, that \(\mathbf{P}^n=\mathbf{P}\).
+
+\[\hat{\sigma}_{\beta}^2=\frac{SSE}{n-m}(\mathbf{X}^T\mathbf{X})^{-1}=\hat{\sigma}^2_e(\mathbf{X}^T\mathbf{X})^{-1}\]
+
+\hypertarget{variation-for-lse}{%
+\subsubsection{Variation for LSE}\label{variation-for-lse}}
+
+\hypertarget{slr-and-mlr}{%
+\paragraph{SLR and MLR}\label{slr-and-mlr}}
+
+There is connection of the regression coefficients between simple linear
+regresssion and multiple linear regrression.
+
+\[\begin{align}
+\hat{\mathbf{\beta}}&=&(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}\\
+&=&(\Lambda_{\sigma_X}\Sigma\Lambda_{\sigma_X})^{-1}\rho_{Xy}\Lambda_{\sigma_X}\sigma_y\\
+&=&\Lambda_{\sigma_X}^{-1}\Sigma^{-1}\Lambda_{\sigma_X}^{-1}\rho_{Xy}\Lambda_{\sigma_X}\sigma_y\\
+&=&\Lambda_{\sigma_X}^{-1}\Sigma^{-1}\rho_{Xy}\sigma_y\\
+&=&\Sigma^{-1}\hat{b}_{Xy}\\
+\end{align}
+\]
+
+in which
+\(\hat{b}_{[i]}=\frac{cov(y, x_i)}{var(x_i)}=\rho_{y,x_i}\frac{\sigma_y}{\sigma_{x_i}}\),
+estimated from the simple linear regression from \(y=a+b_ix_i+e\).
+
+And similarly,
+\(\hat{\sigma}^2_{\beta}=(\frac{y^Ty-\hat{\mathbf{\beta}}^T\hat{b}}{n-m})(\mathbf{\Lambda_{\sigma_X}\Sigma\Lambda_{\sigma_X}})^{-1}\)
+
+\includegraphics{H2ss_files/figure-latex/g3-1.pdf}
+
+\hypertarget{real-example}{%
+\paragraph{Real example}\label{real-example}}
+
+`/public/home/xuhm/gc5k/UKB\_cohort/ss\_adj'
+
+\begin{longtable}[]{@{}cccc@{}}
+\toprule
+cohort & \(gender\) & \(ht\) & \(cor\)\tabularnewline
+\midrule
+\endhead
+Barts & 1 & 1 & -0.6918\tabularnewline
+Birmingham & 1 & 1 & -0.7139\tabularnewline
+Bristol & 1 & 1 & -0.7183\tabularnewline
+Bury & 1 & 1 & -0.7131\tabularnewline
+Cardiff & 1 & 1 & -0.7244\tabularnewline
+Croydon & 1 & 1 & -0.7133\tabularnewline
+Edinburgh & 1 & 1 & -0.7114\tabularnewline
+Glasgow & 1 & 1 & -0.7160\tabularnewline
+Hounslow & 1 & 1 & -0.7170\tabularnewline
+Leeds & 1 & 1 & -0.7136\tabularnewline
+Liverpool & 1 & 1 & -0.7170\tabularnewline
+Manchester & 1 & 1 & -0.6995\tabularnewline
+Middlesborough & 1 & 1 & -0.7199\tabularnewline
+Newcastle & 1 & 1 & -0.7173\tabularnewline
+Nottingham & 1 & 1 & -0.7177\tabularnewline
+Oxford & 1 & 1 & -0.7153\tabularnewline
+Reading & 1 & 1 & -0.7252\tabularnewline
+Sheffield & 1 & 1 & -0.7180\tabularnewline
+Stoke & 1 & 1 & -0.7164\tabularnewline
+\bottomrule
+\end{longtable}
+
+\hypertarget{quadratic-form-statistics}{%
+\subsection{Quadratic form statistics}\label{quadratic-form-statistics}}
+
+Let \(x\) be a vector for \(n\) random variables, and \(A\) be a
+\(n\times n\) symmetric matrix, the scalar quantity \(xAx\) is known as
+quadratic form. If \[x \sim MVN(\mu,\sum)\], it can be shown that
+
+\[E[xAx]=tr[A\sum]+\mu^TA\mu\]
+
+It can be proved as below \(x^TAx = tr[x^TAx]\), and by the cyclic
+property of the trace operator \(E[tr(x^TAx)]=E[tr[Axx^T]]\). Since
+trace operator is linear combination of matrices, it therefor follows
+from the linearity of the expectation operator that
+\[E[tr(Axx^T)]=tr[AE(xx^T)]=tr[A(\sum+\mu\mu^T)]=tr(A\sum)+tr(\sum\mu\mu^T)=tr(A\sum)+tr(\mu^T\sum\mu)=tr(A\sum)+\mu^TA\mu\].
+
+\begin{longtable}[]{@{}l@{}}
+\toprule
+\endhead
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+Variance \[var[\mu^TA\mu]=2tr[A\sum A\sum]+4\mu^TA\sum A\mu\] Covariance
+\[cov[\mu^TA_1, \mu A_2]=2tr[A_1\sum A_2\sum]+4\mu^TA_1\sum A_2\mu\] for
+both variance and covariance, \(A\) is required to be
+\textbf{symmetric}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+When \(A\) is not \textbf{symmetric}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+When \(A\) is asymmetric, \[x^T\tilde{A}x=x^T(A+A^T)x/2\] the expression
+of var and cov are the same, provided \(A\) is replaced by
+\(\tilde{A}=(A+A^T)/2\).\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+\#\# Isserlis theorem It may be related to high-order moments for
+multivariate normal distribution, see
+\href{https://en.wikipedia.org/wiki/Isserlis\%27_theorem}{Isserlis
+Theorem}, published in \emph{Biometrika},
+12:\href{https://www.jstor.org/stable/2331932?seq=1}{134-139}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+\(X_i\) is a vector that follows standard Gaussian distribution
+\(N(0,1)\). The product below can be expanded as\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+\#\#\#\# Example 1 (4-order moments)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+\begin{align}
+E(X_1X_2X_3X_4)&=E(X_1X_2)E(X_3X_4)+E(X_1X_3)E(X_2X_4)+E(X_1X_4)E(X_2X_3)
+\end{align} When \(X_i\), \(i=1\), it is \(E(X_1^4)=3E(X_1^2)=3\).\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+\#\#\#\# Example 2 (6-order moments) \begin{align}
+E(X_1X_2X_3X_4X_5X_5)&=E(X_1X_2)E(X_3X_4X_5X_6)+E(X_1X_3)E(X_2X_4X_5X_6)+E(X_1X_4)E(X_2X_3X_5X_6)+E(X_1X_5)E(X_2X_3X_4X_6)+E(X_1X_6)E(X_2X_3X_4X_5), (5\ terms)\\
+&=E(X_1X_2)[E(X_3X_4)E(X_5X_6)+E(X_3X_5)E(X_4X_6)+E(X_3X_6)E(X_4X_5)]+...,(E(X_3X_4)E(X_5X_6)\ can\ be\ expanded\ as\ Example\ 1)\\
+&=15
+\end{align}\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+However, Isserlis Theorem works for normal distribution only, but it is
+not ``normal'' for a standardized locus.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+\#\#\#\# Cumulant Another possible method is ``Cumulant'', see its
+\href{https://en.wikipedia.org/wiki/Cumulant}{Wiki}. Or for ``joint
+Cumulant'' if covariance exists beween two vectors, see
+\href{https://en.wikipedia.org/wiki/Law_of_total_cumulance}{Joint
+Cumulant}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+\#\# Inversion\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+\#\#\# \(2 \times 2\) \[\mathbf{A}^{-1}=
+\begin{bmatrix} a & b \\ c & d \end{bmatrix} ^{-1} = \frac{1}{ad-bc}\begin{bmatrix} d & a \\ -b & -c \end{bmatrix}\]\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+\#\#\# \(3 \times 3\) \[\mathbf{A}^{-1}=
+\begin{bmatrix} a & b &c \\ d & e & f \\g&h&i \end{bmatrix} ^{-1} = \frac{1}{det(\mathbf{A})}\begin{bmatrix} A & D &G \\B&E&H \\C & F &I \end{bmatrix}\]
+in which (\(A\) is scalar not a matrix as above) \(A=(ei-fh)\),
+\(B=-(di-fg)\), \(C=(dh-eg)\), \(D=-(bi-ch)\), \(E=(ai-cg)\),
+\(F=-(ah-bg)\), \(G=(bf-ce)\), \(H=-(af-cd)\), \(I=(ae-bd)\).\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+\#\# Conditional probability\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.11\columnwidth}\raggedright
+\#\#\# Haplotype for a pair of biallelic loci\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}cccc@{}}
+\toprule
+\begin{minipage}[b]{0.22\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[b]{0.22\columnwidth}\centering
+\(a_l\)\strut
+\end{minipage} & \begin{minipage}[b]{0.22\columnwidth}\centering
+\(A_l\)\strut
+\end{minipage} & \begin{minipage}[b]{0.22\columnwidth}\centering
+\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.22\columnwidth}\centering
+\(a_k\)\strut
+\end{minipage} & \begin{minipage}[t]{0.22\columnwidth}\centering
+\(r_{kl}=q_l+\frac{D_{kl}}{q_k}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.22\columnwidth}\centering
+\(\bar{r}_{kl}=q_l+\frac{D_{kl}}{q_k}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.22\columnwidth}\centering
+\(q_k\)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\centering
+\(A_k\)\strut
+\end{minipage} & \begin{minipage}[t]{0.22\columnwidth}\centering
+\(\bar{R}_{kl}=q_l+\frac{D_{kl}}{p_{kl}}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.22\columnwidth}\centering
+\(R_{kl}=p_l+\frac{D_{kl}}{p_{kl}}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.22\columnwidth}\centering
+\(p_k\)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.22\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[t]{0.22\columnwidth}\centering
+\(q_l\)\strut
+\end{minipage} & \begin{minipage}[t]{0.22\columnwidth}\centering
+\(p_l\)\strut
+\end{minipage} & \begin{minipage}[t]{0.22\columnwidth}\centering
+\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\(p_k\) and \(p_l\) are minor allelic frequencies of the two loci,
+respectively. It exists the transformation as
+\(D_{kl}=\rho_{kl}\sqrt{p_kq_kp_lq_l}\). Of note, \(D_{kl}\) is
+restrained as \texttt{min}(\(p_kq_l\), \(q_kp_l\)), and consequently
+\(\rho_{kl}=\sqrt{\frac{p_kq_l}{p_lq_k}}<1\).
+
+\hypertarget{frequencies-for-a-pair-of-loci-for-the-ith-individual}{%
+\subsubsection{\texorpdfstring{\textbf{Frequencies for a pair of loci
+for the \(i^{th}\)
+individual}}{Frequencies for a pair of loci for the i\^{}\{th\} individual}}\label{frequencies-for-a-pair-of-loci-for-the-ith-individual}}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\begin{longtable}[]{@{}ccccccc@{}}
+\toprule
+\begin{minipage}[b]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering
+Locus \(l\)\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering
+\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+Geno\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(a_la_l\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(a_lA_l\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(A_lA_l\)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+Standardized geno\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(s_{il}=\frac{-2p_l}{\sqrt{2p_lq_l}}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(s_{il}=\frac{q_l-p_l}{\sqrt{2p_lq_l}}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(s_{il}=\frac{2q_l}{\sqrt{2p_lq_l}}\)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+Frequency\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(q_l^2\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(2p_lq_l\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(p_l^2\)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(a_ka_k\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(s_{ik}=\frac{-2p_k}{\sqrt{2p_kq_k}}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(q_k^2\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(r_{kl}^2\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(2r_{kl}\bar{r}_{kl}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(\bar{r}_{kl}^2\)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\centering
+Locus \(k\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(a_ka_k\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(s_{ik}=\frac{q_k-p_k}{\sqrt{2p_kq_k}}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(q_k^2\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(r_{kl}\bar{R}_{kl}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(r_{kl}\bar{R}_{kl}+\bar{r}_{kl}R_{kl}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(\bar{r}_{kl}R_{kl}\)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\centering
+\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(A_kA_k\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(s_{ik}=\frac{2q_k}{\sqrt{2p_kq_k}}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(p_k^2\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(\bar{R}_{kl}^2\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(2R_{kl}\bar{R}_{kl}\)\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+\(R_{kl}^2\)\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{r-sess}{%
+\subsection{R sess}\label{r-sess}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sessionInfo}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## R version 3.6.2 (2019-12-12)
+## Platform: x86_64-apple-darwin15.6.0 (64-bit)
+## Running under: macOS Catalina 10.15.4
+## 
+## Matrix products: default
+## BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+## 
+## locale:
+## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] kableExtra_1.1.0 knitr_1.28       Rcpp_1.0.3      
+## 
+## loaded via a namespace (and not attached):
+##  [1] rstudioapi_0.11   xml2_1.2.2        magrittr_1.5      hms_0.5.3        
+##  [5] munsell_0.5.0     rvest_0.3.5       viridisLite_0.3.0 colorspace_1.4-1 
+##  [9] R6_2.4.1          rlang_0.4.5       stringr_1.4.0     httr_1.4.1       
+## [13] tools_3.6.2       webshot_0.5.2     xfun_0.12         htmltools_0.4.0  
+## [17] yaml_2.2.1        digest_0.6.25     lifecycle_0.2.0   tibble_2.1.3     
+## [21] crayon_1.3.4      readr_1.3.1       vctrs_0.2.3       glue_1.3.1       
+## [25] evaluate_0.14     rmarkdown_2.1     stringi_1.4.6     compiler_3.6.2   
+## [29] pillar_1.4.3      scales_1.1.0      pkgconfig_2.0.3
+\end{verbatim}
+
+\end{document}
