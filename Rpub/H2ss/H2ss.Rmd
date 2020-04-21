@@ -16,6 +16,7 @@ output:
 print(Sys.time())
 ```
 
+
 ## 1 VC-MoM
 
 ### Additive model
@@ -602,7 +603,7 @@ Then, we have
 
 $$\hat{\mathbf{\beta}}=(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}$$
 
-#### Notes for matrix calculus
+### Notes for matrix calculus
 
 **1:** more topics about matrix calculus please refer to ["Matrix Calculus Wiki"](https://en.wikipedia.org/wiki/Matrix_calculus#Derivatives_with_vectors).
 
@@ -613,6 +614,7 @@ If it is general linear model, the LSE is to *minimize* $Q=argmin_{\mathbf{\beta
 
 #### The sampling variance of $\hat{\mathbf{\beta}}$ is 
 
+$$
 \begin{align}
 SSE&=\color{red}{e^T}\color{green}{e}\\
 &=\color{red}{(\mathbf{y}-\mathbf{X\hat{\beta}})^T}\color{green}{(\mathbf{y}-\mathbf{X\hat{\beta}})}\\
@@ -621,7 +623,7 @@ SSE&=\color{red}{e^T}\color{green}{e}\\
 &=\mathbf{y}^T\mathbf{y}-\mathbf{y}^T\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}\\
 &=\mathbf{y}^T(I-\mathbf{P}_{\mathbf{X}})\mathbf{y}
 \end{align}
-
+$$
 Notes: $\mathbf{P}_{\mathbf{X}}=\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T$ is [projection  matrix wiki](https://en.wikipedia.org/wiki/Projection_(linear_algebra)), that $\mathbf{P}^n=\mathbf{P}$.
 
 $$\hat{\sigma}_{\beta}^2=\frac{SSE}{n-m}(\mathbf{X}^T\mathbf{X})^{-1}=\hat{\sigma}^2_e(\mathbf{X}^T\mathbf{X})^{-1}$$
@@ -632,12 +634,13 @@ $$\hat{\sigma}_{\beta}^2=\frac{SSE}{n-m}(\mathbf{X}^T\mathbf{X})^{-1}=\hat{\sigm
 
 There is connection of the regression coefficients between simple linear regresssion and multiple linear regrression.
 
-$$\begin{align}
-\hat{\mathbf{\beta}}&=&(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}\\
-&=&(\Lambda_{\sigma_X}\Sigma\Lambda_{\sigma_X})^{-1}\rho_{Xy}\Lambda_{\sigma_X}\sigma_y\\
-&=&\Lambda_{\sigma_X}^{-1}\Sigma^{-1}\Lambda_{\sigma_X}^{-1}\rho_{Xy}\Lambda_{\sigma_X}\sigma_y\\
-&=&\Lambda_{\sigma_X}^{-1}\Sigma^{-1}\rho_{Xy}\sigma_y\\
-&=&\Sigma^{-1}\hat{b}_{Xy}\\
+$$
+\begin{align}
+\hat{\mathbf{\beta}}&=(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}\\
+&=(\Lambda_{\sigma_X}\Sigma\Lambda_{\sigma_X})^{-1}\rho_{Xy}\Lambda_{\sigma_X}\sigma_y\\
+&=\Lambda_{\sigma_X}^{-1}\Sigma^{-1}\Lambda_{\sigma_X}^{-1}\rho_{Xy}\Lambda_{\sigma_X}\sigma_y\\
+&=\Lambda_{\sigma_X}^{-1}\Sigma^{-1}\rho_{Xy}\sigma_y\\
+&=\Sigma^{-1}\hat{b}_{Xy}\\
 \end{align}
 $$
 
@@ -737,8 +740,7 @@ legend("topleft", legend = c("Locus", "Cov 1", "Cov 2", "Cov 3"), col = COL, pch
 ```
 
 
-#### Real example
-
+### Real example
 '/public/home/xuhm/gc5k/UKB_cohort/ss_adj'
 
 ```{r, UKcor}
@@ -765,10 +767,10 @@ $x^TAx = tr[x^TAx]$, and by the cyclic property of the trace operator
 $E[tr(x^TAx)]=E[tr[Axx^T]]$. Since trace operator is linear combination of matrices, it therefor follows from the linearity of the expectation operator that 
 $$E[tr(Axx^T)]=tr[AE(xx^T)]=tr[A(\sum+\mu\mu^T)]=tr(A\sum)+tr(\sum\mu\mu^T)=tr(A\sum)+tr(\mu^T\sum\mu)=tr(A\sum)+\mu^TA\mu$$.
 
--------
-Variance 
+
+### Variance 
 $$var[\mu^TA\mu]=2tr[A\sum A\sum]+4\mu^TA\sum A\mu$$
-Covariance
+### Covariance
 $$cov[\mu^TA_1, \mu A_2]=2tr[A_1\sum A_2\sum]+4\mu^TA_1\sum A_2\mu$$
 for both variance and covariance, $A$ is required to be **symmetric**.
 
@@ -784,20 +786,27 @@ It may be related to high-order moments for multivariate normal distribution, se
 
 $X_i$ is a vector that follows standard Gaussian distribution $N(0,1)$. The product below can be expanded as
 
-#### Example 1 (4-order moments)
+### Example 1 (4-order moments)
 
+$$
 \begin{align}
 E(X_1X_2X_3X_4)&=E(X_1X_2)E(X_3X_4)+E(X_1X_3)E(X_2X_4)+E(X_1X_4)E(X_2X_3)
 \end{align}
+$$
 When $X_i$, $i=1$, it is $E(X_1^4)=3E(X_1^2)=3$.
 
-#### Example 2 (6-order moments)
+### Example 2 (6-order moments)
+$$
 \begin{align}
-E(X_1X_2X_3X_4X_5X_5)&=E(X_1X_2)E(X_3X_4X_5X_6)+E(X_1X_3)E(X_2X_4X_5X_6)+E(X_1X_4)E(X_2X_3X_5X_6)+E(X_1X_5)E(X_2X_3X_4X_6)+E(X_1X_6)E(X_2X_3X_4X_5), (5\ terms)\\
-&=E(X_1X_2)[E(X_3X_4)E(X_5X_6)+E(X_3X_5)E(X_4X_6)+E(X_3X_6)E(X_4X_5)]+...,(E(X_3X_4)E(X_5X_6)\ can\ be\ expanded\ as\ Example\ 1)\\
+E(X_1X_2X_3X_4X_5X_5)&=E(X_1X_2)E(X_3X_4X_5X_6)+E(X_1X_3)E(X_2X_4X_5X_6)\\
+&+E(X_1X_4)E(X_2X_3X_5X_6)+E(X_1X_5)E(X_2X_3X_4X_6)\\
+&+E(X_1X_6)E(X_2X_3X_4X_5), (5\ terms)\\
+&=E(X_1X_2)[E(X_3X_4)E(X_5X_6)\\
+&+E(X_3X_5)E(X_4X_6)+E(X_3X_6)E(X_4X_5)]\\
+&+...,(E(X_3X_4)E(X_5X_6)\ can\ be\ expanded\ as\ Example\ 1)\\
 &=15
 \end{align}
-
+$$
 
 However, Isserlis Theorem works for normal distribution only, but it is not "normal" for a standardized locus. 
 
@@ -890,9 +899,9 @@ However, there is two technical issues here about snp strand or the switch of th
 ## A note on $L_B$
 $$
 \begin{align}
-L_B&=&tr(KK^T)=\frac{1}{B}\sum_{b=1}^Bz_b^T\mathbf{KK}^Tz_b\\
-&=&\frac{1}{B}\frac{1}{M^2}\sum_{b=1}^Bz_b^T\mathbf{XX}^T\mathbf{XX}^Tz_b\\
-&=&\frac{1}{B}\frac{1}{M^2}\sum_{b=1}^B||\mathbf{XX}^Tz_b||_2^2\\
+L_B&=tr(KK^T)=\frac{1}{B}\sum_{b=1}^Bz_b^T\mathbf{KK}^Tz_b\\
+&=\frac{1}{B}\frac{1}{M^2}\sum_{b=1}^Bz_b^T\mathbf{XX}^T\mathbf{XX}^Tz_b\\
+&=\frac{1}{B}\frac{1}{M^2}\sum_{b=1}^B||\mathbf{XX}^Tz_b||_2^2\\
 \end{align}
 $$
 
@@ -931,7 +940,7 @@ ksq=k^2
 k2=k%*%t(k)
 k4=k2%*%t(k2)
 k4Alt=k2^2
-print(paste("sum(diag(K4))=", sum(diag(k4)), "sum[(kkT)^2]=k4Alt"))
+print(paste("sum(diag(K4))=", sum(diag(k4)), "sum[(kkT)^2]", sum(k4Alt)))
 #evaluate LB
 
 LK=array(0, SM)
@@ -953,15 +962,32 @@ print(paste("incorrected var in Wu's paper", (n^2/m+n)/BS))
 
 ## $\Omega_w$
 
+### TopTable
+
+The classic $h^2=\beta HLH\beta$
+
+:In population-based design, the relatedness is measured in IBS
+
+| | | |
+|:--:|:--:|:--:|
+|classic | $h^2=\beta HLH\beta$ | $h^2_d=d H_dL_dH_dd$|
+|$h^2_{SNP}$ | $h^2_{SNP.A}=m\beta H\{\frac{ \sum_{k=1}^{m} v_k^Tv_k }{1^TP1}\} H \beta$ | $h^2_{SNP.D}=md H_d\{\frac{ \sum_{k=1}^{m} v_{k,d}^T v_{k,d} }{1^TP_d1}\} H_d d$
+|$h^2_{SNP_w}$ | $\tilde{h}^2_{SNP.A}=m\beta H\{\frac{ \sum_{k=1}^{m}w_k v_{k}^Tv_k }{w^TPw}\} H \beta$ | $\tilde{h}^2_{SNP.D}=md H_d\{\frac{ \sum_{k=1}^{m} w_{k,d}v_{k.d}^Tv_{k.d} }{w_{d}^TP_dw_{d}}\} H_d d$
+|$h^2_{cor}$ | $h^2_{SNP.A_2}=m\beta_1 H_1\{\frac{ \sum_{k=1}^{m} v_{k_1}^Tv_{k_2} }{1^TP1}\} H_2 \beta_2$ | $h^2_{SNP.D_2}=md_1 H_{d_1}\{\frac{ \sum_{k=1}^{m} v_{k,d_1}^Tv_{k,d_2} }{1^TP_d1}\} H_{d_2} d_2$
+|$h^2_{cor_w}$ | $\tilde{h}^2_{SNP.A_2}=m\beta_1 H_1\{\frac{ \sum_{k=1}^{m}w_k v_{k,1}^Tv_{k,2} }{w^TPw}\} H_2 \beta_2$ | $\tilde{h}^2_{SNP.D_2}=md_1 H_{d_1}\{\frac{ \sum_{k=1}^{m} w_{k,d}v_{k,d_1}^Tv_{k,d_2} }{w_{d}^TP_dw_{d}}\} H_{d_2} d_2$
+
 $$\Omega_w=\frac{\sum_{k=1}^M(x_{i,k}-2p_k)(x_{j,k}-2p_k)}{\sum_{k=1}^M2p_kq_k}$$
-$Me_w$ can be defined accordingly.
+Like $M_e$, $M_{e_w}$ now can be defined accordingly.
+
+$$h^2_w=\frac{ (\frac{\sum_{k=1}^M2p_kq_k\chi^2_{1.k}}{\sum_{k=1}^M2p_kq_k}-1)n }{n^2/M_{e_w}}$$
+
+An example for $h^2_{SNP}$, and $h^2_{SNP_w}$
 ```{r OmegaW}
 n=500 #sample size
 m=1000 #marker
 h2=0.3 #heritability
-h2d=0.3
+
 b=rnorm(m, 0, sqrt(h2/m)) #effect
-d=rnorm(m, 0, sqrt(h2d/m))
 SIMU=5
 
 #simu g
@@ -979,52 +1005,96 @@ sW=x-2*FQ
 Kw=sW%*%t(sW)/sum(2*FQ*(1-FQ))
 meW=var(Kw[col(Kw)<row(Kw)])
 
-##dominance
-xd=matrix(0, n, m)
-
-for(i in 1:m) {
-  cd=c(0, 2*FQ[i], 4*FQ[i]-2)
-  xd[,i]=cd[x[,i]+1]
-}
-dCt=matrix(rep(2*FQ^2, n), n, m, byrow = T)
-dV=matrix(rep(sqrt(4*FQ^2*(1-FQ)^2), n), n, m, byrow = T)
-sD=(xd-dCt)/dV
-Kd=sD%*%t(sD)/m
-med=var(Kd[col(K)<row(K)])
-
-Dm=ifelse(x==1, 1, 0)
 #simu y
 H2=matrix(0, SIMU, 4)
 H2w=matrix(0, SIMU, 2)
 for(i in 1:SIMU) {
-  y=x%*%b+Dm%*%d
+  y=x%*%b
   vy=var(y)
-  y=y+rnorm(n, 0, sqrt(vy/(h2+h2d)*(1-h2-h2d)))
+  y=y+rnorm(n, 0, sqrt(vy/(h2)*(1-h2)))
   y=scale(y)
   yy=y%*%t(y)
-  h2Mod=lm(yy[col(yy)<row(yy)]~K[col(yy)<row(yy)]+Kd[col(yy)<row(yy)])
+  h2Mod=lm(yy[col(yy)<row(yy)]~K[col(yy)<row(yy)])
   H2[i,1]=summary(h2Mod)$coefficients[2,1]
-  H2[i,2]=summary(h2Mod)$coefficients[3,1]
   ss=matrix(0, m, 5)
-  ssd=matrix(0, m, 5)
   for(j in 1:m) {
-    mod=lm(y~sA[,j]+sD[,j])
+    mod=lm(y~sA[,j])
     ss[j,1:4]=summary(mod)$coefficient[2,]
-    ssd[j,1:4]=summary(mod)$coefficient[3,]
   }
   ss[,5]=ss[,3]^2
-  H2[i,3]=((mean(ss[,5])-1)*n)/(n*n*me)
-  ssd[,5]=ssd[,3]^2
-  H2[i,4]=((mean(ssd[,5])-1)*n)/(n*n*med)
-  
+  H2[i,2]=((mean(ss[,5])-1)*n)/(n*n*me)
+
   h2wMod=lm(yy[col(yy)<row(yy)]~Kw[col(yy)<row(yy)])
-  H2w[i,1]=summary(h2wMod)$coefficients[2,1]
+  H2[i,3]=summary(h2wMod)$coefficients[2,1]
   chiW=ss[,5]*2*FQ*(1-FQ)
-  H2w[i,2]=((mean(chiW)/mean(2*FQ*(1-FQ))-1)*n)/(n*n*meW)
+  H2[i,4]=((mean(chiW)/mean(2*FQ*(1-FQ))-1)*n)/(n*n*meW)
 }
 barplot(t(H2), beside = T)
-abline(h=c(h2, h2d))
-barplot(t(H2w), beside = T)
+abline(h=c(h2))
+legend("topleft", legend=c("h2", "ssh2", "h2w", "ssh2w"))
+```
+
+## Delta method
+$$var(h^2)=var(\frac{A}{B})=\frac{1}{\mu_A^2}\sigma^2_A+\frac{\mu^2_A}{\mu_B^4}\sigma^2_B$$
+in which $\mu_A=\frac{n^2}{\hat{m}_e}\hat{h}^2$, $\sigma_A^2=\frac{n^2}{\hat{m}_e}$, and $\mu_B=\frac{n^2}{\hat{m}_e}$, and $\sigma^2_B=\frac{2\hat{m}_e}{n}$.
+After some algrebra, $var(h^2)=2\frac{\hat{m}_e}{n^2}+2\frac{\hat{m}_e^3}{n^5}\hat{h^2}^2$, and after further approximation $\sigma_{\hat{h}^2}\approx \frac{\sqrt{(2\hat{m}_e)}}{n}$
+
+```{r delta}
+n=500 #sample size
+m=1000 #marker
+h2=0.3 #heritability
+
+b=rnorm(m, 0, sqrt(h2/m)) #effect
+SIMU=10
+
+#simu g
+fq=runif(m, 0.3, 0.5)
+x=matrix(0, n, m)
+for(i in 1:m) {
+  x[,i]=rbinom(n, 2, fq[i])
+}
+FQ=colMeans(x)/2
+sA=apply(x, 2, scale)
+K=sA%*%t(sA)/m
+me=var(K[col(K)<row(K)])
+
+sW=x-2*FQ
+Kw=sW%*%t(sW)/sum(2*FQ*(1-FQ))
+meW=var(Kw[col(Kw)<row(Kw)])
+
+#simu y
+H2=matrix(0, SIMU, 4)
+H2w=matrix(0, SIMU, 2)
+for(i in 1:SIMU) {
+  y=x%*%b
+  vy=var(y)
+  y=y+rnorm(n, 0, sqrt(vy/(h2)*(1-h2)))
+  y=scale(y)
+  yy=y%*%t(y)
+  h2Mod=lm(yy[col(yy)<row(yy)]~K[col(yy)<row(yy)])
+  H2[i,1]=summary(h2Mod)$coefficients[2,1]
+  ss=matrix(0, m, 5)
+  for(j in 1:m) {
+    mod=lm(y~sA[,j])
+    ss[j,1:4]=summary(mod)$coefficient[2,]
+  }
+  ss[,5]=ss[,3]^2
+  H2[i,2]=((mean(ss[,5])-1)*n)/(n*n*me)
+  
+  h2wMod=lm(yy[col(yy)<row(yy)]~Kw[col(yy)<row(yy)])
+  H2[i,3]=summary(h2wMod)$coefficients[2,1]
+  chiW=ss[,5]*2*FQ*(1-FQ)
+  H2[i,4]=((mean(chiW)/mean(2*FQ*(1-FQ))-1)*n)/(n*n*meW)
+}
+barplot(t(H2), beside = T)
+abline(h=c(h2))
+legend("topleft", legend=c("h2", "ssh2", "h2w", "ssh2w"))
+
+ME=1/me
+##delta
+s=sqrt(2*ME/n^2+2*ME^3/n^5*h2^2)
+print(paste("Obs sd for h2:", sd(H2[,2])))
+print(paste("Exp sd for h2:", s))
 
 ```
 
@@ -1032,4 +1102,3 @@ barplot(t(H2w), beside = T)
 ```{r session}
 sessionInfo()
 ```
-
