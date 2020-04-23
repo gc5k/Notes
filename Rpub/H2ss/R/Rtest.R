@@ -1,53 +1,48 @@
-n=500 #sample size
-m=1000 #marker
-h2=0.3 #heritability
+n=100 #sample size
+m=500 #marker
+SM=50 #simulation
+BS=25 #randomization factor
 
-b=rnorm(m, 0, sqrt(h2/m)) #effect
-SIMU=50
+LK=0
 
-#simu g
-fq=runif(m, 0.3, 0.5)
+fq=runif(m, 0.1, 0.5)
 x=matrix(0, n, m)
 for(i in 1:m) {
   x[,i]=rbinom(n, 2, fq[i])
 }
-FQ=colMeans(x)/2
-sA=apply(x, 2, scale)
-K=sA%*%t(sA)/m
-me=var(K[col(K)<row(K)])
+sx=apply(x, 2, scale)
+k=sx%*%t(sx)/m
+ksq=k^2
+k2=k%*%t(k)
+k4=k2%*%t(k2)
+k4Alt=k2^2
+#evaluate LB
 
-sW=x-2*FQ
-Kw=sW%*%t(sW)/sum(2*FQ*(1-FQ))
-meW=var(Kw[col(Kw)<row(Kw)])
-
-#simu y
-H2=matrix(0, SIMU, 4)
-H2w=matrix(0, SIMU, 2)
-for(i in 1:SIMU) {
-  y=x%*%b
-  vy=var(y)
-  y=y+rnorm(n, 0, sqrt(vy/(h2)*(1-h2)))
-  y=scale(y)
-  yy=y%*%t(y)
-  h2Mod=lm(yy[col(yy)<row(yy)]~K[col(yy)<row(yy)])
-  H2[i,1]=summary(h2Mod)$coefficients[2,1]
-  ss=matrix(0, m, 5)
-  for(j in 1:m) {
-    mod=lm(y~sA[,j])
-    ss[j,1:4]=summary(mod)$coefficient[2,]
+LK=array(0, SM)
+for(i in 1:SM) {
+  Lb=array(0, BS)
+  for(j in 1:BS) {
+    z=matrix(rnorm(n), n, 1)
+    x1=t(sx)%*%z
+    x2=sx%*%x1
+    Lb[j]=(t(x2)%*%x2)[1,1]
   }
-  ss[,5]=ss[,3]^2
-  H2[i,2]=((mean(ss[,5])-1)*n)/(n*n*me)
-  
-  h2wMod=lm(yy[col(yy)<row(yy)]~Kw[col(yy)<row(yy)])
-  H2[i,3]=summary(h2wMod)$coefficients[2,1]
-  chiW=ss[,5]*2*FQ*(1-FQ)
-  H2[i,4]=((mean(chiW)/mean(2*FQ*(1-FQ))-1)*n)/(n*n*meW)
+  LK[i]=sum(Lb)/(BS*m^2)
 }
-barplot(t(H2), beside = T)
-abline(h=c(h2))
-legend("topleft", legend=c("h2", "ssh2", "h2w", "ssh2w"))
+print(paste("Obs mean", mean(LK), "vs expected mean", n^2/m+n)) 
+print(paste("obs var", var(LK), " vs expected var", 2*sum(diag(k4))/BS))
+print(paste("incorrected var in Wu's paper", (n^2/m+n)/BS))
+print(paste("sum(diag(K4))=", sum(diag(k4)), "sum[(kkT)^2]", sum(k4Alt)))
 
-ME=1/me
-##delta
-s=sqrt(2*ME/n^2+2*ME^3/n^5)
+
+Sum_D_k2_sq=sum(diag(k2))^2
+
+ZX=n^2*m^4+(2*n^3+2*n^2+8*n)*m^3+(n^4+2*n^3+21*n^2+20*n)*m^2+(8*n^3+20*n^2+20*n)*m
+
+print(paste(ZX/m^4, sum(diag(k2))^2))
+
+EU=n*m^2+(n^2+n)*m
+Sum_D_k2=sum(diag(k2))
+print(paste(EU/m^2, Sum_D_k2))
+
+sum(diag(k2)^2)

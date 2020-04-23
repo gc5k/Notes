@@ -585,6 +585,40 @@ $$
 $$
 The effective number of markers is $E(m_{e_d})=\frac{M^2}{\sum_{l_1=1}^M\sum_{l_2=1}^M\rho_{l_1l_2}^4}$.
 
+```{r AddDom}
+frq=0.25
+N=1000
+g=rbinom(N, 2, frq)
+bv=g*1+1*ifelse(g==1, 1, 0)
+vg=var(bv)
+h2=0.3
+y=bv+rnorm(N, sqrt(var(bv)/h2*(1-h2)))
+
+eF=mean(g)/2
+
+#model 1: naive model
+aCode1=g
+dT1=c(0,1,0)
+dCode1=dT1[(g+1)]
+md1=lm(y~aCode1+dCode1)
+
+#model 2: othorgonal model
+aCode2=(g-2*eF)/(2*eF*(1-eF))
+dT2=c(0, 2*eF, 4*eF-2)
+dCode2=(dT2[(g+1)]-2*eF^2)/(4*eF^2*(1-eF)^2)
+md2=lm(y~aCode2+dCode2)
+
+#model 3: scale will not change t-test value (compare t-test values of dominance in model 2 and model 3)
+aCode2=(g-2*eF)/(2*eF*(1-eF))
+dT2=c(0, 2*eF, 4*eF-2)
+dCode3=(dT2[(g+1)]-2*eF^2)
+md3=lm(y~aCode2+dCode3)
+
+aT=c(summary(md1)$coefficients[2,3], summary(md3)$coefficients[2,3], summary(md3)$coefficients[2,3])
+dT=c(summary(md1)$coefficients[3,3], summary(md3)$coefficients[3,3], summary(md3)$coefficients[3,3])
+
+```
+
 
 ## LSE (Phenome)
 For a linear model $\mathbf{y}=\mathbf{X\beta}+e$,
@@ -899,7 +933,7 @@ However, there is two technical issues here about snp strand or the switch of th
 ## A note on $L_B$
 $$
 \begin{align}
-L_B&=tr(KK^T)=\frac{1}{B}\sum_{b=1}^Bz_b^T\mathbf{KK}^Tz_b\\
+L_B&=tr(\mathbf{KK}^T)=\frac{1}{B}\sum_{b=1}^Bz_b^T\mathbf{KK}^Tz_b\\
 &=\frac{1}{B}\frac{1}{M^2}\sum_{b=1}^Bz_b^T\mathbf{XX}^T\mathbf{XX}^Tz_b\\
 &=\frac{1}{B}\frac{1}{M^2}\sum_{b=1}^B||\mathbf{XX}^Tz_b||_2^2\\
 \end{align}
@@ -907,7 +941,8 @@ $$
 
 The sampling variance is
 
-$$\begin{aligned}
+$$
+\begin{aligned}
 var(L_B)&=\mathbb{E}\{[L_{B}-tr(\mathbf{KK}^T)]^2\}\\
 &=var(\frac{1}{B}\sum_{b=1}^Bz_b^T\mathbf{KK}^Tz_b)\\
 &=\frac{1}{B^2}var(\sum_{b=1}^Bz_b^T\mathbf{KK}^Tz_b) \\
@@ -915,10 +950,11 @@ var(L_B)&=\mathbb{E}\{[L_{B}-tr(\mathbf{KK}^T)]^2\}\\
 &=\frac{1}{B^2}\sum_{b=1}^B2tr(\Sigma_z\mathbf{KK}^T\Sigma_z\mathbf{KK}^T)\\
 &\text{because }z\sim~MVN(0, I_N)\\
 &=\frac{2}{B}tr(\mathbf{KK}^T\mathbf{KK}^T)\\
-&=\frac{1}{B}\sum_{l_1}\sum_{l_2}\mathcal{K}^2_{l_1,l_2}
-\end{aligned}$$
+&=\frac{1}{B}\sum_{l_1}\sum_{l_2}\mathcal{K}_{l_1,l_2}
+\end{aligned}
+$$
 
-in which $\mathcal{K}^2=\mathbf{KK}^T$.
+in which $\mathcal{K}=\mathbf{KK}^T$.
 
 An example
 ```{r Lb}
@@ -959,6 +995,95 @@ print(paste("obs var", var(LK), " vs expected var", 2*sum(diag(k4))/BS))
 print(paste("incorrected var in Wu's paper", (n^2/m+n)/BS))
 ```
 
+#### About $\mathbf{KK}^T$
+About $\mathbf{K}$ and its statistics.
+
+$$
+\mathbf{K}=\frac{1}{M}
+\begin{bmatrix}
+k_{\color{blue}{1},\color{red}{1}}=\sum_{m=1}^M\frac{(\color{blue}{x}_{\color{blue}{1},m}-2p_m)(\color{red}{x}_{\color{red}{1},m}-2p_k)}{2p_mq_m}
+& k_{\color{blue}{1},\color{red}{2}}=\sum_{m=1}^M\frac{(\color{blue}{x}_{\color{blue}{1},m}-2p_m)(\color{red}{x}_{\color{red}{2},m}-2p_m)}{2p_mq_m}
+& \cdots
+& k_{\color{blue}{1},\color{red}{n}}=\sum_{m=1}^M\frac{(\color{blue}{x}_{\color{blue}{1},m}-2p_m)(\color{red}{x}_{\color{red}{n},m}-2p_m)}{2p_mq_m}\\
+k_{\color{blue}{2},\color{red}{1}}=\sum_{m=1}^M\frac{(\color{blue}{x}_{\color{blue}{2},m}-2p_m)(\color{red}{x}_{\color{red}{1},m}-2p_m)}{2p_mq_m}
+& k_{\color{blue}{2},\color{red}{2}}=\sum_{m=1}^M\frac{(\color{blue}{x}_{\color{blue}{2},m}-2p_m)(\color{red}{x}_{\color{red}{2},m}-2p_m)}{2p_mq_m}
+& \cdots
+& k_{\color{blue}{2},\color{red}{n}}=\sum_{m=1}^M\frac{(\color{blue}{x}_{\color{blue}{2},m}-2p_m)(\color{red}{x}_{\color{red}{n},m}-2p_m)}{2p_mq_m}\\
+\cdots
+& \cdots
+& \cdots
+& \cdots\\
+k_{\color{blue}{n},\color{red}{1}}=\sum_{m=1}^M\frac{(\color{blue}{x}_{\color{blue}{n},m}-2p_m)(x_{\color{red}{1},m}-2p_m)}{2p_mq_m} 
+&k_{\color{blue}{n},\color{red}{2}}=\sum_{m=1}^M\frac{(\color{blue}{x}_{\color{blue}{n},m}-2p_m)(x_{\color{red}{2},m}-2p_m)}{2p_mq_m}
+& \cdots
+&k_{\color{blue}{n},\color{red}{n}}=\sum_{m=1}^M\frac{(\color{blue}{x}_{\color{blue}{n},m}-2p_m)(x_{\color{red}{n},m}-2p_m)}{2p_mq_m}
+\end{bmatrix}
+$$
+
+in which
+$$
+\mathbf{KK}^T=\frac{1}{M^2}\mathcal{K}=
+\begin{bmatrix}
+\boxed{\mathcal{K}_{\color{blue}{1},\color{red}{1}}=\sum_{\color{green}{l}=1}^nk_{\color{blue}{1}, \color{green}{l}}k_{\color{green}{l},\color{red}{1}}}
+&\mathcal{K}_{\color{blue}{1},\color{red}{2}}=\sum_{\color{green}{l}=1}^nk_{\color{blue}{1},\color{green}{l}}k_{\color{blue}{l},\color{red}{2}}
+&\cdots
+&\mathcal{K}_{\color{blue}{1},\color{red}{n}}=\sum_{\color{green}{l}=1}^nk_{\color{blue}{1},\color{green}{l}}k_{\color{green}{l},\color{red}{n}}\\
+\mathcal{K}_{\color{blue}{2},\color{red}{1}}=\sum_{\color{green}{l}=1}^nk_{\color{blue}{2}, \color{green}{l}}k_{\color{green}{l},\color{red}{1}}
+&\boxed{\mathcal{K}_{\color{blue}{2},\color{red}{2}}=\sum_{\color{green}{l}=1}^nk_{\color{blue}{2},\color{green}{l}}k_{\color{green}{l},\color{red}{2}}} 
+&\cdots
+&\mathcal{K}_{\color{blue}{2},\color{red}{n}}=\sum_{\color{green}{l}=1}^nk_{\color{blue}{2},\color{green}{l}}k_{\color{green}{l},\color{red}{n}}\\
+\vdots & \vdots & \vdots & \vdots\\
+\mathcal{K}_{\color{blue}{n},\color{red}{1}}=\sum_{\color{green}{l}=1}^nk_{\color{blue}{1}, \color{green}{l}}k_{\color{green}{l},\color{red}{1}}
+&\mathcal{K}_{\color{blue}{n},\color{red}{2}}=\sum_{\color{green}{l}=1}^nk_{\color{blue}{n},\color{green}{l}}k_{\color{green}{l},\color{red}{2}}
+&\cdots
+&\boxed{\mathcal{K}_{\color{blue}{n},\color{red}{n}}=\sum_{\color{green}{l}=1}^nk_{\color{blue}{n},\color{green}{l}}k_{\color{green}{l},\color{red}{n}}}\\
+\end{bmatrix}
+$$
+
+Furthermore
+$$
+\begin{aligned}
+\mathcal{K}_{\color{blue}{\mathcal{L}_1},\color{red}{\mathcal{L}_2}}
+&=\mathbf{K}_{[\color{blue}{\mathcal{L}_1},]}\mathbf{K}^T_{[,\color{red}{\mathcal{L}_2}]}\\
+&=\sum_{\color{green}{l}=1}^nk_{\color{blue}{\mathcal{L}_1},\color{green}{l}}k_{\color{green}{l},\color{red}{\mathcal{L}_2}}\\
+&=\frac{1}{M^2}
+\begin{bmatrix}
+k_{\color{blue}{\mathcal{L}_1},\color{green}{1}}=\sum_{m_1=1}^M\frac{(\color{blue}{x}_{\color{blue}{\mathcal{L}_1},m_1}-2p_{m_1})(\color{green}{x}_{\color{green}{1},m_1}-2p_{m_1})}{2p_{m_1}q_{m_1}}\\
+k_{\color{blue}{\mathcal{L}_1},\color{green}{2}}=\sum_{m_1=1}^M\frac{(\color{blue}{x}_{\color{blue}{\mathcal{L}_1},m_1}-2p_{m_1})(\color{green}{x}_{\color{green}{2},m_1}-2p_{m_1})}{2p_{m_1}q_{m_1}}\\
+\vdots\\
+k_{\color{blue}{\mathcal{L}_1},\color{green}{n}}=\sum_{m_1=1}^M\frac{(\color{blue}{x}_{\color{blue}{\mathcal{L}_1},m_1}-2p_{m_1})(\color{green}{x}_{\color{green}{n},m_1}-2p_{m_1})}{2p_{m_1}q_{m_1}}\\
+\end{bmatrix}^T
+\begin{bmatrix}
+k_{\color{green}{1},\color{red}{\mathcal{L}_2}}=\sum_{m_2=1}^M\frac{(\color{green}{x}_{\color{green}{1},m_2}-2p_{m_2})(\color{red}{x}_{\color{red}{\mathcal{L}_2},m_2}-2p_{m_2})}{2p_{m_2}q_{m_2}}\\ 
+k_{\color{green}{2},\color{red}{\mathcal{L}_2}}=\sum_{m_2=1}^M\frac{(\color{green}{x}_{\color{green}{2},m_2}-2p_{m_2})(\color{red}{x}_{\color{red}{\mathcal{L}_2},m_2}-2p_{m_2})}{2p_{m_2}q_{m_2}}\\
+\vdots\\
+k_{\color{green}{n},\color{red}{\mathcal{L}_2}}=\sum_{m_2=1}^M\frac{(\color{green}{x}_{\color{green}{n},m_2}-2p_{m_2})(\color{red}{x}_{\color{red}{\mathcal{L}_2},m_2}-2p_{m_2})}{2p_{m_2}q_{m_2}}
+\end{bmatrix}\\
+&=\frac{1}{M^2}\sum_{\color{green}{l}}^n
+\left\{
+[\sum_{m_1=1}^M\color{blue}{s}_{\color{blue}{\mathcal{L}_1},m_1}\color{green}{s}_{\color{green}{l},m_1}]
+[\sum_{m_2=1}^M\color{green}{s}_{\color{green}{l},m_2}\color{red}{s}_{\color{red}{\mathcal{L}_2},m_2}] 
+\right\}\\
+&=\frac{1}{M^2}\sum_{\color{green}{l}}^n
+\left\{
+\sum_{m_1,m_2}^M \color{blue}{s_{\mathcal{L}_1,m_1}} \color{green}{s}_{l,m_1}\color{green}{s}_{l,m_2} \color{red}{s_{{\mathcal{L}_2},m_2}} 
+\right\}
+\end{aligned}
+$$
+
+And
+
+$$
+\begin{aligned}
+\mathcal{K}_{\mathcal{L}_1,\mathcal{L}_2}^2&=\frac{1}{M^4} \left\{ \sum_{l}^n \left\{ \sum_{m_1,m_2}^M \color{blue}{s_{\mathcal{L}_1,m_1}} \color{green}{s}_{l,m_1} \color{red}{s_{\mathcal{L}_2,m_2}} \color{green}{s}_{l,m_2}\right\}\right\}^2\\
+&=\frac{1}{M^4}
+\sum_{l_1,l_2}^n
+\sum_{m_1,\color{brown}{m_1^{\prime}}}^M \sum_{m_2,\color{pink}{m_2^{\prime}}}^M
+\underline{\color{blue}{s_{\mathcal{L}_1,m_1}} \color{blue}{s_{\mathcal{L}_1,\color{brown}{m_1^{\prime}}}}}
+\times\boxed{\color{green}{s}_{l_1,m_1} \color{green}{s}_{l_1,\color{brown}{m_1^{\prime}}}}
+\times\underline{\color{red}{s_{\mathcal{L}_2,m_2}} \color{red}{s}_{\color{red}{\mathcal{L}_2},\color{pink}{m_2^{\prime}}}} \times\boxed{\color{green}{s}_{l_2,m_2}\color{green}{s}_{l_2,\color{pink}{m_2^{\prime}}}}
+\end{aligned}
+$$
 
 ## $\Omega_w$
 
