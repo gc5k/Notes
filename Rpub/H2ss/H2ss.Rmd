@@ -338,7 +338,8 @@ It is easy to see $E(y^TI_Ny)=N$, so the expectation of the numerator is $N^2\fr
 The denominator can be derived that $tr[\mathbf{\Omega}^2]=N^2E^2(\rho)+N$, in which $$E^2(\rho)=\frac{\sum_{k_1=1}^M\sum_{k_2=1}^M \rho^2_{k_1k_2}}{M^2} = \frac{\sum_{k=1}^M1+\sum_{k_1=1}^M\sum_{k_2 \ne k_1}^M \rho^2_{k_1k_2}}{M^2} \geq \frac{1}{M}$$
 
 Or, $$\frac{[E(\sum_i^M\chi^2_1)-1]N}{N^2/M_e}$$
-
+Analogously, the dominance variance is estimated as
+$$\color{cyan}{\boxed{\frac{[E(\sum_i^M\chi^2_{1.dom})-1]N}{N^2/M_{e.dom}}}}$$
 
 ### UKB case
 A realized example please refer to $\color{red} {/public/home/xuhm/gc5k/UKB\_cohort/ss}$, $\color{green} {/public/home/xuhm/gc5k/UKB\_cohort/ss\_adj}$
@@ -786,13 +787,12 @@ knitr::kable(ch2, caption = "cohort h2") %>%
 kable_styling("striped", full_width = T) %>%
 row_spec(row=16:16, color="white", background="red")
 ```
+It is adjusted variance.
 
 
-## Quadratic form statistics
+## Quadratic form
 Let $x$ be a vector for $n$ random variables, and $A$ be a $n\times n$ symmetric matrix, the scalar quantity $xAx$ is known as quadratic form.
-If 
-$$x \sim MVN(\mu,\sum)$$, 
-it can be shown that 
+If $$x \sim MVN(\mu,\sum)$$, it can be shown that 
 
 $$E[xAx]=tr[A\sum]+\mu^TA\mu$$
 
@@ -801,9 +801,9 @@ $x^TAx = tr[x^TAx]$, and by the cyclic property of the trace operator
 $E[tr(x^TAx)]=E[tr[Axx^T]]$. Since trace operator is linear combination of matrices, it therefor follows from the linearity of the expectation operator that 
 $$E[tr(Axx^T)]=tr[AE(xx^T)]=tr[A(\sum+\mu\mu^T)]=tr(A\sum)+tr(\sum\mu\mu^T)=tr(A\sum)+tr(\mu^T\sum\mu)=tr(A\sum)+\mu^TA\mu$$.
 
-
-### Variance 
+### Variance
 $$var[\mu^TA\mu]=2tr[A\sum A\sum]+4\mu^TA\sum A\mu$$
+
 ### Covariance
 $$cov[\mu^TA_1, \mu A_2]=2tr[A_1\sum A_2\sum]+4\mu^TA_1\sum A_2\mu$$
 for both variance and covariance, $A$ is required to be **symmetric**.
@@ -958,7 +958,7 @@ in which $\mathcal{K}=\mathbf{KK}^T$.
 
 An example
 ```{r Lb}
-n=200 #sample size
+n=300 #sample size
 m=500 #marker
 SM=50 #simulation
 BS=25 #randomization factor
@@ -976,7 +976,6 @@ ksq=k^2
 k2=k%*%t(k)
 k4=k2%*%t(k2)
 k4Alt=k2^2
-print(paste("sum(diag(K4))=", sum(diag(k4)), "sum[(kkT)^2]", sum(k4Alt)))
 #evaluate LB
 
 LK=array(0, SM)
@@ -993,6 +992,19 @@ for(i in 1:SM) {
 print(paste("Obs mean", mean(LK), "vs expected mean", n^2/m+n)) 
 print(paste("obs var", var(LK), " vs expected var", 2*sum(diag(k4))/BS))
 print(paste("incorrected var in Wu's paper", (n^2/m+n)/BS))
+print(paste("sum(diag(K4))=", sum(diag(k4)), "sum[(kkT)^2]", sum(k4Alt)))
+
+
+Sum_D_k2_sq=sum(diag(k2))^2
+
+ZX=n^2*m^4+(2*n^3+2*n^2+8*n)*m^3+(n^4+2*n^3+21*n^2+20*n)*m^2+(8*n^3+20*n^2+20*n)*m
+
+print(paste(sum(diag(k2)^2)*n, ZX/m^4, sum(diag(k2))^2))
+
+EU=n*m^2+(n^2+n)*m
+Sum_D_k2=sum(diag(k2))
+print(paste(EU/m^2, Sum_D_k2))
+
 ```
 
 #### About $\mathbf{KK}^T$

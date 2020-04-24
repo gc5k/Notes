@@ -1,6 +1,6 @@
 
-n=1000 #sample size
-m=10000 #marker
+n=500 #sample size
+m=2000 #marker
 h2=0.3 #heritability
 SM=1 #simulation
 BS=30 #randomization factor
@@ -35,14 +35,15 @@ for(i in 1:SM) {
   }
   LK=Lb/(BS*m^2)
 
-
   m2=matrix(0, 2, 2)
   m2[1,1]=LK
   m2[1,2]=n
   m2[2,1]=n
   m2[2,2]=n
-  wy=t(sx)%*%ys
-  yVec=matrix(c(sum(wy^2)/m, t(ys)%*%ys), 2, 1)
+  wy=t(sx)%*%ys #yKy
+  yIy=n-1
+  yKy=mean(wy^2)
+  yVec=matrix(c(yKy, yIy), 2, 1) #numerator
   B2=solve(m2)%*%yVec
   H2[i,2]=B2[1,1]/(B2[1,1]+B2[2,1])
 }
