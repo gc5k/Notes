@@ -49,5 +49,37 @@ k2_sq=n^2*m^4+(2*n^2+2*n+8)*m^3+(4*n+40)*m^2+48*m
 k2_sq=n^2*m^4+(2*n^2+2*n)*m^3+(4*n)*m^2
 
 sum(diag(k2)^2)
+mean(diag(k2)^2)
+
 ZX/m^4/n
+(n^2*m^4+(2*n^2+6*n-8)*m^3+(24*n+20)*m^2+48*m)/(n*m^4)
+((3*n^2+2*n-4)*m^4+(8*n+4)*m^3+(20*n+24)*m^2+48*m)/(n^2*m^4)
+
+Uii=mean(diag(k))
+Vii=var(diag(k))
+Uij=mean(k[col(k)<row(k)])
+Vij=var(k[col(k)<row(k)])
+
+A1=Uii
+A2=Uii^2+Vii
+A3=Uii^3+3*Uii*Vii
+A4=Uii^4+6*Uii^2*Vii+3*Vii^2
+
+B1=Uij
+B2=Uij^2+Vij
+B3=Uij^3+3*Uij*Vij
+B4=Uij^4+6*Uij^2*Vij+3*Vij^2
+
+mean(diag(k4))
+
+pK4D=A4+(n-1)*B4+2*(n-1)*A2*B2+(n-1)*(n-2)*B2*B2
+print(pK4D)
+mean(diag(k4Alt))
+
+pK4O=2*A2*B2+(n-2)*B2*B2+2*A1*B2*A1+(n-2)*A1*B1^3+(n-2)*B1^3*A1+(n-1)*(n-2)*B1^4
+print(pK4O)
+mean(k4Alt[col(k4Alt)<row(k4Alt)])
+
+pK4D*n+n*(n-1)*pK4O
+sum(k4Alt)
 
