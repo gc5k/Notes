@@ -852,7 +852,7 @@ Another possible method is "Cumulant", see its [ Wiki](https://en.wikipedia.org/
 
 ### $2 \times 2$
 $$\mathbf{A}^{-1}=
-\begin{bmatrix} a & b \\ c & d \end{bmatrix} ^{-1} = \frac{1}{ad-bc}\begin{bmatrix} d & a \\ -b & -c \end{bmatrix}$$
+\begin{bmatrix} a & b \\ c & d \end{bmatrix} ^{-1} = \frac{1}{ad-bc}\begin{bmatrix} d & -b \\ -c & a \end{bmatrix}$$
 
 
 ### $3 \times 3$
