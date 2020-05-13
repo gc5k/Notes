@@ -57,7 +57,7 @@ for(i in 1:m) {
 
 Q=(mean(ss1[,3]*ss2[,3])-nc/sqrt(N1*N2)*mean(sy1c*sy2c)) / (sqrt(N1*N2)/m)
 
-EQ=((sqrt(N1*N2)*(rg*sqrt(hT1*hT2)/m)+nc/sqrt(N1*N2)*re) - nc/sqrt(N1*N2)*re) / (sqrt(N1*N2)/m)
+EQ=((sqrt(N1*N2)*rg*sqrt(hT1*hT2)/m+nc/sqrt(N1*N2)*re) - nc/sqrt(N1*N2)*re) / (sqrt(N1*N2)/m)
 hT1est=(mean(ss1[,3]^2)-mean(sy1*sy1))/(N1/m)
 hT2est=(mean(ss2[,3]^2)-mean(sy2*sy2))/(N2/m)
 rG=Q/sqrt(hT1est*hT2est)
