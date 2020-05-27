@@ -1236,7 +1236,134 @@ print(paste("Exp sd for h2:", s))
 ```
 
 ## A pair of traits
-```{r}
+
+
+$$
+\hat{\gamma}_{g}=\frac{y_1^T\mathbf{K}y_2-y_1^Ty_2}{tr[\mathbf{KK^T}]-N}=\frac{N(Nr_g\sqrt{h^2_1h^2_2}/M_e+\frac{N}{\sqrt{NN}} r_e)-\frac{N}{\sqrt{NN}}r_e}{\frac{N^2}{M_e}}=\frac{Nr_g\sqrt{h^2_1h^2_2}/M_e}{\frac{N}{M_e}}
+$$
+
+
+\begin{align}
+\mathcal{Q}&=argmin_{\gamma_g, \gamma_e, \sigma^2_{g_1},\sigma^2_{e_1}, \sigma^2_{g_2}, \sigma^2_{e_2}}||yy^T-(
+\begin{bmatrix}
+\sigma^2_{g_1}\mathbf{K}&\sigma^2_{\gamma_g}\mathbf{K}\\
+\sigma^2_{\gamma_g}\mathbf{K}&\sigma^2_{g_2}\mathbf{K}\\
+\end{bmatrix}
++
+\begin{bmatrix}
+\sigma^2_{e_1}\mathbf{I}_N&\gamma_{e}\mathbf{I}_N\\
+\gamma_{e}\mathbf{I}_N&\sigma^2_{e_2}\mathbf{I}_N\\
+\end{bmatrix}
+)||_F^2\\
+
+&=tr\{yy^Tyy^T-2yy^T
+\begin{bmatrix}
+\sigma^2_{g_1}\mathbf{K}+\sigma^2_{e_1}\mathbf{I}_N&\sigma^2_{\gamma_g}\mathbf{K}+\gamma_{e}\mathbf{I}_N\\
+\sigma^2_{\gamma_g}\mathbf{K}+\gamma_{e}\mathbf{I}_N&\sigma^2_{g_2}\mathbf{K}+\sigma^2_{e_2}\mathbf{I}_N\\
+
+\end{bmatrix}
++
+\begin{bmatrix}
+\sigma^2_{g_1}\mathbf{K}+\sigma^2_{e_1}\mathbf{I}_N&\sigma^2_{\gamma_g}\mathbf{K}+\gamma_{e}\mathbf{I}_N\\
+\sigma^2_{\gamma_g}\mathbf{K}+\gamma_{e}\mathbf{I}_N&\sigma^2_{g_2}\mathbf{K}+\sigma^2_{e_2}\mathbf{I}_N\\
+\end{bmatrix}^2
+
+\}\\
+
+\end{align}
+
+
+in which $y=[y_1, y_2]$ and
+$$yy^T=
+\begin{bmatrix}
+y_1y_1^T&y_1y_2^T\\
+y_2y_1^T&y_2y_2^T
+\end{bmatrix}
+$$
+
+$$
+\begin{align}
+\frac{\partial \mathcal{Q}}{\sigma^2_{g_1}}&=tr\{-2yy^T
+\begin{bmatrix}
+\mathbf{K}&0\\
+0&0\\
+\end{bmatrix}
++
+2\begin{bmatrix}
+\sigma^2_{g_1}\mathbf{K}+\sigma^2_{e_1}\mathbf{I}_N&\sigma^2_{\gamma_g}\mathbf{K}+\gamma_{e}\mathbf{I}_N\\
+\sigma^2_{\gamma_g}\mathbf{K}+\gamma_{e}\mathbf{I}_N&\sigma^2_{g_2}\mathbf{K}+\sigma^2_{e_2}\mathbf{I}_N\\
+\end{bmatrix}
+\begin{bmatrix}
+\mathbf{K}&0\\
+0&0\\
+\end{bmatrix}\}\\
+&=-2tr(y_1y_1^T\mathbf{K})+2\sigma^2_{g_1}tr(\mathbf{K}^2)+2\sigma^2_{e_1}tr(\mathbf{K})
+\end{align}
+$$
+
+$$
+\begin{align}
+\frac{\partial \mathcal{Q}}{\sigma^2_{e_1}}&=tr\{-2yy^T
+\begin{bmatrix}
+0&\mathbf{I}_N\\
+0&0\\
+\end{bmatrix}
++
+2\begin{bmatrix}
+\sigma^2_{g_1}\mathbf{K}+\sigma^2_{e_1}\mathbf{I}_N&\sigma^2_{\gamma_g}\mathbf{K}+\gamma_{e}\mathbf{I}_N\\
+\sigma^2_{\gamma_g}\mathbf{K}+\gamma_{e}\mathbf{I}_N&\sigma^2_{g_2}\mathbf{K}+\sigma^2_{e_2}\mathbf{I}_N\\
+\end{bmatrix}
+\begin{bmatrix}
+0&\mathbf{I}_N\\
+0&0\\
+\end{bmatrix}\}\\
+&=-2tr(y_1y_1^T\mathbf{I}_N)+2\sigma^2_{g_1}tr(\mathbf{K})+2\sigma^2_{e_1}tr(\mathbf{I}_N)
+\end{align}
+$$
+
+Similarly for $\frac{\partial \mathcal{Q}}{\sigma^2_{g_{2}}}=-2tr(y_2y_2^T\mathbf{I}_N)+2\sigma^2_{g_2}tr(\mathbf{KK^T})+2\sigma^2_{e_2}tr(\mathbf{K})$, $\frac{\partial \mathcal{Q}}{\sigma^2_{g_{2}}}=-2tr(y_2y_2^T\mathbf{I}_N)+2\sigma^2_{g_2}tr(\mathbf{K})+2\sigma^2_{e_2}tr(\mathbf{I}_N)$,
+
+
+$$
+\begin{align}
+\frac{\partial \mathcal{Q}}{\sigma^2_{\gamma_g}}&=tr\{-2yy^T
+\begin{bmatrix}
+0&\mathbf{K}\\
+\mathbf{K}&0\\
+\end{bmatrix}
++
+2\begin{bmatrix}
+\sigma^2_{g_1}\mathbf{K}+\sigma^2_{e_1}\mathbf{I}_{N}&\sigma^2_{\gamma_g}\mathbf{K}+\gamma_{e}\mathbf{I}\\
+\sigma^2_{\gamma_g}\mathbf{K}+\gamma_{e}\mathbf{I}_{N}&\sigma^2_{g_2}\mathbf{K}+\sigma^2_{e_2}\mathbf{I}\\
+\end{bmatrix}
+\begin{bmatrix}
+0&\mathbf{K}\\
+\mathbf{K}&0\\
+\end{bmatrix}\}\\
+&=-4tr(y_1y_2^T\mathbf{K})+4\sigma^2_{\gamma_g}tr(\mathbf{K}\mathbf{K}^T)+4\sigma^2_{\gamma_e}tr(\mathbf{K})
+\end{align}
+$$
+
+$$
+\begin{align}
+\frac{\partial \mathcal{Q}}{\sigma^2_{\gamma_e}}&=tr\{-2yy^T
+\begin{bmatrix}
+0&\mathbf{K}\\
+\mathbf{K}&0\\
+\end{bmatrix}
++
+2\begin{bmatrix}
+\sigma^2_{g_1}\mathbf{K}+\sigma^2_{e_1}\mathbf{I}&\sigma^2_{\gamma_g}\mathbf{K}+\gamma_{e}\mathbf{I}\\
+\sigma^2_{\gamma_g}\mathbf{K}+\gamma_{e}\mathbf{I}&\sigma^2_{g_2}\mathbf{K}+\sigma^2_{e_2}\mathbf{I}\\
+\end{bmatrix}
+\begin{bmatrix}
+0&\mathbf{K}\\
+\mathbf{K}&0\\
+\end{bmatrix}\}\\
+&=-4tr(y_1y_2^T\mathbf{I})+4\sigma^2_{\gamma_g}tr(\mathbf{K})+4\sigma^2_{\gamma_e}tr(\mathbf{I})
+\end{align}
+$$
+```{r bv1}
 hT1=0.3
 hT2=0.5
 rg=0.5
@@ -1280,6 +1407,10 @@ hT2est=(mean(ss2[,3]^2)-mean(sy2*sy2))/(n/m)
 rGEst=rh2/sqrt(hT1est*hT2est)
 
 ```
+
+$$
+\hat{\gamma}_g=\frac{y_1^T\mathbf{K}y_2-y_1^Ty_2}{tr(\mathbf{KK^T})-N_c}=\frac{\sqrt{N_1N_2}(\gamma_g\sqrt{h^2_1h^2_2}/M_e+\frac{N_c}{N_1N_2}r_e)-\frac{N_c}{\sqrt{N_1N_2}}r_e}{\frac{N_1N_2}{M_e}}
+$$
 
 ```{r biV2}
 S=10

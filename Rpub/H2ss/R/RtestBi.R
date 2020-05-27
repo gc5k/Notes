@@ -1,15 +1,17 @@
-S=10
+S=30
 
 SIMU=array(0, dim=c(S, 4))
+Ey=array(0, dim=c(S, 2))
+
 for(s in 1:S) {
 
-hT1=0.3
+hT1=0.5
 hT2=0.5
-rg=0.5
+rg=1
 re=0.3
-nc=500
-n1=500
-n2=200
+nc=999
+n1=1
+n2=1
 
 N1=nc+n1
 N2=nc+n2
@@ -64,5 +66,24 @@ rG=Q/sqrt(hT1est*hT2est)
 rGEst=EQ/sqrt(hT1est*hT2est)
 
 SIMU[s, ]=c(hT1est, hT2est, rG, rGEst)
+
+sX1=scale(X1)
+sX2=scale(X2)
+K=sX1%*%t(sX2)/m
+I=diag(1, N1, N2)
+Ey[s,1]=t(sy1)%*%(K-I)%*%sy2
+
 }
+trK2=N1*N2/m+N1
+E_Ey=(trK2-N1)*rg*sqrt(hT1*hT2)
+
+Sig1=sy1%*%t(sy1)
+Sig2=sy2%*%t(sy2)
+V_Ey=sum(diag((K-I)%*%(K-I)))*2
+plot(Ey[,1])
+abline(h=E_Ey)
 colMeans(SIMU)
+
+print(paste(mean(Ey[,1]), E_Ey))
+print(paste(var(Ey[,1]), V_Ey))
+
