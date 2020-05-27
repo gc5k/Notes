@@ -1,4 +1,4 @@
-#see 10.1534/genetics.120.303161
+#see 10.1534/genetics.120.303161, equation 6
 library(mnormt)
 m=1000
 n=500
@@ -6,7 +6,7 @@ frq=0.5
 h2=0.01
 he=1-h2
 phi=h2/he
-alpha=0.5
+alpha=0.5 
 
 G=matrix(rbinom(m*n, 2, frq), n, m)
 sG=scale(G)
