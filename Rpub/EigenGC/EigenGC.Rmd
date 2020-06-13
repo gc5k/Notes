@@ -17,6 +17,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 print(Sys.time())
 ```
+## Mixture distribution for many $\chi^2$
+It is related to [Devlin&Roeder](https://github.com/gc5k/Notes/blob/master/Rpub/EigenGC/DevlinRoeder1999.pdf). In its Eq 7, it is 
+$$Y^2 \sim  \epsilon \chi^2_{1,A^2}+(1-\epsilon) \chi^2_{1,0}$$
+Here, it is generalized as
+
+$$Y^2 \sim  \sum_{k=1}^K\chi^2_{1,ncp_k}$$
 
 ## NCP and $\lambda_{GC}$
 $median(\chi^2_{1,ncp})=ncp$ when $ncp$ is smaller than 0.2, and $\lambda_{GC} \approx 1+ncp$
