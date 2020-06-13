@@ -1,30 +1,237 @@
 ---
 title: "EigenGC"
-author: "gc5k"
-date: "6/13/2020"
-output: html_document
+author: "Chen Guo-Bo [chenguobo@gmail.com]"
+date: "`r Sys.Date()`"
+output:
+ html_document:
+    theme: united
+    highlight: tango
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+# Table of contents {.tabset .tabset-fade .tabset-pills}
+```{r}
+print(Sys.time())
 ```
 
-## Including Plots
+## NCP and $\lambda_{GC}$
+$median(\chi^2_{1,ncp})=ncp$ when $ncp$ is smaller than 0.2, and $\lambda_{GC} \approx 1+ncp$
 
-You can also embed plots, for example:
+$median(\chi^2_{1,ncp})=ncp$ when $ncp$ is greater than 1, and $\lambda_{GC}=\frac{ncp}{\chi^2_{1, ncp=0}}=\frac{ncp}{0.455}$
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r, gc-smallNCP}
+layout(matrix(1:2, 1, 2))
+NCPA=seq(0.01, 0.2, 0.01)
+plot(main="Small NCP (<0.2)", NCPA, qchisq(0.5, 1, NCPA)/0.455, xlab="NCP", ylab="LambdaGC")
+abline(a=1, b=1, col=c("blue"))
+abline(a=1, b=2, col=c("red"), lty=2)
+legend("topleft", legend = c("b=1", "b=2"), col=c("blue", "red"), lty=c(1,2))
+
+NCPB=c(seq(0.01, 0.2, 0.01),seq(1, 10, 0.5))
+plot(main="Large NCP (>1)",NCPB, qchisq(0.5, 1, NCPB)/0.455, xlab="NCP", ylab="LambdaGC")
+abline(a=0, b=1, col=c("blue"))
+abline(a=0, b=2, col=c("red"), lty=2)
+legend("topleft", legend = c("b=1", "b=2"), col=c("blue", "red"), lty=c(1,2))
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Estimate NCP from $\lambda_{GC}$
+
+```{r, NCP_GC}
+NCP=c(0.1, 0.25, 0.5, 1.1, 1.25, 1.5)
+SM=10000
+for(i in 1:length(NCP)) {
+  layout(matrix(1:2, 1, 2, byrow = T))
+  dat=rchisq(SM, 1, ncp=NCP[i])
+  gc=median(dat)/0.455
+
+  qqplot(rchisq(SM, 1), dat/gc,main=paste0("NCP=", NCP[i]), pch=16, cex=0.5)
+  abline(a=0, b=1, col="red")
+  legend("topleft", legend = format(gc, digits = 4))
+  qqplot(rchisq(SM,1, ncp=gc/2), dat, main=paste0("NCP=", NCP[i]), pch=16, cex=0.5)
+  abline(a=0, b=1, col="blue")
+  legend("topleft", legend = format(gc/2, digits=4))
+}
+```
+
+## Simulated Example 1 (frq=0.5)
+```{r, two-group}
+# lambda1 mixture distribution / genetic drift only
+M=10000
+f=0.01 # genetic drift
+
+P=runif(M, 0.5, 0.5) # ancestral
+Sz=c(300, 300) #subgroup sample size
+Fq=matrix(0, 2, M) 
+Fq[1,]=rbeta(M, P*(1-f)/f, (1-P)*(1-f)/f)
+Fq[2,]=rbeta(M, P*(1-f)/f, (1-P)*(1-f)/f)
+
+G=matrix(0, sum(Sz), M)
+for(i in 1:Sz[1]) {
+  G[i,] = rbinom(M, 2, Fq[1,])
+}
+
+for(i in (Sz[1]+1):(Sz[1]+Sz[2])) {
+  G[i,] = rbinom(M, 2, Fq[2,])
+}
+
+fq1 = colMeans(G[1:Sz[1],])/2 # observed allele freq, in subgroup 1
+fq2 = colMeans(G[(Sz[1]+1):(Sz[1]+Sz[2]),])/2 # observed allele freq, in subgroup 2
+H1 = 2*fq1*(1-fq1)
+H2 = 2*fq2*(1-fq2)
+Hs = (H1+H2)/2
+HT = 2*((fq1+fq2)/2)*(1-(fq1+fq2)/2)
+FstL = (fq1-fq2)^2/(HT)*(Sz[1]+Sz[2])
+Fst = mean((fq1-fq2)^2/(HT))*(Sz[1]+Sz[2])
+
+Gs=apply(G, 2, scale)
+GG=Gs %*% t(Gs) / M
+EigenG=eigen(GG)
+layout(matrix(1:2, 1, 2))
+barplot(EigenG$values[1:20])
+plot(main=paste(M, "markers"), EigenG$vectors[,1], EigenG$vectors[,2], bty='n', xlab="PC 1", ylab="PC 2", pch=16, col=c(rep("red", Sz[1]), rep("blue", Sz[2])))
+
+# get lambda GC
+eigenspace1 = EigenG$vectors[,1]
+para = matrix(0, M, 2)
+for (i in 1:M){
+  model = lm(eigenspace1~Gs[,i])
+  para[i,1]=summary(model)$coefficients[2,3]^2 #p value
+  para[i,2]=summary(model)$coefficients[2,4] #p value
+}
+lambdaGC = qchisq(median(para[,2]), 1, lower.tail = F)/qchisq(0.5, 1, lower.tail = F)
+lambda1 = EigenG$values[1]
+layout(matrix(1:1, 1))
+a = matrix(c(Fst, lambda1, lambdaGC), 1, 3)
+colnames(a)=c("Fst", "Eigenvalue 1", "LambdaGC")
+barplot(a)
+
+layout(matrix(1:2, 1, 2))
+qqplot(rchisq(nrow(para), 1, ncp=Fst), para[,1])
+qqplot(rchisq(nrow(para), 1, ncp=FstL), para[,1])
+
+```
+
+## Simulated Example 2 (frq=0.2~0.8)
+```{r, two-group-het}
+# lambda1 mixture distribution / genetic drift only
+M=10000
+f=0.01 # genetic drift
+
+P=runif(M, 0.2, 0.8) # ancestral
+Sz=c(300, 300) #subgroup sample size
+Fq=matrix(0, 2, M) 
+Fq[1,]=rbeta(M, P*(1-f)/f, (1-P)*(1-f)/f)
+Fq[2,]=rbeta(M, P*(1-f)/f, (1-P)*(1-f)/f)
+
+G=matrix(0, sum(Sz), M)
+for(i in 1:Sz[1]) {
+  G[i,] = rbinom(M, 2, Fq[1,])
+}
+
+for(i in (Sz[1]+1):(Sz[1]+Sz[2])) {
+  G[i,] = rbinom(M, 2, Fq[2,])
+}
+
+fq1 = colMeans(G[1:Sz[1],])/2 # observed allele freq, in subgroup 1
+fq2 = colMeans(G[(Sz[1]+1):(Sz[1]+Sz[2]),])/2 # observed allele freq, in subgroup 2
+H1 = 2*fq1*(1-fq1)
+H2 = 2*fq2*(1-fq2)
+Hs = (H1+H2)/2
+HT = 2*((fq1+fq2)/2)*(1-(fq1+fq2)/2)
+FstL = (fq1-fq2)^2/(HT)*(Sz[1]+Sz[2])
+Fst = mean((fq1-fq2)^2/(HT))*(Sz[1]+Sz[2])
+
+Gs=apply(G, 2, scale)
+GG=Gs %*% t(Gs) / M
+EigenG=eigen(GG)
+layout(matrix(1:2, 1, 2))
+barplot(EigenG$values[1:20])
+plot(main=paste(M, "markers"), EigenG$vectors[,1], EigenG$vectors[,2], bty='n', xlab="PC 1", ylab="PC 2", pch=16, col=c(rep("red", Sz[1]), rep("blue", Sz[2])))
+
+# get lambda GC
+eigenspace1 = EigenG$vectors[,1]
+para = matrix(0, M, 2)
+for (i in 1:M){
+  model = lm(eigenspace1~Gs[,i])
+  para[i,1]=summary(model)$coefficients[2,3]^2 #p value
+  para[i,2]=summary(model)$coefficients[2,4] #p value
+}
+lambdaGC = qchisq(median(para[,2]), 1, lower.tail = F)/qchisq(0.5, 1, lower.tail = F)
+lambda1 = EigenG$values[1]
+layout(matrix(1:1, 1))
+a = matrix(c(Fst, lambda1, lambdaGC), 1, 3)
+colnames(a)=c("Fst", "Eigenvalue 1", "LambdaGC")
+barplot(a)
+
+layout(matrix(1:2, 1, 2))
+qqplot(rchisq(nrow(para), 1, ncp=Fst), para[,1])
+qqplot(rchisq(nrow(para), 1, ncp=FstL), para[,1])
+
+```
+
+## Arabdopsis Eigen1
+Arabidopsis has 295 lines, and 150K markers. Eigenvalue 1=9.4, $\lambda_{GC}=9.3$
+```{r, arabdopsis-1}
+conn <- gzfile("arab.1.egwas.gz", "rt")
+eg <- read.table(conn, as.is = T, header = T)
+eg$P0=pchisq(eg$Chi, 1, lower.tail = F)
+library(qqman)
+
+print(paste("GC correction"))
+gc=median(eg$Chi)/qchisq(0.5, 1)
+eg$P0gc=pchisq(eg$Chi/gc, 1, lower.tail = F)
+manhattan(eg, chr="CHR", bp="BP", p="P0gc")
+
+print(paste("ncp=gc correction"))
+eg$P0ncp=pchisq(eg$Chi, 1, ncp=gc, lower.tail = F)
+manhattan(eg, chr="CHR", bp="BP", p="P0ncp")
+
+print(paste("ncp=mean(fst)*N"))
+eg$P0ncpFst=pchisq(eg$Chi, 1, ncp=mean(eg$Fst)*295, lower.tail = F)
+manhattan(eg, chr="CHR", bp="BP", p="P0ncpFst")
+
+print(paste("ncp=mean(fst)+sd(fst)*1.96"))
+fstMk=mean(eg$Fst)+sd(eg$Fst)*1.96
+eg$P0ncpFstH=pchisq(eg$Chi, 1, ncp=fstMk*295, lower.tail = F)
+manhattan(eg, chr="CHR", bp="BP", p="P0ncpFstH")
+```
+
+
+## Arabdopsis Eigen2
+
+```{r, arabdopsis-2}
+conn <- gzfile("arab.2.egwas.gz", "rt")
+eg <- read.table(conn, as.is = T, header = T)
+eg$P0=pchisq(eg$Chi, 1, lower.tail = F)
+library(qqman)
+
+print(paste("GC correction"))
+gc=median(eg$Chi)/qchisq(0.5, 1)
+eg$P0gc=pchisq(eg$Chi/gc, 1, lower.tail = F)
+manhattan(eg, chr="CHR", bp="BP", p="P0gc")
+
+print(paste("ncp=gc correction"))
+eg$P0ncp=pchisq(eg$Chi, 1, ncp=gc, lower.tail = F)
+manhattan(eg, chr="CHR", bp="BP", p="P0ncp")
+
+print(paste("ncp=mean(fst)*N"))
+eg$P0ncpFst=pchisq(eg$Chi, 1, ncp=mean(eg$Fst)*295, lower.tail = F)
+manhattan(eg, chr="CHR", bp="BP", p="P0ncpFst")
+
+print(paste("ncp=mean(fst)+sd(fst)*1.96"))
+fstMk=mean(eg$Fst)+sd(eg$Fst)*1.96
+eg$P0ncpFstH=pchisq(eg$Chi, 1, ncp=fstMk*295, lower.tail = F)
+manhattan(eg, chr="CHR", bp="BP", p="P0ncpFstH")
+
+```
+
+## R.sys
+
+```{r, R.sys}
+sessionInfo()
+```
