@@ -1,5 +1,5 @@
 #row dimension vs column dimension
-RD=1
+RD=0
 
 m=1000
 n1=250
