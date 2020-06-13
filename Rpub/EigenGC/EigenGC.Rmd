@@ -230,6 +230,35 @@ manhattan(eg, chr="CHR", bp="BP", p="P0ncpFstH")
 
 ```
 
+
+## CEU vs TSI
+$\lambda_{GC}=1.708$
+```{r, euro}
+conn <- gzfile("eu.1.egwas.gz", "rt")
+eg <- read.table(conn, as.is = T, header = T)
+eg$P0=pchisq(eg$Chi, 1, lower.tail = F)
+library(qqman)
+
+print(paste("GC correction"))
+gc=median(eg$Chi)/qchisq(0.5, 1)
+eg$P0gc=pchisq(eg$Chi/gc, 1, lower.tail = F)
+manhattan(eg, chr="CHR", bp="BP", p="P0gc")
+
+print(paste("ncp=gc correction"))
+eg$P0ncp=pchisq(eg$Chi, 1, ncp=gc, lower.tail = F)
+manhattan(eg, chr="CHR", bp="BP", p="P0ncp")
+
+print(paste("ncp=mean(fst)*N"))
+eg$P0ncpFst=pchisq(eg$Chi, 1, ncp=mean(eg$Fst)*295, lower.tail = F)
+manhattan(eg, chr="CHR", bp="BP", p="P0ncpFst")
+
+print(paste("ncp=mean(fst)+sd(fst)*1.96"))
+fstMk=mean(eg$Fst)+sd(eg$Fst)*1.96
+eg$P0ncpFstH=pchisq(eg$Chi, 1, ncp=fstMk*295, lower.tail = F)
+manhattan(eg, chr="CHR", bp="BP", p="P0ncpFstH")
+
+```
+
 ## R.sys
 
 ```{r, R.sys}
