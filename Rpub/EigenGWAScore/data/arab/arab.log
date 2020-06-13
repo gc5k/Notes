@@ -1,0 +1,26 @@
+PLINK v1.90b3.36 64-bit (31 Mar 2016)
+Options in effect:
+  --bfile ./data/arab/arab
+  --linear
+  --out ./data/arab/arab
+  --pheno ./data/arab/arab.eigenvec
+
+Hostname: Guo-Bos-MacBook-Pro.local
+Working directory: /Users/gc5k/git/Notes/Rpub/EigenGWAScore
+Start time: Sat Jun 13 11:53:23 2020
+
+Random number seed: 1592020403
+16384 MB RAM detected; reserving 8192 MB for main workspace.
+156744 variants loaded from .bim file.
+295 people (295 males, 0 females) loaded from .fam.
+295 phenotype values present after --pheno.
+Using 1 thread (no multithreaded calculations invoked).
+Before main variant filters, 295 founders and 0 nonfounders present.
+Calculating allele frequencies... done.
+Total genotyping rate is 0.997681.
+156744 variants and 295 people pass filters and QC.
+Phenotype data is quantitative.
+Writing linear model association results to ./data/arab/arab.assoc.linear ...
+done.
+
+End time: Sat Jun 13 11:53:25 2020

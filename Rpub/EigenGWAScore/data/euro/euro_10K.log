@@ -1,0 +1,26 @@
+PLINK v1.90b3.36 64-bit (31 Mar 2016)
+Options in effect:
+  --bfile ./data/euro/euro_10K
+  --linear
+  --out ./data/euro/euro_10K
+  --pheno ./data/euro/euro_10K.eigenvec
+
+Hostname: Guo-Bos-MacBook-Pro.local
+Working directory: /Users/gc5k/git/Notes/Rpub/EigenGWAScore
+Start time: Sat Jun 13 11:53:05 2020
+
+Random number seed: 1592020385
+16384 MB RAM detected; reserving 8192 MB for main workspace.
+100000 variants loaded from .bim file.
+200 people (101 males, 99 females) loaded from .fam.
+200 phenotype values present after --pheno.
+Using 1 thread (no multithreaded calculations invoked).
+Before main variant filters, 200 founders and 0 nonfounders present.
+Calculating allele frequencies... done.
+Total genotyping rate is 0.997823.
+100000 variants and 200 people pass filters and QC.
+Phenotype data is quantitative.
+Writing linear model association results to ./data/euro/euro_10K.assoc.linear
+... done.
+
+End time: Sat Jun 13 11:53:06 2020

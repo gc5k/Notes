@@ -1,0 +1,1137 @@
+---
+title: "EigenGWAScore"
+author: "Chen Guo-Bo [chenguobo@gmail.com]"
+date: "`r Sys.Date()`"
+output:
+ html_document:
+    theme: united
+    highlight: tango
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Table of contents {.tabset .tabset-fade .tabset-pills}
+```{r}
+print(Sys.time())
+```
+
+## 1. Original publication & tools
+It is an linear model implementation for genomic scan for loci under selection
+
+Related publications
+
+1 EigenGWAS: finding loci under selection through genome-wide association studies of eigenvectors in structured populations. [Heredity, 2016, 117:51-61](https://www.nature.com/articles/hdy201625)
+
+2 Identifying loci with breeding potential across temperate and tropical adaptation via EigenGWAS and EnvGWAS. [Mol Ecology, 2019, 28:3544-60](https://onlinelibrary.wiley.com/doi/full/10.1111/mec.15169)
+
+Java tools for EigenGWAS analysis. [GEAR](https://github.com/gc5k/GEAR/wiki/EigenGWAS)
+
+
+## 2. Discrete subgroups
+
+### A pair of subgroups
+Step 1 Set the genetic backgroud differentiation between a pair of subgroups as $F_{st}=f$, in which $f$ quantifies the intensity of genetic drift.
+
+Step 2 Simulating ancestral population that has the frequencies vector $P$ for $M$ loci.
+
+Step 3 Simulating the diversed frequencies for two subpopulations $Frq_1=beta(\alpha=\frac{P(1-f)}{f}, \beta=\frac{(1-P)(1-f)}{f})$, $Frq_2=beta(\alpha=\frac{P(1-f)}{f}, \beta=\frac{(1-P)(1-f)}{f})$, 
+
+Under $beta$ distribution, it will have mean of the two population $\frac{\alpha}{\alpha+\beta}$, and variance $\frac{\alpha\beta}{(\alpha+\beta)^2(\alpha+\beta+1)}$. It is easy to see that for the simulated $Frq_1$ and $Frq_2$, the averaged allele frequency is 
+
+$$\frac{\alpha}{\alpha+\beta}=\frac{\frac{P(1-f)}{f}}{\frac{P(1-f)}{f}+\frac{(1-P)(1-f)}{f}}=P$$
+
+identical to the ancestral population, and the variance is 
+
+$$\frac{\alpha\beta}{(\alpha+\beta)^2(\alpha+\beta+1)}=\frac{\frac{P(1-f)}{f}\frac{(1-P)(1-f)}{f}}{[\frac{(1-f)}{f}]^2[\frac{1}{f}]}=P(1-P)f$$
+
+It is known that under genetic drift the allele frequency randomly runs towards fixation, either 0 or 1, given its intial allele frequency (See binomail Tab for its demonstration). The speed of changing can be written as $\sigma=\sqrt{p(1-p)/n}$, proportional to the sample size (effective sample size).
+
+See more statistical properties of Beta distribution [wiki](https://en.wikipedia.org/wiki/Beta_distribution).
+
+```{r, 2pop}
+M=c(10000, 1000)
+f=0.05
+for(m in 1:length(M)) {
+  P=runif(M[m], 0.2, 0.8)
+  Sz=c(100, 100)
+  Fq=matrix(0, 2, M[m])
+  Fq[1,]=rbeta(M[m], P*(1-f)/f, (1-P)*(1-f)/f)
+  Fq[2,]=rbeta(M[m], P*(1-f)/f, (1-P)*(1-f)/f)
+
+  G=matrix(0, sum(Sz), M[m])
+  for(i in 1:Sz[1]) {
+    G[i,] = rbinom(M[m], 2, Fq[1,])
+  }
+
+  for(i in (Sz[1]+1):(Sz[1]+Sz[2])) {
+    G[i,] = rbinom(M[m], 2, Fq[2,])
+  }
+
+  Gs=apply(G, 2, scale)
+  GG=Gs %*% t(Gs)
+  EigenG=eigen(GG)
+  layout(matrix(1:2, 1, 2))
+  barplot(EigenG$values[1:20])
+  plot(main=paste(M[m], "markers"), EigenG$vectors[,1], EigenG$vectors[,2], bty='n', xlab="PC 1", ylab="PC 2", pch=16, col=c(rep("red", Sz[1]), rep("blue", Sz[2])))
+}
+```
+
+
+#### Including a locus under selection
+In addition to backgroud markers, we can add additional loci that are under selection. In the simulation below, given 10005 loci the last five of that are under selection.
+```{r, 2pop_qtl}
+m=c(10000) #backgroud marker
+mq=c(5) #loci under selection
+f1=0.01
+fq=0.1
+f=c(rep(f1, m), rep(fq, mq))
+M=length(f)
+
+P=runif(M, 0.2, 0.8) #ancestral
+Sz=c(200, 200) #subgroup sample size
+Fq=matrix(0, 2, M)
+Fq[1,]=rbeta(M, P*(1-f)/f, (1-P)*(1-f)/f) #freq for subgroup 1
+Fq[2,]=rbeta(M, P*(1-f)/f, (1-P)*(1-f)/f) #freq for subgroup 2
+
+G=matrix(0, sum(Sz), M)
+for(i in 1:Sz[1]) {
+  G[i,] = rbinom(M, 2, Fq[1,])
+}
+
+for(i in (Sz[1]+1):(Sz[1]+Sz[2])) {
+  G[i,] = rbinom(M, 2, Fq[2,])
+}
+
+Gs=apply(G, 2, scale)
+GG=Gs %*% t(Gs)/M
+EigenG=eigen(GG)
+layout(matrix(1:3, 1, 3))
+plot(colMeans(G[1:Sz[1],1:m])/2, colMeans(G[(Sz[1]+1):(Sz[1]+Sz[2]), 1:m]/2))
+points(colMeans(G[1:Sz[1],(m+1):M])/2, colMeans(G[(Sz[1]+1):(Sz[1]+Sz[2]), (m+1):M]/2), pch=16, cex=2, col="red")
+abline(a=0, b=1, col="green")
+barplot(EigenG$values[1:20])
+plot(main=paste(M, "markers"), EigenG$vectors[,1], EigenG$vectors[,2], bty='n', xlab="PC 1", ylab="PC 2", pch=16, col=c(rep("red", Sz[1]), rep("blue", Sz[2])))
+
+```
+
+
+### Three subgroups
+```{r, 3pop}
+M=c(10000, 1000)
+fst1=0.05
+fst2=0.01
+for(m in 1:length(M)) {
+  P=runif(M[m], 0.2, 0.8)
+  Sz=c(100, 100, 100)
+  Fq=matrix(0, 3, M[m])
+  Fq[1,]=rbeta(M[m], P*(1-fst1)/fst1, (1-P)*(1-fst1)/fst1)
+  Fq[2,]=rbeta(M[m], P*(1-fst1)/fst1, (1-P)*(1-fst1)/fst1)
+  Fq[3,]=rbeta(M[m], Fq[2,]*(1-fst2)/fst2, (1-Fq[2,])*(1-fst2)/fst2)
+
+  G=matrix(0, sum(Sz), M[m])
+  for(i in 1:Sz[1]) {
+    G[i,] = rbinom(M[m], 2, Fq[1,])
+  }
+
+  for(i in (Sz[1]+1):(Sz[1]+Sz[2])) {
+    G[i,] = rbinom(M[m], 2, Fq[2,])
+  }
+
+  for(i in (Sz[1]+Sz[2]+1):sum(Sz)) {
+    G[i,] = rbinom(M[m], 2, Fq[3,])
+  }
+
+  Gs=apply(G, 2, scale)
+  GG=Gs %*% t(Gs)
+  EigenG=eigen(GG)
+  layout(matrix(1:2, 1, 2))
+  barplot(EigenG$values[1:20])
+  plot(main=paste(M[m], "markers"), EigenG$vectors[,1], EigenG$vectors[,2], bty='n', xlab="PC 1", ylab="PC 2", pch=16, col=c(rep("red", Sz[1]), rep("blue", Sz[2]), rep("gold", Sz[3])))
+}
+```
+
+## 3. Admixted population
+
+### Admixture Dirichlet distribution
+Dirichlet distribution [wiki](https://en.wikipedia.org/wiki/Dirichlet_distribution)
+
+$$D(\alpha_1, \alpha_2, ...\alpha_K)$$
+$E(\alpha_i)=\frac{\alpha_i}{\sum_1^K\alpha_i}$, and $$var(\alpha_i)=\frac{\tilde{\alpha}_i(1-\tilde{\alpha}_i)}{\alpha_0+1}$$
+$$cov(\alpha_i, \alpha_j)=\frac{-\tilde{\alpha}_i\tilde{\alpha}_j}{\alpha_0+1}$$
+
+in which $\tilde{\alpha}_i=\frac{\alpha_i}{\sum_1^K\alpha_i}$ and $\alpha_0=\sum_1^K\alpha_i$.
+
+```{r rdiri}
+library(Compositional)
+library(MCMCpack)
+M=10000
+fst1=0.05
+fst2=0.01
+P=runif(M, 0.1, 0.9)
+Fq=matrix(0, 3, M)
+Fq[1,]=rbeta(M, P*(1-fst1)/fst1, (1-P)*(1-fst1)/fst1)
+Fq[2,]=rbeta(M, P*(1-fst1)/fst1, (1-P)*(1-fst1)/fst1)
+Fq[3,]=rbeta(M, Fq[2,]*(1-fst2)/fst2, (1-Fq[2,])*(1-fst2)/fst2)
+
+sz=50
+g=array(0, dim=c(3, sz, M))
+for(i in 1:3) {
+  for(j in 1:sz) {
+    g[i,j,]=rbinom(M, 2, Fq[i,])
+  }
+}
+
+N=300
+adx=rdirichlet(N, c(1,1,1))
+bivt.contour(adx)
+
+G=matrix(0, N, M)
+for(i in 1:N) {
+  G[i,]=rbinom(M, 2, t(Fq)%*%adx[i,])
+}
+gg=rbind(g[1,,], g[2,,], g[3,,], G)
+sG=apply(gg, 2, scale)
+grm=sG %*% t(sG)/M
+eg=eigen(grm)
+
+plot(eg$vectors[,1], eg$vectors[,2], col=c(rep("red",sz), rep("blue", sz), rep("green", sz), rep("cyan", N)), pch=16, main="Admixed", xlab="E1", ylab="E2")
+```
+
+
+### Admixture population
+We set two founder populations, upon which an admixed population is generated. The $F_{st}$ is set apart the two founder populations -- have allele frequencies $p_1$ and $p_2$, respectively. The admixture population has is allele frequency $wp_1+(1-w)p_2$. $w$ is sampled from beta distribution with $a=20$ and $b=50$.
+```{r, admix}
+
+M=5000
+n1=50
+n2=50
+N=500
+fst1=0.05
+P=runif(M, 0.1, 0.9)
+Fq=matrix(0, 2, M)
+Fq[1,]=rbeta(M, P*(1-fst1)/fst1, (1-P)*(1-fst1)/fst1)
+Fq[2,]=rbeta(M, P*(1-fst1)/fst1, (1-P)*(1-fst1)/fst1)
+G1=matrix(0, n1, M)
+for(i in 1:n1) {
+  G1[i,]=rbinom(M, 2, Fq[1,])
+}
+G2=matrix(0, n1, M)
+for(i in 1:n1) {
+  G2[i,]=rbinom(M, 2, Fq[2,])
+}
+
+G=matrix(0, N, M)
+admix=rbeta(N, 20, 50) 
+for(i in 1:N) {
+  p=admix[i]*Fq[1,] + (1-admix[i])*Fq[2,]
+  G[i,] = rbinom(M, 2, p)
+}
+
+GT=rbind(G1, G2, G)
+
+sG=scale(GT)
+gg=sG%*%t(sG)/M
+eg=eigen(gg)
+layout(matrix(1:2, 1, 2))
+barplot(eg$values)
+plot(eg$vectors[,1], eg$vectors[,2], xlab="PC 1", ylab="PC 2", 
+     cex=0.5, pch=16, bty="l",
+     col=c(rep("black", n1), rep("red", n2), rep("green", N)))
+
+```
+
+### Admixture population [Triangle]
+```{r, admix3}
+
+M=10000
+n1=50
+n2=50
+n3=50
+n12=100
+n13=100
+n23=100
+fst1=0.05
+fst2=0.01
+P=runif(M, 0.1, 0.9)
+Fq=matrix(0, 3, M)
+Fq[1,]=rbeta(M, P*(1-fst1)/fst1, (1-P)*(1-fst1)/fst1)
+Fq[2,]=rbeta(M, P*(1-fst1)/fst1, (1-P)*(1-fst1)/fst1)
+Fq[3,]=rbeta(M, Fq[2,]*(1-fst2)/fst2, (1-Fq[2,])*(1-fst2)/fst2)
+G1=matrix(0, n1, M)
+for(i in 1:n1) {
+  G1[i,]=rbinom(M, 2, Fq[1,])
+}
+G2=matrix(0, n1, M)
+for(i in 1:n1) {
+  G2[i,]=rbinom(M, 2, Fq[2,])
+}
+
+G3=matrix(0, n3, M)
+for(i in 1:n1) {
+  G3[i,]=rbinom(M, 2, Fq[3,])
+}
+
+G12=matrix(0, n12, M)
+admix=rbeta(n12, 30, 50) 
+for(i in 1:n12) {
+  p=admix[i]*Fq[1,] + (1-admix[i])*Fq[2,]
+  G12[i,] = rbinom(M, 2, p)
+}
+
+G13=matrix(0, n13, M)
+admix=rbeta(n13, 30, 50) 
+for(i in 1:n13) {
+  p=admix[i]*Fq[1,] + (1-admix[i])*Fq[3,]
+  G13[i,] = rbinom(M, 2, p)
+}
+
+G23=matrix(0, n23, M)
+admix=rbeta(n23, 25, 50) 
+for(i in 1:n23) {
+  p=admix[i]*Fq[2,] + (1-admix[i])*Fq[3,]
+  G23[i,] = rbinom(M, 2, p)
+}
+
+GT=rbind(G1, G2, G3, G12, G13, G23)
+
+sG=scale(GT)
+gg=sG%*%t(sG)/M
+eg=eigen(gg)
+layout(matrix(1:2, 1, 2))
+barplot(eg$values)
+plot(eg$vectors[,1], eg$vectors[,2], xlab="PC 1", ylab="PC 2", 
+     cex=0.5, pch=16, bty="l",
+     col=c(rep("black", n1), rep("red", n2), rep("green", n3),
+           rep("orange", n12), rep("grey", n13), rep("brown", n23)))
+
+```
+
+### Six pops
+```{r, 6pop}
+M=c(10000)
+fst1=0.05
+fst2=0.01
+for(m in 1:length(M)) {
+  P=runif(M[m], 0.2, 0.8)
+  Sz=c(100, 100, 100, 100, 100, 100)
+  Fq=matrix(0, length(Sz), M[m])
+  Fq[1,]=rbeta(M[m], P*(1-fst1)/fst1, (1-P)*(1-fst1)/fst1)
+
+  P3=rbeta(M[m], P*(1-fst1)/fst1, (1-P)*(1-fst1)/fst1)
+
+  P2=(0.5*Fq[1,]+0.5*P3)
+
+  Fq[3,]=rbeta(M[m], P2*(1-fst2)/fst2, (1-P2)*(1-fst2)/fst2)
+  Fq[4,]=rbeta(M[m], P2*(1-fst2)/fst2, (1-P2)*(1-fst2)/fst2)
+  
+  Fq[2,]=rbeta(M[m], P3*(1-fst2)/fst2, (1-P3)*(1-fst2)/fst2)
+  Fq[5,]=rbeta(M[m], P3*(1-fst2)/fst2, (1-P3)*(1-fst2)/fst2)
+  Fq[6,]=rbeta(M[m], P3*(1-fst2)/fst2, (1-P3)*(1-fst2)/fst2)
+
+  G=matrix(0, sum(Sz), M[m])
+  for(i in 1:Sz[1]) {
+    G[i,] = rbinom(M[m], 2, Fq[1,])
+  }
+  
+  for(i in (Sz[1]+1):(Sz[1]+Sz[2])) {
+    G[i,] = rbinom(M[m], 2, Fq[2,])
+  }
+  
+  for(i in (Sz[1]+Sz[2]+1):sum(Sz)) {
+    G[i,] = rbinom(M[m], 2, Fq[3,])
+  }
+
+  for(i in (Sz[1]+Sz[2]+Sz[3]+1):sum(Sz)) {
+    G[i,] = rbinom(M[m], 2, Fq[4,])
+  }
+
+  for(i in (Sz[1]+Sz[2]+Sz[3]+Sz[4]+1):sum(Sz)) {
+    G[i,] = rbinom(M[m], 2, Fq[5,])
+  }
+
+  for(i in (Sz[1]+Sz[2]+Sz[3]+Sz[4]+Sz[5]+1):sum(Sz)) {
+    G[i,] = rbinom(M[m], 2, Fq[6,])
+  }
+
+  Gs=apply(G, 2, scale)
+  GG=Gs %*% t(Gs)
+  EigenG=eigen(GG)
+  layout(matrix(1:2, 1, 2))
+  barplot(EigenG$values[1:20])
+  plot(EigenG$vectors[,1], EigenG$vectors[,2])
+  layout(matrix(1:6, 2, 3, byrow=T))
+  plot(xlim=range(EigenG$vectors[,1]), ylim=range(EigenG$vectors[,2]), main=paste(M[m], "markers"), EigenG$vectors[1:100,1], EigenG$vectors[1:100,2], bty='n', xlab="PC 1", ylab="PC 2", pch=16)
+  plot(xlim=range(EigenG$vectors[,1]), ylim=range(EigenG$vectors[,2]), main=paste(M[m], "markers"), EigenG$vectors[101:200,1], EigenG$vectors[101:200,2], bty='n', xlab="PC 1", ylab="PC 2", pch=16)
+  plot(xlim=range(EigenG$vectors[,1]), ylim=range(EigenG$vectors[,2]), main=paste(M[m], "markers"), EigenG$vectors[201:300,1], EigenG$vectors[201:300,2], bty='n', xlab="PC 1", ylab="PC 2", pch=16)
+  plot(xlim=range(EigenG$vectors[,1]), ylim=range(EigenG$vectors[,2]), main=paste(M[m], "markers"), EigenG$vectors[301:400,1], EigenG$vectors[301:400,2], bty='n', xlab="PC 1", ylab="PC 2", pch=16)
+  plot(xlim=range(EigenG$vectors[,1]), ylim=range(EigenG$vectors[,2]), main=paste(M[m], "markers"), EigenG$vectors[401:500,1], EigenG$vectors[401:500,2], bty='n', xlab="PC 1", ylab="PC 2", pch=16)
+  plot(xlim=range(EigenG$vectors[,1]), ylim=range(EigenG$vectors[,2]), main=paste(M[m], "markers"), EigenG$vectors[501:600,1], EigenG$vectors[501:600,2], bty='n', xlab="PC 1", ylab="PC 2", pch=16)
+}
+```
+
+## 4 PCA methods
+
+### Flash PCA
+There are several papers about ramdimized algorithm for PCA
+1. PLoS ONE, 2014, 9:e93766
+2. Rokhlin, V., Szlam, A., and Tygert, M. (2009). A randomized algorithm for principal component analysis. SIAM J. Matrix Anal. Appl. 31, 1100???1124.
+3. Halko, N., Martinsson, P., Shkolnisky, Y., and Tygert, M. (2011). An algorithm for the principal component analysis of large data sets. SIAM J. Sci. Comput. 33, 2580???2594.
+```{r flash pca}
+library(MASS)
+N=1000 #sample size
+M=2000 #SNP
+X=matrix(0, N, M) #SNP matrix
+
+#simulating snp
+for(i in 1:M) {
+  p1=runif(1, 0.1, 0.9)
+  p2=1-p1
+  X[1:(N/2),i]=rbinom(N/2, 2, p1)
+  X[(N/2+1):N,i]=rbinom(N/2, 2, p2)
+}
+
+#conventional PCA
+sX=scale(X)
+G=sX%*%t(sX)
+Geg=eigen(G)
+#plot(Geg$vectors[,1], Geg$vectors[,2])
+
+
+#quick pca
+dm=30
+sg=matrix(0,dm,dm)
+diag(sg)=1
+R=mvrnorm(M, rep(0, dm), Sigma=sg)
+xt=sX%*%R
+ss=apply(xt^2, 2, sum)
+Y=matrix(0, nrow(xt), ncol(xt))
+for(i in 1:length(ss)) {
+  Y[,i]=xt[,i]/ss[i]
+}
+
+XtX=sX%*%t(sX)
+
+maxiter=10
+for(it in 1:maxiter) {
+  xxt=XtX%*%Y
+  ss1=apply(xxt^2, 2, sum)
+  
+  for(i in 1:length(ss1)) {
+    Y[,i]=xxt[,i]/ss1[i]
+  }
+}
+
+QR=qr.default(Y)
+B=t(QR$qr)%*%sX
+S=B%*%t(B)
+
+eg=eigen(S)
+
+U=QR$qr %*% eg$vectors
+D=sqrt(eg$values/(N-1))  
+P=U*D
+
+par(mfrow = c(1,2))
+plot(main="PCA", xlab="eVec 1", ylab="eVec 2", Geg$vectors[,1], Geg$vectors[,2])
+plot(main="Quick PCA", xlab="eVec 1", ylab="eVec 2", U[,1], U[,2])
+cor(Geg$vectors[,1], U[,1])
+```
+
+### FastPCA
+Galinsky 2016 AJHG
+```{r flashpca}
+library(Rcpp)
+sourceCpp("~/git/Notes/R/RLib/Shotgun.cpp")
+M=10000
+N=500
+L=20
+I=5
+
+frq=runif(M, 0.1, 0.3)
+Dp=sample(c(runif(M/2, 0, 0), runif(M/2, 0, 0)), M)
+Dp=Dp[-1]
+
+fst=0.02
+frq1=rbeta(M, frq*(1-fst)/fst, (1-frq)*(1-fst)/fst)
+frq2=rbeta(M, frq*(1-fst)/fst, (1-frq)*(1-fst)/fst)
+
+G1=GenerateGenoDprimeRcpp(frq1, Dp, N)
+G2=GenerateGenoDprimeRcpp(frq2, Dp, N)
+
+G=rbind(G1, G2)
+
+s=apply(G, 2, scale)
+ss=s%*%t(s)/M
+sE=eigen(ss)
+
+G0=matrix(rnorm(nrow(s)*L), nrow(s), L)
+HH=matrix(0, M, (I+1)*L)
+for(i in 0:(I-1)) {
+  H=t(s) %*% G0
+  G0=s%*%H/M
+  HH[,(i*L+1):((i+1)*L)]=H
+}
+
+svd_h=svd(HH)
+Ty=t(svd_h$u)%*%t(s)
+svd_t=svd(Ty)
+
+layout(matrix(1:2, 1, 2))
+plot(sE$vectors[,1], sE$vectors[,2])
+
+plot(svd_t$v[,1], svd_t$v[,2], col="red")
+```
+
+### Scalable PCA
+PLoS Genetics,"Scalable probabilistic PCA for large-scale genetic variation data"
+```{r, scalablePCA}
+#row dimension vs column dimension
+RD=0
+
+m=1000
+n1=250
+n2=250
+n=n1+n2
+
+fst=0.2
+frq=runif(m, 0.2, 0.8)
+
+frq1=rbeta(m, frq*(1-fst)/fst, (1-frq)*(1-fst)/fst)
+G1=matrix(rbinom(n1*m, 2, frq1), n1, m, byrow = T)
+frq2=rbeta(m, frq*(1-fst)/fst, (1-frq)*(1-fst)/fst)
+G2=matrix(rbinom(n2*m, 2, frq2), n2, m, byrow = T)
+
+G=rbind(G1, G2)
+plot(colMeans(G)/2, frq)
+
+if(RD==1) {
+  Y=t(scale(G))
+} else {
+  Y=scale(G)
+}
+yy=t(Y)%*%Y/ncol(Y)
+
+eY=eigen(yy)
+svdY=svd(Y)
+k=10
+
+C0=matrix(rnorm(nrow(Y)*k), nrow(Y), k)
+for(i in 1:5) {
+  #E-step
+  inv_CC=solve(t(C0)%*%C0)
+  X=inv_CC%*%t(C0)%*%Y
+  
+  #M-step
+  XXt=X%*%t(X)
+  inv_XXt=solve(XXt)
+  C1=Y%*%t(X)%*%inv_XXt
+  print(cor(C1[,1], C0[,1]))
+  C0=C1
+}
+Ye=C0%*%X
+plot(Ye[,1], svdY$u[,1])
+
+```
+
+
+## 5 Homo and hetro
+
+### Homo cohort
+
+```{r, homo-cohort, eval=FALSE}
+rep=1
+EV=matrix(0, rep, 10)
+typeI=matrix(0, rep, 4)
+fst=0.02
+N1=c(100, 500, 1000)
+N2=1000
+M=10000
+ME=matrix(0, length(N1), 3)
+for(s in 1:length(N1)) {
+  for(r in 1:rep) {
+    P=runif(M, 0.2, 0.8)
+    P1=rbeta(M, P*(1-fst)/fst, (1-P)*(1-fst)/fst)
+    P2=rbeta(M, P*(1-fst)/fst, (1-P)*(1-fst)/fst)
+
+    Gn=matrix(0, nrow=N1[s]+N2, ncol=M)
+    for(i in 1:N1[s]) {
+      Gn[i,] = rbinom(M, 2, P1)
+    }
+
+    for(i in (N1[s]+1):(N2+N1[s])) {
+      Gn[i,] = rbinom(M, 2, P2)
+    }
+    Frq1=apply(Gn[1:N1[s],], 2, mean)/2
+    Frq2=apply(Gn[(N1[s]+1):(N1[s]+N2),], 2, mean)/2
+    FrqM=apply(Gn, 2, mean)/2
+    Fst=2*(N1[s]/(N1[s]+N2)*(Frq1-FrqM)^2 + N2/(N1[s]+N2) * (Frq2-FrqM)^2)/(FrqM*(1-FrqM))
+    FstN=(Frq1-Frq2)^2/(2*FrqM*(1-FrqM))
+    plot(Fst, FstN)
+  }
+
+  GnS=apply(Gn, 2, scale)
+  G=GnS %*% t(GnS)/M
+  EigenGN=eigen(G)
+  
+  RegB=matrix(0, M, 4)
+  for(i in 1:M) {
+    mod=lm(EigenGN$vectors[,1]~Gn[,i])
+    RegB[i,1]=summary(mod)$coefficients[2,1]
+    RegB[i,2]=summary(mod)$coefficients[2,2]
+  }
+  RegB[,3]=RegB[,1]^2/RegB[,2]^2
+  qqplot(rchisq(M, 1), RegB[,3], bty='n', pch=16)
+  abline(a=0, b=1, col="red")
+  gc=median(RegB[,3])/0.455
+  abline(a=0, b=gc, col="blue")
+  
+  ME[s,1]=mean(Fst)*(N1[s]+N2)
+  ME[s,2]=gc
+  ME[s,3]=EigenGN$values[1]
+}
+rownames(ME)=N1
+barplot(t(ME), beside = T, border = F)
+legend("topleft", legend = c("Fst", "GC", "Eigenvalue"), pch=15, col=c("black", "grey50", "grey"), bty='n')
+
+```
+
+### Heterogeneous cohort
+```{r, het-cohort, eval=FALSE}
+rep=1
+EV=matrix(0, rep, 10)
+typeI=matrix(0, rep, 4)
+fst=c(0.002, 0.01)
+N1=c(100, 500, 1000)
+N2=1000
+Ml=c(8000, 2000)
+M=sum(Ml)
+ME=matrix(0, length(N1), 3)
+for(s in 1:length(N1)) {
+  for(r in 1:rep) {
+    P=runif(M, 0.2, 0.8)
+    p1=runif(Ml[1], 0.2, 0.8)
+    p2=runif(Ml[2], 0.2, 0.8)
+    P=c(p1, p2)
+    P1=c(rbeta(Ml[1], p1*(1-fst[1])/fst[1], (1-p1)*(1-fst[1])/fst[1]),
+         rbeta(Ml[2], p2*(1-fst[2])/fst[2], (1-p2)*(1-fst[2])/fst[2]))
+    P2=c(rbeta(Ml[1], p1*(1-fst[1])/fst[1], (1-p1)*(1-fst[1])/fst[1]),
+         rbeta(Ml[2], p2*(1-fst[2])/fst[2], (1-p2)*(1-fst[2])/fst[2]))
+
+    Gn=matrix(0, nrow=N1[s]+N2, ncol=M)
+    for(i in 1:N1[s]) {
+      Gn[i,] = rbinom(M, 2, P1)
+    }
+
+    for(i in (N1[s]+1):(N2+N1[s])) {
+      Gn[i,] = rbinom(M, 2, P2)
+    }
+    Frq1=apply(Gn[1:N1[s],], 2, mean)/2
+    Frq2=apply(Gn[(N1[s]+1):(N1[s]+N2),], 2, mean)/2
+    FrqM=apply(Gn, 2, mean)/2
+    Fst=2*(N1[s]/(N1[s]+N2)*(Frq1-FrqM)^2 + N2/(N1[s]+N2) * (Frq2-FrqM)^2)/(FrqM*(1-FrqM))
+    FstN=(Frq1-Frq2)^2/(2*FrqM*(1-FrqM))
+    plot(Fst, FstN)
+  }
+
+  GnS=apply(Gn, 2, scale)
+  G=GnS %*% t(GnS)/M
+  EigenGN=eigen(G)
+  
+  RegB=matrix(0, M, 4)
+  for(i in 1:M) {
+    mod=lm(EigenGN$vectors[,1]~Gn[,i])
+    RegB[i,1]=summary(mod)$coefficients[2,1]
+    RegB[i,2]=summary(mod)$coefficients[2,2]
+  }
+  RegB[,3]=RegB[,1]^2/RegB[,2]^2
+  qqplot(rchisq(M, 1), RegB[,3], bty='n', pch=16)
+  abline(a=0, b=1, col="red")
+  gc=median(RegB[,3])/0.455
+  abline(a=0, b=gc, col="blue")
+  
+  ME[s,1]=mean(Fst)*(N1[s]+N2)
+  ME[s,2]=gc
+  ME[s,3]=EigenGN$values[1]
+}
+rownames(ME)=N1
+barplot(t(ME), beside = T, border = F)
+legend("topleft", legend = c("Fst", "GC", "Eigenvalue"), pch=15, col=c("black", "grey50", "grey"), bty='n')
+
+```
+
+## 6 Power analysis
+
+
+### Noncentrality parameter for $\chi^2_1$
+$\chi^2_1$ with NCP, [wiki](https://en.wikipedia.org/wiki/Chi-squared_distribution#Noncentral_chi-square_distribution).
+
+#### NCP for additive model
+
+For linear mode $\tilde{E}_k=\mu+\beta_lx_l+e$, in which $\tilde{E}_k$ is the $k^{th}$ standardized eigenvector of interest, $x_l$ codes for the additive effect, and $\beta_l$ is the regression coefficient, and $e$ is the residual of the model. The regression coefficient can be estimated as 
+$$
+\hat{\beta}_l=\frac{cov(x_l, \tilde{E}_k)}{var(x_l)}
+$$
+
+| | | |$x_l$ | | Marginal probability| |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| || $aa$ |$Aa$ | $AA$ | | |
+|Subgroup 1|$\tilde{E}_k$|2|1|0|||
+||$\color{cyan}{\frac{\sqrt{\frac{n_2}{n_1}}}{1+\omega_1\sigma^2_1+\omega_2\sigma^2_2}}$|$\color{cyan}{p^2_1}$|$\color{cyan}{2p_1q_1}$|$\color{cyan}{q^2_1}$|$1-\gamma_1$|$\color{cyan}{\omega_1=\frac{n_1}{n_1+n_2}}$|
+|||$\color{pink}{p^2_2}$|$\color{pink}{2p_2q_2}$|$\color{pink}{q^2_2}$|$\gamma_2$||
+|Subgroup 2||2|1|0|||
+||$\color{pink}{\frac{-\sqrt{\frac{n_1}{n_2}}}{1+\omega_1\sigma^2_1+\omega_2\sigma^2_2}}$|$\color{pink}{p^2_2}$|$\color{pink}{2p_2q_2}$|$\color{pink}{q^2_2}$|$1-\gamma_2$|$\color{pink}{\omega_1=\frac{n_1}{n_1+n_2}}$|
+|||$\color{cyan}{p^2_1}$|$\color{cyan}{2p_1q_1}$|$\color{cyan}{q^2_1}$|$\gamma_1$||
+-----------------------
+
+$$cov(\tilde{E}_k,x_l)=E(\tilde{E}_kx_l)-E(\tilde{E}_k)E(x_l)=E(\tilde{E}_kx_l)$$
+
+And, 
+$$
+\begin{align}
+E(\tilde{E}_kx_l)&=&\color{cyan}{\frac{\sqrt{\frac{n_2}{n_1}}}{1+\omega_1\sigma^2_1+\omega_2\sigma^2_2}}[\omega_1(2p^2_1+2p_1q_1)(1-\gamma_1)+\omega_2(2p^2_2+2p_2q_2)\gamma_2]\\
+&&-
+\color{pink}{\frac{\sqrt{\frac{n_1}{n_2}}}{1+\omega_1\sigma^2_1+\omega_2\sigma^2_2}}[\omega_2(2p^2_2+2p_2q_2)(1-\gamma_2)+\omega_2(2p^2_1+2p_2q_1)\gamma_1]\\
+&=&\color{cyan} { \frac{2\sqrt{\frac{n_2}{n_1}}}{1+\omega_1\sigma^2_1+\omega_2\sigma^2_2} }[\omega_1 \color{cyan}{p_1}(1-\gamma_1)+\omega_2 \color{cyan}{p_2}\gamma_2]
+-\color{pink} { \frac{2\sqrt{\frac{n_1}{n_2}}}{1+\omega_1\sigma^2_1+\omega_2\sigma^2_2} }[\omega_2 \color{pink}{p_2}(1-\gamma_2)+\omega_1 \color{pink}{p_1}\gamma_1]
+\end{align}
+$$
+
+Under the condition that $\gamma_1= 0$ and $ \gamma_2= 0$, and the sampling variance $\sigma^2_.$ further shrinks to zero, the NCP becomes $$2\sqrt{\frac{n_1}{N}\frac{n_2}{N}}(p_1-p_2)$$
+
+| | | |$x_l$ | | Marginal probability|
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| || $aa$ |$Aa$ | $AA$ ||
+|Subgroup 1|$\tilde{E}_k$|2|1|0|||
+||$\color{cyan}{\sqrt{\frac{n_2}{n_1}}}$|$\color{cyan}{p^2_1}$|$\color{cyan}{2p_1q_1}$|$\color{cyan}{q^2_1}$|$\color{cyan}{\omega_1=\frac{n_1}{n_1+n_2}}$|
+|Subgroup 2||2|1|0|||
+||$\color{pink}{-\sqrt{\frac{n_2}{n_1}}}$|$\color{pink}{p^2_2}$|$\color{pink}{2p_2q_2}$|$\color{pink}{q^2_2}$|$\color{pink}{\omega_1=\frac{n_1}{n_1+n_2}}$|
+-----------------------
+
+$$
+E(\tilde{E}_kx_l)=\omega_1\color{cyan}{\sqrt{\frac{n_2}{n_1}}}[(2p^2_1+2p_1q_1)]-
+\omega_2\color{pink}{\sqrt{\frac{n_1}{n_2}}}[(2p^2_2+2p_2q_2)]
+=2\sqrt{\frac{n_1}{N}\frac{n_2}{N}}(p_1-p_2)
+$$
+We have 
+$$E(\beta_l)\approx\frac{2\sqrt{\omega_1\omega_2} (p_1-p_2)}{2p_lq_l}$$
+
+The sampling variance of $\beta_l$ is $\sigma_{\beta_l}=\sqrt{\frac{\sigma^2_{E_k}-\beta_l^2\sigma^2_{x_l}}{(N-1)\sigma^2_{x_l}}}$, so the z-statistic is $$z \approx \sqrt{(N-1)\omega_1\omega_2}\frac{2(p_1-p_2)}{\sqrt{2p_lq_l}}$$
+
+and $z^2\sim\chi^2_1$, with NCP of $(N-1)\omega_1\omega_2\frac{4(p_1-p_2)^2}{2p_lq_l}$.
+
+#### NCP for Inbred line
+
+| | | |$x_l$ | | Marginal probability|
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| || $aa$ | $AA$ ||
+|Subgroup 1|$\tilde{E}_k$|2|0|||
+||$\color{cyan}{\sqrt{\frac{n_2}{n_1}}}$|$\color{cyan}{p^2_1}$|$\color{cyan}{q^2_1}$|$\color{cyan}{\omega_1=\frac{n_1}{n_1+n_2}}$|
+|Subgroup 2||2|0|||
+||$\color{pink}{-\sqrt{\frac{n_1}{n_2}}}$|$\color{pink}{p^2_2}$|$\color{pink}{q^2_2}$|$\color{pink}{\omega_1=\frac{n_1}{n_1+n_2}}$|
+-----------------------
+
+$$
+E(\tilde{E}_kx)=-\omega_1\sqrt{\frac{n_2}{n_1}}2p_1+\omega_2\sqrt{\frac{n_2}{n_1}}2p_2
+=2\frac{\sqrt{n_1n_2}}{N}(p_1-p_2)
+$$
+
+$$
+E(\beta_l)=\frac{E(\tilde{E}_kx_l)}{4p_lq_l}=\frac{2\frac{\sqrt{n_1n_2}}{N}(p_1-p_2)}{4p_lq_l}
+$$
+$$
+\sigma_{\beta_l}=\sqrt{\frac{\sigma^2_{E_k}-\beta_l^2\sigma^2_{x_l}}{(n-1)\sigma^2_{x_l}}}
+$$
+
+$z\approx\sqrt{(n-1)\omega_1\omega_2}\frac{2(p_1-p_2)}{4p_lq_l}$, and its NCP is $(n-1)\omega_1\omega_2\frac{(p_1-p_2)^2}{p_lq_l}$, which is half of that for a random mating population.
+
+#### NCP for dominance model
+
+For linear mode $\tilde{E}_k=\mu+\beta_dx_d+e$, here we drop off the subscript $l$ for the target locus.
+
+| | | |$x_d$ | | Marginal probability|
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| || $aa$ |$Aa$ | $AA$ ||
+|Subgroup 1|$\tilde{E}_k$|0|1|0|||
+||$\color{cyan}{\sqrt{\frac{n_2}{n_1}}}$|$\color{cyan}{p^2_1}$|$\color{cyan}{2p_1q_1}$|$\color{cyan}{q^2_1}$|$\color{cyan}{\omega_1=\frac{n_1}{n_1+n_2}}$|
+|Subgroup 2||0|1|0|||
+||$\color{pink}{-\sqrt{\frac{n_1}{n_2}}}$|$\color{pink}{p^2_2}$|$\color{pink}{2p_2q_2}$|$\color{pink}{q^2_2}$|$\color{pink}{\omega_1=\frac{n_1}{n_1+n_2}}$|
+-----------------------
+
+$$
+E(\tilde{E}_kx_d)=\omega_1\sqrt{\frac{n_2}{n_1}}2p_1q_1-\omega_2\sqrt{\frac{n_1}{n_2}}2p_2q_2=\sqrt{\frac{n_1}{N}\frac{n_2}{N}}(2p_1q_1-2p_2q_2)
+$$
+We have $E(x_d)=\omega_1$, and $var(x_d)=f_2(1-f_2)$, in which $f_2=\omega_12p_1q_1+\omega_22p_2q_2$, and $$E(\beta_d)=\frac{\sqrt{\omega_1\omega_2}(2p_1q_1-2p_2q_2)}{f_2(1-f_2)}$$
+
+The sampling variance for $\beta_d$ is $\sigma_{\beta_d}=\sqrt{\frac{\sigma^2_{E_k}-\beta_d^2\sigma_{x_k}^2}{(n-1)\sigma^2_{x_k}}}$.
+
+So, the z-score is 
+$$z\approx \frac{\frac{\sqrt{\omega_1\omega_2(2p_1q_1-2p_2q_2)}}{f_2(1-f_2)}}{\sqrt{\frac{\sigma^2_{E_k}-\beta^2_d\sigma^2_{x_d}}{(n-1)\sigma^2_{x_d}}}}=\sqrt{(n-1)\omega_1\omega_2}\frac{2p_1q_1-2p_2q_2}{\sqrt{f_2(1-f_2)}}$$
+and $z^2\sim\chi^2_1$, with NCP of $(n-1)\omega_1\omega_2\frac{(2p_1q_1-2p_2q_2)^2}{f_2(1-f_2)}$. In comparsion, for the additive effect, the NCP is $4n\omega_1\omega_2\frac{(p_{l|1}-p_{l|2})^2}{2p_lq_2}$.
+
+
+### A realized power calculation for EigenGWAS
+
+EigenGWAS power analysis [Shiny](https://gc5k.shinyapps.io/eigengwaspowercal/).
+
+```{r, power-a}
+m=1000000
+alpha=0.05
+pcut=alpha/m
+chiT=qchisq(pcut, 1, lower.tail = F)
+
+n=c(100,  200,  500,   1000,  1500,  2000,
+    5000, 7500, 10000, 15000, 20000, 50000)
+PW=matrix(0, 2, length(n))
+
+w1=0.3
+w2=1-w1
+
+p1=0.35
+h1=2*p1*(1-p1)
+p2=0.5
+h2=2*p2*(1-p2)
+
+p=w1*p1+w2*p2
+H=w1*h1+w2*h2
+
+for(i in 1:length(n)) {
+  ncpA=4*n[i]*w1*w2*(p1-p2)^2/(2*p*(1-p))
+  ncpD=n[i]*w1*w2*(h1-h2)^2/H
+
+  PW[1,i]=pchisq(chiT, 1, ncp=ncpA, lower.tail = F)
+  PW[2,i]=pchisq(chiT, 1, ncp=ncpD, lower.tail = F)
+}
+colnames(PW)=n
+barplot(PW, beside = T, border = F)
+abline(h=0.85, lty=2, col="grey")
+legend("topleft", legend=c("Add", "Dom"), pch=15, col=c("black", "grey"), bty='n')
+```
+
+
+Related parameters:
+
+$p_1$ and $p_2$ are the allele frequencies for the reference allele at two sub groups.
+
+$n_1$ and $n_2$ are sample sizes for two subgroups, respectively. $n=n_1+n_2$ the total sample size.
+
+$\omega_1=\frac{n_1}{n_1+n_2}$, and $\omega_2=\frac{n_2}{n_1+n_2}$.
+
+$p=\omega_1p_1+\omega_2p_2$
+
+### R validation
+
+#### NCP for additive model
+
+NCP is \[2n\omega_1\omega_2\frac{(p_1-p_2)^2}{p(1-p)}\]
+
+```{r, power-add}
+RP=1000
+n1=500
+n2=500
+N=n1+n2
+f1=0.4
+f2=0.6
+paraA=matrix(0, RP, 1)
+for(i in 1:RP) {
+  g1=rbinom(n1, 2, f1)
+  g2=rbinom(n2, 2, f2)
+  y=c(rep(1,n1), rep(0, n2))
+  ys=scale(y)
+  Ga=c(g1, g2)
+
+  modA=lm(ys~Ga)
+  paraA[i,1]=summary(modA)$coefficients[2,3]^2
+}
+
+ncpA=2*N*n1/N*n2/N*(mean(g1)/2-mean(g2)/2)^2/(mean(Ga)/2*(1-mean(Ga)/2))
+qqplot(main="", rchisq(RP, 1, ncp = ncpA), paraA[,1], pch=16, cex=0.5, bty='n',
+       xlab=expression(paste("Theoretical ", chi[1]^2)), ylab=expression(paste("Observed ",chi[1]^2)))
+abline(a=0, b=1, lty=2, col="grey")
+
+```
+
+#### NCP for inbred lines
+
+NCP is: \[n\omega_1\omega_2\frac{(p_1-p_2)^2}{p(1-p)}\]
+
+```{r, power-inb}
+RP=1000
+n1=500
+n2=500
+N=n1+n2
+f1=0.4
+f2=0.6
+paraA=matrix(0, RP, 1)
+for(i in 1:RP) {
+  g1=rbinom(n1, 1, f1)*2
+  g2=rbinom(n2, 1, f2)*2
+  y=c(rep(1,n1), rep(0, n2))
+  ys=scale(y)
+  G=c(g1, g2)
+  Ga=c(g1, g2)
+
+  modA=lm(ys~Ga)
+  paraA[i,1]=summary(modA)$coefficients[2,3]^2
+}
+
+ncpA=N*n1/N*n2/N*(mean(g1)/2-mean(g2)/2)^2/(mean(Ga)/2*(1-mean(Ga)/2))
+qqplot(main="", rchisq(RP,1, ncp = ncpA), paraA[,1], pch=16, cex=0.5, bty='n',
+       xlab=expression(paste("Theoretical ", chi[1]^2)), ylab=expression(paste("Observed ",chi[1]^2)))
+abline(a=0, b=1, lty=2, col="grey")
+
+```
+
+#### Statistical power for dominance model
+
+NCP is $n\omega_1\omega_2\frac{[2p_1(1-p_1)-2p_2(1-p_2)]^2}{2p_1(1-p_1)\omega_1-2p_2(1-p_2)\omega_2}$
+
+```{r, ncp_dom}
+RP=500
+n1=300
+n2=700
+N=n1+n2
+f1=0.4
+f2=0.6
+para=matrix(0, RP, 6)
+paraA=matrix(0, RP, 6)
+for(i in 1:RP) {
+  g1=rbinom(n1, 2, f1)
+  g2=rbinom(n2, 2, f2)
+  y=c(rep(1,n1), rep(0, n2))
+  ys=scale(y)
+  G=c(g1, g2)
+  Gd=ifelse(G==1, 1, 0)
+  Ga=c(g1, g2)
+#  Gd=scale(Gd)
+  mod=lm(ys~Gd)
+  Ecov=sqrt(n1/N*n2/N)*(length(which(g1==1))/n1-length(which(g2==1))/n2)
+  EV=mean(Gd)*(1-mean(Gd))
+  Eb=Ecov/EV
+  b=mod$coefficients[2]
+  para[i,1]=Eb
+  para[i,2]=b
+  para[i,3]=sqrt(1/(N*var(Gd)))
+  para[i,4]=summary(mod)$coefficients[2,2]
+  para[i,5]=summary(mod)$coefficients[2,3]^2
+  para[i,6]=summary(mod)$coefficients[2,4]
+  
+  modA=lm(ys~Ga)
+  paraA[i,5]=summary(modA)$coefficients[2,3]^2
+}
+#layout(matrix(1:2, 1, 2))
+#vF2=f1*(1-f1)*n1/N+f2*(1-f2)*n2/N
+#ncpD=n1*n2/N * (2*f1*(1-f1)-2*f2*(1-f2))^2/vF2
+#qqplot(main="Dom", rchisq(RP,1, ncp = ncpD), para[,5], pch=16, cex=0.5, bty='n',
+#       xlab=expression(paste("Theoretical ", chi[1]^2)), ylab=expression(paste("Obs ",chi[1]^2)))
+#abline(a=0, b=1)
+
+ncpA=4*N*n1/N*n2/N*(mean(g1)/2-mean(g2)/2)^2/(2*mean(Ga)/2*(1-mean(Ga)/2))
+qqplot(main="", rchisq(RP,1, ncp = ncpA), paraA[,5], pch=16, cex=0.5, bty='n',
+       xlab=expression(paste("Theoretical ", chi[1]^2)), ylab=expression(paste("Observed ",chi[1]^2)))
+abline(a=0, b=1, lty=2, col="grey")
+
+```
+
+
+## 7 EigenGWAS pipeline
+### Manhattan plot function
+```{r, manhattan}
+manhattan <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limitchromosomes=NULL, suggestiveline=-log10(1e-5), genomewideline=NULL, title="", annotate=NULL, ...) {
+  
+  d=dataframe
+  if (!("CHR" %in% names(d) & "BP" %in% names(d) & "P" %in% names(d))) stop("Make sure your data frame contains columns CHR, BP, and P")
+  if (!is.null(limitchromosomes)) {
+    d=d[d$CHR %in% limitchromosomes, ]
+  }
+  
+  d=subset(na.omit(d[order(d$CHR, d$BP), ]), (P>0 & P<=1)) # remove na's, sort, and keep only 0<P<=1
+  d$logp = -log10(d$P)
+  d$pos=NA
+  ticks=NULL
+  lastbase=0 #  colors <- rep(colors,max(d$CHR))[1:max(d$CHR)]
+  colors <- rep(colors,max(d$CHR))[1:length(unique(d$CHR))]
+  
+  if (ymax=="max") ymax<-ceiling(max(d$logp))
+  if (ymax<8) ymax<-8
+  numchroms=length(unique(d$CHR))
+  if (numchroms==1) {
+    d$pos=d$BP
+    ticks=floor(length(d$pos))/2+1
+  } else {
+    Uchr=unique(d$CHR)
+    for (i in 1:length(Uchr)) {
+      if (i==1) {
+        d[d$CHR==Uchr[i], ]$pos=d[d$CHR==Uchr[i], ]$BP
+      } else {
+        lastbase=lastbase+tail(subset(d, CHR==Uchr[i-1])$BP, 1)
+        d[d$CHR==Uchr[i], ]$pos=d[d$CHR==Uchr[i], ]$BP+lastbase
+      }
+      ticks=c(ticks, d[d$CHR==Uchr[i], ]$pos[floor(length(d[d$CHR==Uchr[i], ]$pos)/2)+1])
+    }
+  }
+  if (numchroms==1) {
+    with(d, plot(main=title, pos, logp, ylim=c(0,ymax), ylab=expression(-log[10](italic(p))), xlab=paste("Chromosome",unique(d$CHR),"position"), ...))
+  } else {
+    with(d, plot(main=title, pos, logp, ylim=c(0,ymax), ylab=expression(-log[10](italic(p))), xlab="Chromosome", xaxt="n", type="n", ...))
+    axis(1, at=ticks, lab=unique(d$CHR), ...)
+    icol=1
+    Uchr=unique(d$CHR)
+    for (i in 1:length(Uchr)) {
+      with(d[d$CHR==Uchr[i], ], points(pos, logp, col=colors[icol], ...))
+      icol=icol+1
+    }
+  }
+  if (!is.null(annotate)) {
+    d.annotate=d[which(d$SNP %in% annotate), ]
+    with(d.annotate, points(pos, logp, col="green3", ...))
+  }
+  #  if (suggestiveline) abline(h=suggestiveline, col="blue")
+  if (!is.null(genomewideline)) {
+    abline(h=genomewideline, col="gray")
+  } else {
+    abline(h=-log10(0.05/nrow(d)), col="gray")    
+  }
+}
+```
+
+#### Random mating population (CEU vs TSI)
+Replace the plink with your own path. Using HapMap CEU (northwest European) vs TSI (south Europeans) as example. The data can be found [here](https://github.com/gc5k/EigenGWASRDoc/tree/master/data/euro).
+```{r, euro-demo, collapse=TRUE}
+plink2='/Users/gc5k/bin/plink_mac/plink' #replace it with your own path
+dat="./data/euro/euro_10K"
+layout(matrix(1:6, 2, 3))
+
+#make-grm
+grmCmd=paste(plink2, "--bfile ", dat, "--make-grm-gz --out ", dat)
+system(grmCmd)
+
+gz=gzfile(paste0(dat, ".grm.gz"))
+grm=read.table(gz, as.is = T)
+Ne=-1/mean(grm[grm[,1]!=grm[,2], 4])
+Me=1/var(grm[grm[,1]!=grm[,2], 4])
+print(paste("Ne=", format(Ne, digits = 2), "Me=", format(Me, digits = 2)))
+hist(grm[grm[,1]!=grm[,2],4], main="Pairwise relatedness", xlab="Relatedness score", breaks = 50)
+
+#pca
+pcaCmd=paste(plink2, "--bfile ", dat, "--pca 10 --out ", dat)
+system(pcaCmd)
+barplot(main="Top 10 eigenvalue", read.table(paste0(dat, ".eigenval"), as.is = T)[,1], border = F)
+abline(h=1, col="red", lty=2, lwd=3)
+
+pc=read.table(paste0(dat, ".eigenvec"), as.is = T)
+plot(pc[,3], pc[,4], xlab="Eigenvector 1", ylab="Eigenvector 2", bty="n", main="Eigenspace", bty="n", col=ifelse(pc[,3]>0, "red", "blue"), pch=16, cex=0.5)
+
+#EigenGWAS
+liCmd=paste0(plink2, " --linear --bfile ", dat, " --pheno ", dat, ".eigenvec --out ", dat)
+system(liCmd)
+
+#plot
+EigenRes=read.table(paste0(dat, ".assoc.linear"), as.is = T, header = T)
+EigenRes$Praw=EigenRes$P
+gc=qchisq(median(EigenRes$P), 1, lower.tail = F)/qchisq(0.5, 1, lower.tail = F)
+print(paste("GC = ", format(gc, digits = 4)))
+EigenRes$P=pchisq(qchisq(EigenRes$Praw, 1, lower.tail = F)/gc, 1, lower.tail = F)
+manhattan(EigenRes, title="EigenGWAS 1", pch=16, cex=0.3, bty='n')
+
+#QQplot
+chiseq=rchisq(nrow(EigenRes), 1)
+qqplot(chiseq, qchisq(EigenRes$Praw, 1, lower.tail = F), xlab=expression(paste("Theoretical ", chi[1]^2)), ylab=expression(paste("Observed ", chi[1]^2)), bty="n", col="grey", pch=16, cex=0.5)
+points(sort(chiseq), sort(qchisq(EigenRes$P, 1, lower.tail = F)), col="black", pch=16, cex=0.5)
+legend("topleft", legend = c("Raw", "GC correction"), pch=16, cex=0.5, col=c("grey", "black"), bty='n')
+abline(a=0, b=1, col="red", lty=2)
+
+```
+
+#### Inbred population (Arabdopsis)
+Replace the plink with your own path. The Arabidopsis data can be found [here](https://github.com/gc5k/EigenGWASRDoc/tree/master/data/arab).
+```{r, arab-demo, collapse=TRUE}
+plink2='/Users/gc5k/bin/plink_mac/plink' #replace it with your own path
+dat="./data/arab/arab"
+
+layout(matrix(1:6, 2, 3))
+#make-grm
+grmCmd=paste(plink2, "--bfile ", dat, "--make-grm-gz --out ", dat)
+system(grmCmd)
+
+gz=gzfile(paste0(dat, ".grm.gz"))
+grm=read.table(gz, as.is = T)
+Ne=-1/mean(grm[grm[,1]!=grm[,2], 4]/2)
+Me=1/var(grm[grm[,1]!=grm[,2], 4]/2)
+print(paste("Ne=", format(Ne, digits = 2), "Me=", format(Me, digits = 2)))
+hist(grm[grm[,1]!=grm[,2],4]/2, main="Pairwise relatedness", xlab="Relatedness score", breaks = 50)
+
+#pca
+pcaCmd=paste(plink2, "--bfile ", dat, "--pca 10 --out ", dat)
+system(pcaCmd)
+barplot(main="Top 10 eigenvalue", read.table(paste0(dat, ".eigenval"), as.is = T)[,1]/2, border = F)
+abline(h=1, col="red", lty=2, lwd=3)
+
+pc=read.table(paste0(dat, ".eigenvec"), as.is = T)
+plot(pc[,3], pc[,4], xlab="Eigenvector 1", ylab="Eigenvector 2", bty="n", main="Eigenspace", bty="n", col=ifelse(pc[,3]>0, "red", "blue"), pch=16, cex=0.5)
+
+#EigenGWAS
+liCmd=paste0(plink2, " --linear --bfile ", dat, " --pheno ", dat, ".eigenvec --out ", dat)
+system(liCmd)
+
+#plot
+EigenRes=read.table(paste0(dat, ".assoc.linear"), as.is = T, header = T)
+EigenRes$Praw=EigenRes$P
+gc=qchisq(median(EigenRes$P), 1, lower.tail = F)/qchisq(0.5, 1, lower.tail = F)
+print(paste("GC = ", format(gc, digits = 4)))
+EigenRes$P=pchisq(qchisq(EigenRes$Praw, 1, lower.tail = F)/gc, 1, lower.tail = F)
+manhattan(EigenRes, title="EigenGWAS 1", pch=16, cex=0.3, bty='n')
+
+#QQplot
+chiseq=rchisq(nrow(EigenRes), 1)
+qqplot(chiseq, qchisq(EigenRes$Praw, 1, lower.tail = F), xlab=expression(paste("Theoretical ", chi[1]^2)), ylab=expression(paste("Observed ", chi[1]^2)), bty="n", col="grey", pch=16, cex=0.5)
+points(sort(chiseq), sort(qchisq(EigenRes$P, 1, lower.tail = F)), col="black", pch=16, cex=0.5)
+legend("topleft", legend = c("Raw", "GC correction"), pch=16, cex=0.5, col=c("grey", "black"), bty='n')
+abline(a=0, b=1, col="red", lty=2)
+
+```
+
+
+#### UK Birds
+[Recent natural selection causes adaptive evolution of an avian polygenic trait](https://rpubs.com/gc5k/Day2_NLUK) and paper [pdf](https://science.sciencemag.org/content/358/6361/365)
+
+
+## Appendix: Tracy-Widom & Wishart
+```{r, tw}
+library(RMTstat)
+plot(density(rtw(10000)))
+
+S <- toeplitz((10:1)/10)
+set.seed(11)
+R <- rWishart(1000, 20, S)
+```
+
+## Binomial distribution
+As each locus follows binomial distribution, the **genetic drift** can be modelled $\frac{\sqrt{pq}}{2n_e}$, in which $n_e$ is the effective population size.
+```{r, bino}
+f=0.5
+pop=c(50, 200, 500, 1000)
+gn=100
+cohort=100
+G=matrix(0, cohort, gn)
+layout(matrix(1:4, 2, 2))
+for(p in 1:length(pop)) {
+  plot(main=paste("Population size", pop[p]), x=NULL, y=NULL, xlim=c(1, gn), ylim=c(0, 1), xlab="Generation", ylab="Frequency", bty='n')
+  for(i in 1:cohort) {
+    G[i,1] = 0.5
+    for(j in 2:gn) {
+      G[i,j]=mean(rbinom(pop[p], 2, G[i,j-1]))/2
+    }
+    lines(G[i,], col=sample(1:10, 1))
+  }
+}
+```
+
+## R.sys
+
+```{r, R.sys}
+sessionInfo()
+```
+
