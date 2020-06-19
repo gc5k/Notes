@@ -201,6 +201,7 @@ print(paste("ncp=mean(fst)*N"))
 eg$P0ncpFst=pchisq(eg$Chi, 1, ncp=mean(eg$Fst)*295, lower.tail = F)
 manhattan(eg, chr="CHR", bp="BP", p="P0ncpFst")
 
+hist(eg$Fst)
 print(paste("ncp=mean(fst)+sd(fst)*1.96"))
 fstMk=mean(eg$Fst)+sd(eg$Fst)*1.96
 eg$P0ncpFstH=pchisq(eg$Chi, 1, ncp=fstMk*295, lower.tail = F)
@@ -229,6 +230,7 @@ print(paste("ncp=mean(fst)*N"))
 eg$P0ncpFst=pchisq(eg$Chi, 1, ncp=mean(eg$Fst)*295, lower.tail = F)
 manhattan(eg, chr="CHR", bp="BP", p="P0ncpFst")
 
+hist(eg$Fst)
 print(paste("ncp=mean(fst)+sd(fst)*1.96"))
 fstMk=mean(eg$Fst)+sd(eg$Fst)*1.96
 eg$P0ncpFstH=pchisq(eg$Chi, 1, ncp=fstMk*295, lower.tail = F)
@@ -258,6 +260,7 @@ print(paste("ncp=mean(fst)*N"))
 eg$P0ncpFst=pchisq(eg$Chi, 1, ncp=mean(eg$Fst)*295, lower.tail = F)
 manhattan(eg, chr="CHR", bp="BP", p="P0ncpFst")
 
+hist(eg$Fst)
 print(paste("ncp=mean(fst)+sd(fst)*1.96"))
 fstMk=mean(eg$Fst)+sd(eg$Fst)*1.96
 eg$P0ncpFstH=pchisq(eg$Chi, 1, ncp=fstMk*295, lower.tail = F)
