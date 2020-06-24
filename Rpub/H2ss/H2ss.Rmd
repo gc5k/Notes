@@ -1237,7 +1237,148 @@ print(paste("Exp sd for h2:", s))
 
 ## A pair of traits
 
+### $N_1=N_2=N$
+Under the first circumstance, both traits have same subjects, and $N_1=N_2=N$.
 
+The target function can be 
+
+$$\begin{align}
+Q&=argmin_{\{\Delta\}}|| \mathbf{yy}^T-(
+\begin{bmatrix}
+\sigma^2_{a_1}\mathbf{K} & \gamma_{g}\mathbf{K}\\
+\gamma_{g}\mathbf{K} & \sigma^2_{a_2}\mathbf{K} \\
+\end{bmatrix}
++
+\begin{bmatrix}
+\sigma^2_{e_1}\mathbf{I}_N & \gamma_{e}\mathbf{I}_N\\
+\gamma_{e}\mathbf{I}_N & \sigma^2_{e_2}\mathbf{I}_N\\
+\end{bmatrix}
+)||^2_F\\
+&=tr\{
+[\mathbf{yy}^T-(
+\begin{bmatrix}
+\sigma^2_{a_1}\mathbf{K} & \gamma_{g}\mathbf{K}\\
+\gamma_{g}\mathbf{K} & \sigma^2_{a_2}\mathbf{K} \\
+\end{bmatrix}
++
+\begin{bmatrix}
+\sigma^2_{e_1}\mathbf{I}_N & \gamma_{e}\mathbf{I}_N\\
+\gamma_{e}\mathbf{I}_N & \sigma^2_{e_2}\mathbf{I}_N\\
+\end{bmatrix}
+)]^2\}
+\end{align}
+$$
+
+in which $\Delta=(\sigma^2_{a_1},\sigma^2_{e_1},\sigma^2_{a_2},\sigma^2_{e_2},\gamma_g,\gamma_e)$.
+
+Setting the gradient of $Q$ to zero in respective to each component,
+$$\color{red}{\frac{\partial Q}{\partial\Delta}}
+\color{blue}{\frac{\partial \Delta}{\partial\sigma^2_.}}=tr\{
+\color{red}{2[\mathbf{yy}^T-(
+\begin{bmatrix}
+\sigma^2_{a_1}\mathbf{K} & \gamma_{g}\mathbf{K}\\
+\gamma_{g}\mathbf{K} & \sigma^2_{a_2}\mathbf{K} \\
+\end{bmatrix}
++
+\begin{bmatrix}
+\sigma^2_{e_1}\mathbf{I}_N & \gamma_{e}\mathbf{I}_N\\
+\gamma_{e}\mathbf{I}_N & \sigma^2_{e_2}\mathbf{I}_N\\
+\end{bmatrix}
+)]}
+\cdot \color{blue}{\frac{\partial{\Delta}}{\partial \sigma^2_.}}
+\}
+$$
+
+
+For each element in $\Delta$, its partial can be derived as below
+
+$$\begin{bmatrix}
+\frac{\partial Q}{\partial \sigma^2_{a_1}}=\begin{bmatrix}
+\mathbf{K}&0\\
+0&0\\
+\end{bmatrix},
+
+
+\frac{\partial Q}{\partial \sigma^2_{a_2}}=\begin{bmatrix}
+0&0\\
+0&\mathbf{K}
+\end{bmatrix},
+
+\frac{\partial Q}{\partial \gamma_g}=\begin{bmatrix}
+0&\mathbf{K}\\
+\mathbf{K}&0
+\end{bmatrix}
+\\
+
+\frac{\partial Q}{\partial \sigma^2_{e_1}}=\begin{bmatrix}
+\mathbf{I}_N&0\\
+0&0
+\end{bmatrix},
+
+\frac{\partial Q}{\partial \sigma^2_{e_2}}=\begin{bmatrix}
+0&0\\
+0&\mathbf{I}_N
+\end{bmatrix},
+
+\frac{\partial Q}{\partial \gamma_e}=\begin{bmatrix}
+0&\mathbf{I}_N\\
+\mathbf{I}_N&0
+\end{bmatrix}
+\end{bmatrix}
+$$
+
+Then, the $\frac{\partial Q}{\partial \Delta}\frac{\partial \Delta}{\partial \sigma^2}$ becomes
+
+$$\left \{
+\begin{align}
+\frac{\partial Q}{\partial \sigma^2_{a_1}}&=2\{tr(\mathbf{y_1y_1}^T\mathbf{K})-\sigma^2_{a_1}tr(\mathbf{KK})-\sigma^2_{e_1}tr(\mathbf{K})\}=0
+\\
+\frac{\partial Q}{\partial \sigma^2_{e_1}}&=2\{tr(\mathbf{y_1y_1}^T\mathbf{I}_N)-\sigma^2_{a_1}tr(\mathbf{KI}_N)-\sigma^2_{e_1}tr(\mathbf{I}_N)\}=0
+\\
+
+\frac{\partial Q}{\partial \sigma^2_{a_2}}&=2\{tr(\mathbf{y_2y_2}^T\mathbf{K})-\sigma^2_{a_2}tr(\mathbf{KK})-\sigma^2_{e_2}tr(\mathbf{K})\}=0
+\\
+
+\frac{\partial Q}{\partial \sigma^2_{e_2}}&=2\{tr(\mathbf{y_2y_2}^T\mathbf{I}_N)-\sigma^2_{a_2}tr(\mathbf{KI}_N)-\sigma^2_{e_2}tr(\mathbf{I}_N)\}=0
+\\
+
+\frac{\partial Q}{\partial \sigma^2_{r_g}}&=2\{tr(\mathbf{y_1y_2}^T\mathbf{K}+\mathbf{y_1y_2}^T\mathbf{K})-\gamma_{g}tr(\mathbf{KK}+\mathbf{KK})-\gamma_{e}tr(\mathbf{K}+\mathbf{K})\}=0
+\\
+
+\frac{\partial Q}{\partial \sigma^2_{r_e}}&=2\{tr(\mathbf{y_1y_2}^T\mathbf{I}_N+\mathbf{y_1y_2}^T\mathbf{I}_N)-\gamma_{g}tr(\mathbf{K}+\mathbf{K})-\gamma_{e}tr(\mathbf{I}_N+\mathbf{I}_N)\}=0
+\\
+\end{align}
+\right .
+$$
+
+And, it turns out a normal equation as below
+
+$$\begin{bmatrix} 
+tr(\mathbf{KK}) & tr(\mathbf{K}) & 0 & 0 &0 &0 \\
+tr(\mathbf{K}) & tr(\mathbf{I}_N) & 0 & 0 &0 &0 \\
+
+0& 0& tr(\mathbf{KK}) & tr(\mathbf{K}) & 0 & 0 \\
+0& 0&tr(\mathbf{K}) & tr(\mathbf{I}_N) & 0 & 0 \\
+
+0& 0 & 0 & 0& tr(\mathbf{KK}) & tr(\mathbf{K}) \\
+0& 0& 0 & 0 &tr(\mathbf{K}) & tr(\mathbf{I}_N) \\
+\end{bmatrix} 
+ 
+\left[ \begin{array}{c} \hat{\sigma}^2_{a_1} \\
+\hat{\sigma}^2_{e_1} \\
+\hat{\sigma}^2_{a_2} \\
+\hat{\sigma}^2_{e_2} \\
+\hat{\gamma}_g \\
+\hat{\gamma}_e \\
+
+\end{array} \right] 
+= 
+\left [ \begin{array}{c} tr[y^T_1\mathbf{K}y_1] \\ tr[y^T_1\mathbf{I}_Ny_1]\\ tr[y^T_2\mathbf{K}y_2] \\ tr[y^T_2\mathbf{I}_Ny_2]\\tr[y^T_1\mathbf{K}y_2]\\tr[y^T_1\mathbf{I}_Ny_2] 
+\end{array} 
+\right ]
+$$
+
+Then we hava
 $$
 \hat{\gamma}_{g}=\frac{y_1^T\mathbf{K}y_2-y_1^Ty_2}{tr[\mathbf{KK^T}]-N}=\frac{N(Nr_g\sqrt{h^2_1h^2_2}/M_e+\frac{N}{\sqrt{NN}} r_e)-\frac{N}{\sqrt{NN}}r_e}{\frac{N^2}{M_e}}=\frac{Nr_g\sqrt{h^2_1h^2_2}/M_e}{\frac{N}{M_e}}
 $$

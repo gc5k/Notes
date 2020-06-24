@@ -1,5 +1,5 @@
 ---
-title: "EigenGC"
+title: "Overfitting"
 author: "Chen Guo-Bo [chenguobo@gmail.com]"
 date: "`r Sys.Date()`"
 output:
@@ -16,12 +16,17 @@ set.seed(2020)
 
 # Table of contents {.tabset .tabset-fade .tabset-pills}
 
+[A note for overfitting in prediction](https://github.com/gc5k/Notes/blob/master/Rpub/TroubleShooting/PredictionTerms.pdf)
+
 ## PCA overfitting
 It is a typical overfitting in data analysis that PCA seems promising in distinguishing cases and controls. However, it is not true but typical overfitting, which creeps in at feature preselection.
 
 The data is simulated as below:
+
 1 $M=10000$ markers were sampled from freq between 0.2~0.8, and $N=200$.
-2 $Y=0 $ or $1$ is randomly assigne.
+
+2 $Y=0$ or $1$ is randomly assigned. 
+
 So there is no association.
 
 In pre-selection for markers, simple regression is conducted. Markers are ranked by thier p-values. By applying p-value cutoff,say $<0.01$, $<0.05$, etc, different numbers of markers can be used to conduct PCA again. Then, "case" and "controls" can be seperated.
