@@ -12,3 +12,5 @@ dd <- diag(ch)
 Lf <- t(ch/dd)
 DD <- diag(dd, nrow(Lf), ncol(Lf))
 Lf%*%DD%*%DD%*%t(Lf)
+
+solve(t(Lf))%*%diag(1/dd^2, nrow(Lf), ncol(Lf))%*%solve(Lf)

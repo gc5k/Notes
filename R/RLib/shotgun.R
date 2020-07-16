@@ -63,7 +63,7 @@ MeSriramSub <-function(B, n, G) {
 readPlinkBed <-function(root) {
   fam.file=read.table(paste0(root,".fam"), as.is = T)
   bim.file=read.table(paste0(root, ".bim"), as.is = T)
-  bed.file="test.bed"
+  bed.file=read.table(paste0(root,".bed"), as.is = T)
   bin.connection = file(bed.file, 'rb') # opens a connection with .bed file
   test.bytes = readBin(bin.connection, what = "raw", n = 3) # bytes 1 and 2 store infor about file type, byte 3 about array type
   if(!identical(as.character(test.bytes), c('6c', '1b', '01'))) {
