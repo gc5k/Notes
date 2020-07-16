@@ -1,4 +1,4 @@
-sourceCpp("~/git/Notes/R/RLib/Shotgun.cpp")
+sourceCpp("~/git/Notes/R/RLib/Shotgun.cpp") #https://github.com/gc5k/Notes/blob/master/R/RLib/Shotgun.cpp
 #simulation setup
 hl=0.2 #large effect
 hs=0.3 #small effect
