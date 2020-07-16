@@ -1,17 +1,17 @@
+library(Rcpp)
 sourceCpp("~/git/Notes/R/RLib/Shotgun.cpp") #https://github.com/gc5k/Notes/blob/master/R/RLib/Shotgun.cpp
 #simulation setup
 hl=0.2 #large effect
 hs=0.3 #small effect
-BLK=50 #number of blocks
+BLK=100 #number of blocks
 BLK_snp=50 #LD block size
 
 M=BLK_snp*BLK #loci
-Ml=BLK #one large effect in each block
+Bloci=seq(10, M, by=BLK) #big effect loci
+Ml=length(Bloci) #one large effect in each block
 Ms=M-Ml #number of small effect loci
 
-Bloci=seq(10, M, by=BLK) #big effect loci
-
-ldTag=BLK*seq(0, BLK) #ld Tag
+ldInterval=BLK*seq(0, BLK) #ld Tag
 
 N=2000 #sample size
 for(i in 1:BLK) {
@@ -32,7 +32,7 @@ sG=scale(G) #scale genotype
 snpEff=array(0, M)
 snpEff[-Bloci]=rnorm(Ms, 0, sqrt(hs/Ms))
 print(var(snpEff[-Bloci])*Ms)
-snpEff[Bloci]=rnorm(Ml, 0, sqrt(hl/Ml))
+snpEff[Bloci]=rnorm(Bloci, 0, sqrt(hl/Ml))
 print(var(snpEff[Bloci])*Ml)
 
 bv=sG%*%snpEff
@@ -86,7 +86,7 @@ hMat=matrix(0, M-length(BigLoci), M-length(BigLoci)) #v matrix
 lCnt=0
 
 for(i in 1:BLK) { #block-wise inversion for V using Zhou Xiang's trick
-  ld_tag=seq(ldTag[i]+1, ldTag[i+1])
+  ld_tag=seq(ldInterval[i]+1, ldInterval[i+1])
   rmLoci=intersect(ld_tag, Bloci)
   if(length(rmLoci)!=0) {
     ld_tag=setdiff(ld_tag, rmLoci)
@@ -105,7 +105,7 @@ LDss=LDmat[-BigLoci, -BigLoci]
 Zl=SumStat[BigLoci,3]
 Zs=SumStat[-BigLoci,3]
 
-P1=LDls%*%hMat
+P1=LDls%*%hMat #there is another trick here to reduce multiplication
 C1=(LDll-P1%*%LDsl)
 C1_inv=solve(C1)
 C2=(Zl-P1%*%Zs)
