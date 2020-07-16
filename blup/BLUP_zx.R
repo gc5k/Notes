@@ -115,3 +115,10 @@ Ims=diag(1, M-length(BigLoci))
 P2=LDss%*%hMat
 beta_s_zx=hs_hat*(Ims-P2)%*%(sqrt(N)*Zs-N*LDsl%*%beta_l_zx)
 
+layout(matrix(1:3, 1,3))
+plot(snpEff[Bloci], beta_l_zx, ylab="Quick Big Effect", xlab="True Big effect")
+abline(a=0, b=c(1))
+plot(snpEff[-Bloci], beta_s_zx, ylab="Quick small effect", xlab="True small effect")
+abline(a=0, b=c(1))
+plot(Bs_henderson, beta_s_zx, xlab="Henderson BLUP", ylab="Quick BLUP")
+abline(a=0, b=c(1))
