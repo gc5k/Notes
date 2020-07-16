@@ -17,7 +17,7 @@ N=2000 #sample size
 for(i in 1:BLK) {
   frq=runif(BLK_snp, 0.1, 0.9)
   Dp=runif(BLK_snp-1, 0.7, 1)*sample(c(1, -1), BLK_snp-1, replace = T)
-
+  
   g=GenerateGenoDprimeRcpp(frq, Dp, N)
   if(i == 1) {
     G=g
@@ -80,7 +80,7 @@ hist(snpEff[BigLoci], main="B")
 hist(SumStat[BigLoci], main="Blup-Bsmall")
 hist(Bs_henderson[BigLoci], main="Blup-Blarge")
 
-#####zxBLUP AJHG v106 p679???693
+#####zxBLUP AJHG v106 p679-693
 LDmat=t(sG)%*%sG/(N-1)
 hMat=matrix(0, M-length(BigLoci), M-length(BigLoci)) #v matrix
 lCnt=0
@@ -92,8 +92,8 @@ for(i in 1:BLK) { #block-wise inversion for V using Zhou Xiang's trick
     ld_tag=setdiff(ld_tag, rmLoci)
   }
   LDss=LDmat[ld_tag, ld_tag]
-  Ims=diag(1/hs_hat/N,length(ld_tag))
-  h=Ims+LDss
+  Ims_sub=diag(1/hs_hat/N,length(ld_tag))
+  h=Ims_sub+LDss
   h_Inv=solve(h)
   hMat[(lCnt+1):(lCnt+length(ld_tag)),(lCnt+1):(lCnt+length(ld_tag))]=h_Inv
   lCnt=lCnt+length(ld_tag)
@@ -112,9 +112,6 @@ C2=(Zl-P1%*%Zs)
 beta_l_zx=1/sqrt(N)*C1_inv%*%C2
 
 Ims=diag(1, M-length(BigLoci))
-beta_s_zx=hs_hat*(Ims+LDss%*%Ims)%*%(sqrt(N)*Zs-N*LDsl%*%beta_l_zx)
+P2=LDss%*%hMat
+beta_s_zx=hs_hat*(Ims-P2)%*%(sqrt(N)*Zs-N*LDsl%*%beta_l_zx)
 
-layout(matrix(1:3, 1,3))
-plot(snpEff[Bloci], beta_l_zx, ylab="Quick Big Effect", xlab="True Big effect")
-plot(snpEff[-Bloci], beta_s_zx, ylab="Quick small effect", xlab="True small effect")
-plot(Bs_henderson, beta_s_zx, xlab="Henderson BLUP", ylab="Quick BLUP")
