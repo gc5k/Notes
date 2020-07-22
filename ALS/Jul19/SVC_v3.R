@@ -5,7 +5,7 @@ boxplot(dat[,-2], cex=0.5, pch=16, col=runif(nrow(dat), 1, nrow(dat)))
 
 ##basic accessment of the data
 ###fivenum, mean, sd, missing, isNumeric
-cutoff=5 #outlier pickup
+cutoff=7 #outlier pickup
 
 SUMmat=matrix(0, ncol(dat), 9)
 colnames(SUMmat)=c("minimum", "lower-hinge", "median", "upper-hinge", "maximum", "mean", "sd", "missingRate", "isNumeric")
@@ -20,8 +20,9 @@ for(i in 1:nrow(SUMmat)) {
     
     idx=which(dat[,i] > SUMmat[i,6]+cutoff*SUMmat[i,7])
     if(length(idx)>0) {
-      print(paste0("", colnames(dat)[i], ", sample id: ",dat[idx,2]))
-      print(paste0("outlier value: ",  dat[idx, i]))
+      for(j in 1:length(idx)) {
+        print(paste0("sample id: ",dat[idx[j],2], ", col:", colnames(dat)[i], ", ", "outlier value: ",  dat[idx[j], i]))
+      }
 
     }
   } else {

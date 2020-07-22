@@ -79,6 +79,40 @@ for(m in 1:length(M)) {
 }
 ```
 
+### Simulating LD
+
+```{r 2pop-ld}
+library(Rcpp)
+sourceCpp("~/git/Notes/R/RLib/Shotgun.cpp") #available at https://github.com/gc5k/Notes/blob/master/R/RLib/Shotgun.cpp
+
+M=c(10000, 1000)
+f=0.05
+for(m in 1:length(M)) {
+  P=runif(M[m], 0.2, 0.8)
+  Sz=c(100, 100)
+  Fq=matrix(0, 2, M[m])
+  Fq[1,]=rbeta(M[m], P*(1-f)/f, (1-P)*(1-f)/f)
+  Fq[2,]=rbeta(M[m], P*(1-f)/f, (1-P)*(1-f)/f)
+
+  Dprime=runif(M[m]-1, 0.3, 1)
+# inbred line
+#  G1=GenerateHapDprimeRcpp(Fq[1,], Dprime, Sz[1])
+#  G2=GenerateHapDprimeRcpp(Fq[2,], Dprime, Sz[2])
+
+  G1=GenerateGenoDprimeRcpp(Fq[1,], Dprime, Sz[1])
+  G2=GenerateGenoDprimeRcpp(Fq[2,], Dprime, Sz[2])
+  G=rbind(G1, G2)
+
+  Gs=apply(G, 2, scale)
+  GG=Gs %*% t(Gs)/M[m]
+  EigenG=eigen(GG)
+  layout(matrix(1:2, 1, 2))
+  barplot(EigenG$values[1:20])
+  plot(main=paste(M[m], "markers"), EigenG$vectors[,1], EigenG$vectors[,2], bty='n', xlab="PC 1", ylab="PC 2", pch=16, col=c(rep("red", Sz[1]), rep("blue", Sz[2])))
+}
+
+```
+
 
 #### Including a locus under selection
 In addition to backgroud markers, we can add additional loci that are under selection. In the simulation below, given 10005 loci the last five of that are under selection.
@@ -1134,4 +1168,3 @@ for(p in 1:length(pop)) {
 ```{r, R.sys}
 sessionInfo()
 ```
-
