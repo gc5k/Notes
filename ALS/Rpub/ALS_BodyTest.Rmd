@@ -1,4 +1,28 @@
+---
+title: "ALS"
+author: "Chen Guo-Bo [chenguobo@gmail.com]"
+date: "`r Sys.Date()`"
+output:
+ html_document:
+    theme: united
+    highlight: tango
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(pROC)
+library("knitr")
+library("kableExtra")
+
 dat=read.csv("20200721all_cgb.csv", as.is = T, header = T)
+
+```
+
+# Table of contents {.tabset .tabset-fade .tabset-pills}
+
+## Quality check
+```{r, data-check}
 
 par(las=2, font=5, bty='l', ps=6)
 boxplot(dat[,-2], cex=0.5, pch=16, col=runif(nrow(dat), 1, nrow(dat)))
@@ -7,17 +31,19 @@ boxplot(dat[,-2], cex=0.5, pch=16, col=runif(nrow(dat), 1, nrow(dat)))
 ###fivenum, mean, sd, missing, isNumeric
 cutoff=7 #outlier pickup
 
-SUMmat=matrix(0, ncol(dat), 9)
-colnames(SUMmat)=c("minimum", "lower-hinge", "median", "upper-hinge", "maximum", "mean", "sd", "missingRate", "isNumeric")
+SUMmat=matrix(0, ncol(dat), 10)
+colnames(SUMmat)=c("minimum", "lower-hinge", "median", "upper-hinge", "maximum", "mean", "sd", "missingRate", "isNumeric", "CaseOnly")
 rownames(SUMmat)=colnames(dat)
 for(i in 1:nrow(SUMmat)) {
   if(is.numeric(dat[,i])) {
     SUMmat[i,1:5]=fivenum(dat[,i])
     SUMmat[i,6]=mean(dat[,i], na.rm = T)
     SUMmat[i,7]=sd(dat[,i], na.rm = T)
-    SUMmat[i,8]=length(which(is.na(dat[,i])))/nrow(dat)
+    naIdx=which(!is.na(dat[,i]))
+    SUMmat[i,8]=1-length(naIdx)/nrow(dat)
     SUMmat[i,9]=T
-    
+    SUMmat[i,10]=ifelse(length(unique(dat[naIdx,1]))==1, T, F)
+
     idx=which(dat[,i] > SUMmat[i,6]+cutoff*SUMmat[i,7])
     if(length(idx)>0) {
       for(j in 1:length(idx)) {
@@ -31,7 +57,19 @@ for(i in 1:nrow(SUMmat)) {
   }
 }
 
+write.table(SUMmat, "Als_sumDat.txt", row.names = T, col.names = T, quote = F)
 
+
+
+basicSum=read.table("Als_sumDat.txt", as.is = T, header = T)
+knitr::kable(basicSum, caption = "Data quality") %>%
+kable_styling("striped", full_width = T)
+#row_spec(row=16:16, color="white", background="red")
+
+```
+
+## Feature selection
+```{r, data-p}
 Smat=matrix(0, ncol(dat)-2, 4)
 
 for(i in 3:ncol(dat)) {
@@ -40,15 +78,17 @@ for(i in 3:ncol(dat)) {
 }
 rownames(Smat)=colnames(dat)[3:ncol(dat)]
 
-library(pROC)
+
 aucMat=matrix(2, ncol(dat)-2, 1)
 rownames(aucMat)=colnames(dat)[3:ncol(dat)]
 for(i in 3:ncol(dat)) {
-  rocObj=roc(dat[,1], dat[,i], quiet = T)
-  aucMat[i-2,1]=rocObj$auc
+  if(!SUMmat[colnames(dat)[i],10]) {
+    rocObj=roc(dat[,1], dat[,i], quiet = T)
+    aucMat[i-2,1]=rocObj$auc
+  }
 }
 
-layout(matrix(c(1,2,3,4), 2, 2, byrow = F))
+layout(matrix(c(1, 2, 3, 4), 2, 2, byrow = F))
 par(las=2, cex=0.5, mai=c(1,0.5,0.5,0.5))
 pcut=-log10(0.05/(ncol(dat)-2))
 barplot(main="case-control",-log10(Smat[,4]), col=ifelse(-log10(Smat[,4])>pcut, "cyan", "grey"))
@@ -74,3 +114,6 @@ par(las=2, cex=0.5, mai=c(1.5,0.5,0.5,0.5))
 pcut=-log10(0.05/(ncol(dat)-2))
 barplot(-log10(Smat[,4]), col=ifelse(-log10(Smat[,4])>pcut, "cyan", "grey"))
 abline(h=-log10(0.05/ncol(dat)), col="red")
+
+```
+
