@@ -1,5 +1,5 @@
 ---
-title: "EigenGC"
+title: "blup"
 author: "Chen Guo-Bo [chenguobo@gmail.com]"
 date: "`r Sys.Date()`"
 output:
@@ -17,6 +17,48 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 print(Sys.time())
 ```
+
+
+## blup1 animal model
+```{r blup-animal}
+Ml=20
+Ms=200
+N=1000
+
+
+Xl=apply(matrix(rbinom(Ml*N, 2, 0.5), N, Ml), 2, scale)
+Xs=apply(matrix(rbinom(Ms*N, 2, 0.5), N, Ms), 2, scale)
+G=Xs%*%t(Xs)/Ms
+
+hs=0.5
+he=1
+bl=rnorm(Ml, 1)
+bs=rnorm(Ms, 0, sqrt(hs/(2*0.5*0.5*Ms)))
+
+Fb=Xl%*%bl
+Sb=Xs%*%bs
+Ev=rnorm(N, 0, sqrt(he))
+y=Fb+Sb+Ev
+
+V=G*hs+diag(he,N,N)
+V_Inv=solve(V)
+
+layout(matrix(1:3, 1, 3))
+bl_est=solve(t(Xl)%*%V_Inv%*%Xl)%*%t(Xl)%*%V_Inv%*%y
+plot(bl, bl_est, pch=16, cex=0.5)
+abline(a=0, b=1, col="red")
+ypre=y-Xl%*%bl_est
+
+bs_est=hs/Ms*t(Xs)%*%V_Inv%*%ypre
+plot(bs, bs_est, pch=16, cex=0.5)
+abline(a=0, b=1, col="red")
+
+gs_est=hs/Ms*Xs%*%t(Xs)%*%V_Inv%*%ypre
+plot(Sb, gs_est, pch=16, cex=0.5)
+abline(a=0, b=1, col="red")
+
+```
+
 
 ## Simulation setup
 ```{r simu-setup}
