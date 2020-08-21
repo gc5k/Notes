@@ -18,11 +18,12 @@ bS=Sa*diag(1, 3, 3)%*%t(z)%*%VI%*%(y-x%*%bL)
 #MME
 R=diag(Se, 6, 6)
 RI=solve(R)
-c11=t(x)%*%RI%*%x
-c12=t(x)%*%RI%*%z
+c11=t(x)%*%x
+c12=t(x)%*%z
 c21=t(c12)
-c22=solve(Sa*diag(1, 3, 3))+t(z)%*%RI%*%z
+c22=solve(Sa*diag(1, 3, 3)*Sa/Se)+t(z)%*%z
 MME_m=rbind(cbind(c11, c12), cbind(c21, c22))
-MME_y=rbind(t(x)%*%RI%*%y, t(z)%*%RI%*%y)
+MME_y=rbind(t(x)%*%y, t(z)%*%y)
 
 MME_b=solve(MME_m)%*%MME_y
+plot(c(bL, bS), MME_b)
