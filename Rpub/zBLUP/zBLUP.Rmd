@@ -16,7 +16,83 @@ knitr::opts_chunk$set(echo = TRUE)
 # Table of contents {.tabset .tabset-fade .tabset-pills}
 ```{r}
 print(Sys.time())
+set.seed(2020)
 ```
+
+## 1 LMM (BLUE & BLUP)
+$$\mathbf{y}=\mathbf{\color{red}{X\beta}+\color{blue}{\sum_{k=1}^KZ_ku_k}+\color{green}{e}}$$
+
+Design matrices (or incident matrices):
+
+$\color{red}{\mathbf{X}}$ ($n\times p$) for fixed effects vector $\color{red}{\mathbf{\beta}}$
+
+$\mathbf{Z_k}$ ($n\times q_k$) for random effects vector $\mathbf{u_k}$, and $u_k \sim N(0, \mathbf{G_k})$. For example, if $u_k$ is sampled from iid with variance $\sigma^2_k$, then $u_k \sim N(0, \mathbf{I}\sigma^2_k)$.
+
+$\color{green}{\mathbf{e}}$ is random effects. Often, for unrelated samples, $e \sim N(0, \mathbf{I}\sigma^2_e)$.
+
+Then $\mathbf{y}$ follows the distribution $$MVN(\color{red}{\mathbf{X\beta}}, V=\color{blue}{\sum_{k=1}^KG_k\sigma^2_k+R\sigma^2_e})$$
+
+### Estimator
+Using general least squares estimation
+
+$$\mathbf{\color{red}{\hat{\beta}}=(X^TV^{-1}X)^{-1}X^TV^{-1}y}$$
+Of note, when $V=I$, it becomes ordinary LSE that $\mathbf{\hat{\beta}=(X^TX)^{-1}X^Ty}$.
+
+The random effect is estimated, known as $\color{cyan}{\boxed{BLUP}}$, can be written as
+$$\mathbf{\color{blue}{\hat{u}_k}=G_kZ^T_kV^{-1}(y-X\hat{\beta})}$$
+
+Given $\mathbf{\hat{\beta}}$ and $\hat{\mathbf{u}}$ we have
+$$
+\mathbf{E}=\left \{
+\left [ \begin{array}{l}
+\mathbf{\beta}-\mathbf{\hat{\beta}}\\
+\mathbf{\mu}-\mathbf{\hat{\mu}}
+\end{array}
+\right ]
+\left [ \begin{array}{l}
+\mathbf{\beta}-\mathbf{\hat{\beta}}\\
+\mathbf{\mu}-\mathbf{\hat{\mu}}
+\end{array}
+\right ]^T
+\right \}=
+\begin{bmatrix}
+\mathbf{X^TR^{-1}X} & \mathbf{X^TR^{-1}Z}\\
+\mathbf{Z^TR^{-1}X} & \mathbf{X^TR^{-1}Z}+\mathbf{G}^{-1}\\
+\end{bmatrix}^{-1}\sigma^2_e
+$$
+
+## 2 Mixed model equation (MME)
+MME is proposed by Henderson. Here we follow the summary by Robinson (Statistical Science, 1991, 6:15-32),
+
+The joint density of $y$ and $u$ is
+$$
+(2\pi\sigma^2_e)^{-\frac{1}{2}n-\frac{1}{2}q}
+\lgroup det
+\begin{bmatrix}
+\mathbf{G} & 0 \\
+0 & \mathbf{R}\\
+\end{bmatrix}
+\rgroup
+^{-1}
+\cdot
+exp
+\left \{
+-\frac{1}{2\sigma^2_e}
+\begin{bmatrix}
+\mathbf{u}\\
+\mathbf{y-X\beta-Zu}
+\end{bmatrix}^T
+\begin{bmatrix}
+\mathbf{G} & 0 \\
+0 & \mathbf{R}\\
+\end{bmatrix}^{-1}
+\begin{bmatrix}
+\mathbf{u}\\
+\mathbf{y-X\beta-Zu}
+\end{bmatrix}
+\right \}
+$$
+
 
 ## Walsh'sCh26 example 1
 
@@ -118,6 +194,66 @@ abline(a=0, b=1, col="red")
 plot(bs, bMMe[(Ml+1):(Ms+Ml)], col="blue")
 abline(a=0, b=1, col="red")
 plot(bs_est, bMMe[(Ml+1):(Ms+Ml)], col="blue")
+abline(a=0, b=1, col="red")
+
+```
+
+## ADD+Dom
+Eq 26.21, 26.22, 26.23
+```{r, AD}
+M=200
+N=200
+ha=0.5
+hd=0.3
+
+frq=rep(0.5, M)
+G=matrix(rbinom(M*N, 2, frq), N, M)
+Gd=matrix(ifelse(G==1, 1, 0), N, M)
+a=rnorm(M)
+d=rnorm(M)
+BVa=G%*%a
+BVd=Gd%*%d
+
+Beta=matrix(c(1, 2), 2, 1)
+X=matrix(rbinom(2*N, 2, 0.5), N, 2)
+vBVa=var(BVa)[1,1]
+vBVd=var(BVd)[1,1]
+ve=vBVa+vBVd
+y=X%*%Beta+BVa+BVd+rnorm(N, 0, sqrt(ve))
+
+#MME
+C11=t(X)%*%X
+C12=t(X)
+C21=X
+C13=t(X)
+C31=X
+C22=diag(1, M)+1.5*diag(1, M)
+C33=diag(1, M)+3*diag(1, M)
+MME_1=cbind(C11, C12, C13)
+MME_2=cbind(C21, C22, diag(1, M))
+MME_3=cbind(C31, diag(1, M), C33)
+
+MME_mat=rbind(MME_1, MME_2, MME_3)
+MME_y=matrix(c(t(X)%*%y, y, y), 2*M+2, 1)
+MME_b=solve(MME_mat)%*%MME_y
+plot(BVa, MME_b[3:(M+2),1])
+abline(a=0, b=1)
+plot(BVd, MME_b[(M+3):(nrow(MME_b)),1])
+
+##GLMM
+V=(diag(vBVa, N)+diag(vBVd, N)+diag(ve, N))
+VI=solve(V)
+bEst=solve(t(X)%*%VI%*%X)%*%t(X)%*%VI%*%y
+
+uA=vBVa*VI%*%(y-X%*%bEst)
+uD=vBVd*VI%*%(y-X%*%bEst)
+uD2=(vBVd/vBVa)*uA
+
+plot(uA, MME_b[3:(M+2),1])
+abline(a=0, b=1, col="red")
+plot(uD, MME_b[(M+3):(nrow(MME_b)),1])
+abline(a=0, b=1, col="red")
+plot(uD, uD2)
 abline(a=0, b=1, col="red")
 
 ```
