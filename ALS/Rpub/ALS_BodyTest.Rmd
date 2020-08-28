@@ -15,7 +15,7 @@ library(pROC)
 library("knitr")
 library("kableExtra")
 
-dat=read.csv("20200721all_cgb.csv", as.is = T, header = T)
+dat=read.csv("20200818all.csv", as.is = T, header = T)
 
 ```
 

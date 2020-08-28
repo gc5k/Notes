@@ -69,8 +69,9 @@ $$
 (2\pi\sigma^2_e)^{-\frac{1}{2}n-\frac{1}{2}q}
 \lgroup det
 \begin{bmatrix}
-\mathbf{G} & 0 \\
-0 & \mathbf{R}\\
+\mathbf{G_1} & 0 & 0\\
+0 & \mathbf{G_2} & 0 \\
+0 & 0 & \mathbf{R}\\
 \end{bmatrix}
 \rgroup
 ^{-1}
@@ -79,24 +80,129 @@ exp
 \left \{
 -\frac{1}{2\sigma^2_e}
 \begin{bmatrix}
-\mathbf{u}\\
-\mathbf{y-X\beta-Zu}
+\mathbf{u_1}\\
+\mathbf{u_2}\\
+\mathbf{y-X\beta-Z_1u_1-Z_2u_2}
 \end{bmatrix}^T
 \begin{bmatrix}
-\mathbf{G} & 0 \\
-0 & \mathbf{R}\\
+\mathbf{G_1} & 0 &0\\
+0 & \mathbf{G_2} & 0\\
+0 & 0 &\mathbf{R} \\
 \end{bmatrix}^{-1}
 \begin{bmatrix}
-\mathbf{u}\\
-\mathbf{y-X\beta-Zu}
+\mathbf{u_1}\\
+\mathbf{u_2}\\
+\mathbf{y-X\beta-Z_1u_1-Z_2u_2}
 \end{bmatrix}
 \right \}
 $$
+We can define
 
+$$\mathbf{\mathcal{Q}}=\mathbf{u_1^TG_1^{-1}u_1}+\mathbf{u_2^TG_2^{-1}u_2}+\mathbf{\tilde{y}R^{-1}\tilde{y}}$$
+
+in which $\mathbf{\tilde{y}}=\mathbf{y-X\beta-Z_1u_1-Z_2u_2}$,
+
+$$
+\begin{bmatrix}
+\mathbf{\frac{\partial\mathcal{Q}}{\partial\beta}}=-2\mathbf{X\tilde{y}+2X^T\beta X+2Z_1^Tu_1Z_1+2Z_2^Tu_2Z_2}=0\\
+\mathbf{\frac{\partial\mathcal{Q}}{\partial u_1}}=2\mathbf{G_1^{-1}u_1-2yZ_1+2X\beta Z_1+2Z_1^Tu_1Z_1+2Z_1^Tu_2Z_2}=0\\
+\mathbf{\frac{\partial\mathcal{Q}}{\partial u_2}}=2\mathbf{G_2^{-1}u_2-2yZ_2+2X\beta Z_2+2Z_1^Tu_1Z_2+2Z_2^Tu_2Z_2}=0
+\end{bmatrix}
+$$
+
+It yields MME equation below
+
+$$
+\begin{bmatrix}
+\mathbf{X^TR^{-1}X} & \mathbf{X^TR^{-1}Z_1} & \mathbf{X^TR^{-1}Z_2} \\
+\mathbf{Z_1^TR^{-1}X} & \mathbf{Z_1^TR^{-1}Z_1}+\mathbf{G_1^{-1}} & \mathbf{Z_1^TR^{-1}Z_2}\\
+\mathbf{Z_2^TR^{-1}X} & \mathbf{Z_2^TR^{-1}Z_1} & \mathbf{Z_2^TR^{-1}Z_2}+\mathbf{G_2^{-1}}
+\end{bmatrix}
+\begin{bmatrix}
+\mathbf{\hat{\beta}}\\
+\mathbf{\hat{u}_1}\\
+\mathbf{\hat{u}_2}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf{X^TR^{-1}y}\\
+\mathbf{Z_1^TR^{-1}y}\\
+\mathbf{Z_2^TR^{-1}y}\\
+\end{bmatrix}
+$$
+When $R=I$, it can be written as
+
+$$
+\begin{bmatrix}
+\mathbf{X^TX} & \mathbf{X^TZ_1} & \mathbf{X^TZ_2} \\
+\mathbf{Z_1^TX} & \mathbf{Z_1^TZ_1}+\lambda_1\mathbf{G_1^{-1}} & \mathbf{Z_1^TZ_2}\\
+\mathbf{Z_2^TR^{-1}X} & \mathbf{Z_2^TR^{-1}Z_1} & \mathbf{Z_2^TR^{-1}Z_2}+\lambda_2\mathbf{G_2^{-1}}
+\end{bmatrix}
+\begin{bmatrix}
+\mathbf{\hat{\beta}}\\
+\mathbf{\hat{u}_1}\\
+\mathbf{\hat{u}_2}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf{X^Ty}\\
+\mathbf{Z_1^Ty}\\
+\mathbf{Z_2^Ty}\\
+\end{bmatrix}
+$$
+in which $\lambda_1=\sigma^2_e/\sigma^2_1$ and $\lambda_2=\sigma^2_e/\sigma^2_2$.
 
 ## Walsh'sCh26 example 1
 
-```{r walsh example1}
+$$\mathbf{y}=
+\begin{bmatrix}
+y_{\color{blue}{1},\color{red}{1},1}\\
+y_{\color{blue}{1},\color{red}{2},1}\\
+y_{\color{blue}{2},\color{red}{1},1}\\
+y_{\color{blue}{2},\color{red}{1},2}\\
+y_{\color{blue}{3},\color{red}{1},1}\\
+y_{\color{blue}{3},\color{red}{2},1}\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+9\\
+12\\
+11\\
+6\\
+7\\
+14
+\end{bmatrix}
+$$
+giving the mixed model as
+$$\mathbf{y=X\beta+Zu+e}$$
+the incident matrix is 
+$$
+\color{red}{\mathbf{X}=
+\begin{bmatrix}
+1 & 0\\
+0 & 1\\
+1 & 0 \\
+1 & 0 \\
+1 & 0 \\
+0 & 1 \\
+\end{bmatrix}}
+$$
+and $\mathbf{\beta}^T=(\beta_1, \beta_2)$
+$$
+\color{blue}{\mathbf{Z}=
+\begin{bmatrix}
+1 & 0 & 0\\
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & 1 & 0\\
+0 & 0 & 1 \\
+0 & 0 & 1 \\
+\end{bmatrix}}
+$$
+and $\mathbf{u}^T=(u_1, u_2, u_3)$.
+
+```{r, walsh example1}
+
 #walsh example
 y=matrix(c(9, 12, 11, 6, 7, 14), 6, 1)
 x=matrix(0, 6, 2)
