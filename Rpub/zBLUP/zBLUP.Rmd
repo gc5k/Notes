@@ -173,8 +173,18 @@ y_{\color{blue}{3},\color{red}{2},1}\\
 14
 \end{bmatrix}
 $$
+
+|$y_{\color{blue}{S,}\color{red}{E,}C}$ | $\color{blue}{Sire}$ (Random) | $\color{red}{Environment}$ (Fixed) | Count | Value |
+|:------:|:------:|:------:|:----:|:----:|
+| $y_{\color{blue}{1},\color{red}{1},1}$ | $\color{blue}{1}$ | $\color{red}{1}$ | $1$ | 9 |
+| $y_{\color{blue}{1},\color{red}{2},1}$ | $\color{blue}{1}$ | $\color{red}{2}$ | $1$ | 12 |
+| $y_{\color{blue}{2},\color{red}{1},1}$ | $\color{blue}{2}$ | $\color{red}{1}$ | $1$ | 11 |
+| $y_{\color{blue}{2},\color{red}{1},2}$ | $\color{blue}{2}$ | $\color{red}{1}$ | $2$ | 6 |
+| $y_{\color{blue}{3},\color{red}{1},1}$ | $\color{blue}{3}$ | $\color{red}{1}$ | $1$ | 7 |
+| $y_{\color{blue}{3},\color{red}{2},2}$ | $\color{blue}{3}$ | $\color{red}{2}$ | $1$ | 14 |
+
 giving the mixed model as
-$$\mathbf{y=X\beta+Zu+e}$$
+$$\mathbf{y=\color{red}{X}\beta+\color{blue}{Z}u+e}$$
 the incident matrix is 
 $$
 \color{red}{\mathbf{X}=
@@ -237,6 +247,112 @@ plot(bS, MME_b[3:5,1])
 abline(a=0, b=1, col="red")
 
 ```
+
+
+## Robinson's data
+Robinson ("That BLUP is a good thing : the estimation of random effects", Statitical Science, 1991, 6:15-32)
+
+| $\color{red}{Herd}$ (fixed) | $\color{blue}{Sire}$ (random) | Yield |
+|:----:|:---:|:----:|
+| 1 | A | 110 |
+| 1 | D | 100 |
+| 2 | B | 110 |
+| 2 | D | 100 |
+| 2 | D | 100 |
+| 3 | C | 110 |
+| 3 | C | 110 |
+| 3 | D | 100 |
+| 3 | D | 100 |
+
+- $$\mathbf{y}=(110,100, 110, 100, 100, 110, 110, 100, 100)^T$$
+
+- The fixed effect is $\mathbf{\beta}=(\beta_1, \beta_2, \beta_3)^T$, and
+
+$$
+\color{red}{\mathbf{X}}=
+\begin{bmatrix}
+1&0&0\\
+1&0&0\\
+0&1&0\\
+0&1&0\\
+0&1&0\\
+0&0&1\\
+0&0&1\\
+0&0&1\\
+0&0&1\\
+\end{bmatrix}
+$$
+
+- The sire effect is $\mathbf{\mu}=(s_A, s_B, s_C, s_D)^T$, and
+$$
+\color{blue}{\mathbf{Z}}=
+\begin{bmatrix}
+1&0&0&0\\
+0&0&0&1\\
+0&1&0&0\\
+0&0&0&1\\
+0&0&0&1\\
+0&0&1&0\\
+0&0&1&0\\
+0&0&0&1\\
+0&0&0&1\\
+\end{bmatrix}
+$$
+If we assume $R=I\sigma^2_e$ the identity matrix, and $G=0.1R=0.1I\sigma^2_e$, using MME
+
+$$
+\begin{bmatrix}
+\mathbf{\color{red}{X}^T\color{red}{X}} & \mathbf{\color{red}{X}^T\color{blue}{Z}} \\
+\mathbf{\color{blue}{Z}^T\color{red}{X}} & \mathbf{\color{blue}{Z}^T\color{blue}{Z}}+\frac{\sigma^2_e}{\sigma^2_s}\mathbf{G^{-1}}\\
+\end{bmatrix}
+\begin{bmatrix}
+\mathbf{\color{red}{\hat{\beta}}}\\
+\mathbf{\color{blue}{\hat{u}}}\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf{\color{red}{X}^Ty}\\
+\mathbf{\color{blue}{Z}^Ty}\\
+\end{bmatrix}
+$$
+
+It is realized as 
+$$
+\begin{bmatrix}
+\color{red}{2}&\color{red}{0}&\color{red}{0}&1&0&0&1\\
+\color{red}{0}&\color{red}{3}&\color{red}{0}&0&1&0&2\\
+\color{red}{0}&\color{red}{0}&\color{red}{4}&0&0&2&2\\
+1&0&0&\color{blue}{11}&\color{blue}{0}&\color{blue}{0}&\color{blue}{0}\\
+0&1&0&\color{blue}{0}&\color{blue}{11}&\color{blue}{0}&\color{blue}{0}\\
+0&0&2&\color{blue}{0}&\color{blue}{0}&\color{blue}{12}&\color{blue}{0}\\
+1&1&2&\color{blue}{0}&\color{blue}{0}&\color{blue}{0}&\color{blue}{12}\\
+\end{bmatrix}
+\begin{bmatrix}
+\color{red}{\hat{h}_1}\\
+\color{red}{\hat{h}_2}\\
+\color{red}{\hat{h}_3}\\
+\color{blue}{\hat{s}_A}\\
+\color{blue}{\hat{s}_B}\\
+\color{blue}{\hat{s}_C}\\
+\color{blue}{\hat{s}_D}\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+\color{red}{210}\\
+\color{red}{310}\\
+\color{red}{420}\\
+\color{blue}{110}\\
+\color{blue}{110}\\
+\color{blue}{220}\\
+\color{blue}{500}\\
+\end{bmatrix}
+$$
+which has solution
+
+- $\mathbf{\hat{\beta}}=(105.64, 104.28, 105.64)^T$
+
+- $\mathbf{\hat{\mu}}=(0.40, 0.52, 0.76, -1.67)^T$
+
 
 ## blup1 animal model
 ```{r, blup-animal}
