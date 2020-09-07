@@ -1,0 +1,42 @@
+General
+1. Falconer, D. S. and T. F. C. Mackay. Introduction to Quantitative Genetics, 4th Edition
+2. Lynch, M. and B. Walsh. 1998. Genetics and Analysis of Quantitative Traits. Sinauer.
+Roff, D. A. 1997. Evolutionary Quantitative Genetics. Chapman and Hall.
+3. Mather, K., and J. L. Jinks. 1982. Biometrical Genetics. (3rd Ed.) Chapman & Hall.
+
+Animal Breeding
+1. Cameron, N. D. 1997. Selection Indices and Prediction of Genetic Merit in Animal Breeding.
+CAB International.
+2. Mrode, R. A. 1996. Linear Models for the Prediction of Animal Breeding Values. CAB
+International.
+3. Simm, G. 1998. Genetic Improvement of Cattle and Sheep. Farming Press.
+4. Turner, H. N., and S. S. Y. Young. 1969. Quantitative Genetics in Sheep Breeding. Cornell
+University Press.
+5. Weller, J. I. 2001. Quantitative Trait Loci Analysis in Animals. CABI Publishing.
+
+Plant Breeding
+1. Acquaah, G. 2007. Principles of Plant Genetics and Breeding. Blackwell.
+2. Bernardo, R. 2002. Breeding for Quantitative Traits in Plants. Stemma Press.
+3. Hallauer, A. R., and J. B. Miranda. 1986. Quantitative Genetics in Maize Breeding. Iowa
+State Press.
+4. Mayo, O. 1987. The Theory of Plant Breeding. Oxford.
+5. Sleper, D. A., and J. M. Poehlman. 2006. Breeding Field Crops. 5th Edition. Blackwell
+6. Wricke, G., and W. E. Weber. 1986. Quantitative Genetics and Selection in Plant Breeding.
+De Gruyter.
+
+Humans
+1. Khoury, M. J., T. H. Beaty, and B. H. Cohen. 1993. Fundamentals of Genetic Epidemiology.
+Oxford.
+2. Plomin, R., J. C. DeFries, G. E. McLearn, and P. McGuffin. 2002. Behavioral Genetics (4th Ed)
+Worth Publishers.
+3. Sham, P. 1998. Statistics in Human Genetics. Arnold.
+4. Thomas, D. C. 2004. Statistical Methods in Genetic Epidemiology. Oxford.
+5. Weiss, K. M. 1993. Genetic Variation and Human Disease. Cambridge.
+6. Ziegler, A., and I. R. Konig. 2006. A Statistical Approach to Genetic Epidemiology. Wiley.
+
+Statistical and Technical Issues
+1. Bulmer, M. 1980. The Mathematical Theory of Quantitative Genetics. Clarendon Press.
+2. Kempthorne, O. 1969. An Introduction to Genetic Statistics. Iowa State University Press.
+3. Saxton, A. M. (Ed). 2004. Genetic Analysis of Complex Traits Using SAS. SAS Press.
+4. Sorensen, D., and D. Gianola. 2002. Likelihood, Bayesian, and MCMC Methods in
+Quantitative Genetics. Springer.
