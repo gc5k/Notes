@@ -1,5 +1,5 @@
 ---
-title: "blup"
+title: "zBLUP"
 author: "Chen Guo-Bo [chenguobo@gmail.com]"
 date: "`r Sys.Date()`"
 output:
@@ -11,13 +11,102 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
-
-# Table of contents {.tabset .tabset-fade .tabset-pills}
-```{r}
 print(Sys.time())
 set.seed(2020)
 ```
+
+# Table of contents {.tabset .tabset-fade .tabset-pills}
+
+## 0 Multivariate normal distribution (MVN)
+$$f_\mathbf{X}(x_1, ...,x_k)=\frac{exp[-\frac{1}{2}\mathbf{(X-\mu)^T\Sigma^{-1}(X-\mu)}]}{\sqrt{(2\pi)^k|\mathbf{\Sigma|}}}$$
+in which $|\mathbf{\Sigma}|$ is the determinant of $\mathbf{\Sigma}$.
+
+### Bivariate normal distribution 
+$$f(x,y)=\frac{1}{2\pi\sigma_X\sigma_Y\sqrt{1-\rho^2}}exp \{-\frac{1}{2(1-\rho^2)}[\frac{(x-\mu_X)^2}{\sigma^2_X}+\frac{(x-\mu_Y)^2}{\sigma^2_Y}-2\frac{\rho(x-\mu_X)(y-\mu_Y)}{\sigma_X\sigma_X}]\}$$
+in which $\mathbf{\mu}=\begin{bmatrix}\mu_X\\\mu_Y\end{bmatrix}$, $\mathbf{\Sigma}=\begin{bmatrix}\sigma^2_X&\rho\sigma_X\sigma_Y\\\rho\sigma_X\sigma_Y&\sigma^2_X\end{bmatrix}$
+
+The conditional distribution for $y|x$ is
+
+$$y|x=\rho\frac{\sigma_X}{\sigma_Y}(x-\mu_X)+\mu_Y$$, which is best linear unbiased prediction. 
+
+and the conditional sampling variance is $var(y|x)=(1-\rho^2)\sigma^2_Y$.
+
+### Conditional multivariate 
+
+$$\mathbf{X \sim MVN(\mu, \Sigma)}$$
+If we partition it into to components
+$$\mathbf{X} \sim MVN(\begin{bmatrix} \mathbf{\mu_{X_1}}\\ \mathbf{\mu_{X_2}} \end{bmatrix},
+\begin{bmatrix} \mathbf{\Sigma_{X_1X_1}} & \mathbf{\Sigma_{X_1X_2}} \\ \mathbf{\Sigma_{X_2X_1}} & \mathbf{\Sigma_{X_2X_2}}\end{bmatrix})$$
+
+Its conditional distribution is 
+$$\mathbf{X_{2|{X_1}}\sim MVN} (\mathbf{\mu_{X_2}}-\mathbf{\Sigma}_{21}\mathbf{\Sigma}_{22}^{-1}(X_1-\mu_{X_1}), \mathbf{\Sigma_{X_2X_2}}-\mathbf{\Sigma_{21}\mathbf{\Sigma_{11}^{-1}}\Sigma_{12}})$$
+
+### Example (from Walsh example C8.6)
+
+Consider the regression of the phenotypic value of an offspring ($z_o$) on that of its parents ($z_s$ and $z_d$ for sire and dam, respectively). Assume that the joint distribution of zo, zs, and Zd is multivariate normal. For the simplest case of noninbred and unrelated parents, no epistasis or genotype-environment correlation, the covariance matrix can be obtained from the theory of correlation between relatives (Chapter 7), giving the joint distribution as
+
+$$
+\begin{bmatrix}
+z_o\\
+z_s\\
+z_d\\
+\end{bmatrix}
+\sim MVN (
+\begin{bmatrix}
+\mu_z\\
+\mu_s\\
+\mu_d\\
+\end{bmatrix}
+,
+\sigma^2_z
+\begin{bmatrix}
+1 & \frac{h^2}{2} & \frac{h^2}{2}\\
+ \frac{h^2}{2} & 1 & 0\\
+\frac{h^2}{2} & 0 & 1\\
+\end{bmatrix}
+)
+$$
+Let $X_1=z_0$ and $X_2=(z_s, z_d)^T$, giving $\mathbf{V_{X_1, X_1}}=\sigma^2_z$, $\mathbf{V_{X_1, X_2}}=\mathbf{V_{X_2, X_1}^T}=\sigma^2_z(\frac{h^2}{2}\frac{h^2}{2})$ and $\mathbf{V_{X_2, X_2}}$, and $\mathbf{V_{X_2, X_2}}=\mathbf{I}_{2\times2}$. Upon conditional distribution, it is 
+
+$$
+\begin{align}
+z_o&=\mu_0+\sigma^2_z\frac{h^2}{2}
+\begin{bmatrix}1&1\end{bmatrix}
+(\sigma^2_z)^{-1}\begin{bmatrix}
+z_s-\mu_s\\
+z_d-\mu_d
+\end{bmatrix}
++e\\
+&=\mu_o+\frac{h^2}{2}(z_s-\mu_s)+\frac{h^2}{2}(z_d-\mu_d)+e
+\end{align}
+$$
+The residual is distributed as 
+$$
+\begin{align}
+\sigma^2_e&=\sigma^2_z-\frac{h^2\sigma^2_z}{2}
+\begin{bmatrix}1&1\end{bmatrix}
+(\sigma^2_z)^{-1}
+\begin{bmatrix}
+1&0\\
+0&1
+\end{bmatrix}
+\frac{h^2\sigma^2_z}{2}
+\begin{bmatrix}
+1\\
+1
+\end{bmatrix}\\
+&=\sigma^2_z(1-\frac{h^4}{2})
+\end{align}
+$$
+
+
+Further reading
+
+- Lynch & Walsh
+
+- [Multivariate normal distribution](https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Conditional_distributions)
+
+- [Risk Prediction of Complex Diseases from Family History and Known Susceptibility Loci, with Applications for Cancer Screening, $AJHG,2011,88:648-65$]
 
 ## 1 LMM (BLUE & BLUP)
 $$\mathbf{y}=\mathbf{\color{red}{X\beta}+\color{blue}{\sum_{k=1}^KZ_ku_k}+\color{green}{e}}$$
@@ -40,6 +129,7 @@ Of note, when $V=I$, it becomes ordinary LSE that $\mathbf{\hat{\beta}=(X^TX)^{-
 
 The random effect is estimated, known as $\color{cyan}{\boxed{BLUP}}$, can be written as
 $$\mathbf{\color{blue}{\hat{u}_k}=G_kZ^T_kV^{-1}(y-X\hat{\beta})}$$
+
 
 Given $\mathbf{\hat{\beta}}$ and $\hat{\mathbf{u}}$ we have
 $$
@@ -248,7 +338,6 @@ abline(a=0, b=1, col="red")
 
 ```
 
-
 ## Robinson's data
 Robinson ("That BLUP is a good thing : the estimation of random effects", Statitical Science, 1991, 6:15-32)
 
@@ -354,7 +443,33 @@ which has solution
 - $\mathbf{\hat{\mu}}=(0.40, 0.52, 0.76, -1.67)^T$
 
 
-## blup1 animal model
+## Three Blup equivalent models (Animal, Gametic, Red)
+### Animal model
+$$y_i=\mu+a_i+e_i$$
+It is the conventional model used, and $a_i$ is the breeding value of the $i^{th}$ individual, its corresponding LMM can be written as
+$$\mathbf{y=\color{red}{X}\beta+\color{blue}{Z}\mu+e}$$
+For additive model, $\mathbf{G=A}\sigma^2_A$
+
+It's correponding MME is 
+
+$$
+\begin{bmatrix}
+\mathbf{\color{red}{X}^T\color{red}{X}} & \mathbf{\color{red}{X}^T\color{blue}{Z}} \\
+\mathbf{\color{blue}{Z}^T\color{red}{X}} & \mathbf{\color{blue}{Z}^T\color{blue}{Z}}+\frac{\sigma^2_e}{\sigma^2_s}\mathbf{\color{red}{G}^{-1}}\\
+\end{bmatrix}
+\begin{bmatrix}
+\mathbf{\color{red}{\hat{\beta}}}\\
+\mathbf{\color{blue}{\hat{u}}}\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf{\color{red}{X}^Ty}\\
+\mathbf{\color{blue}{Z}^Ty}\\
+\end{bmatrix}
+$$
+
+### Gematic model
+
 ```{r, blup-animal}
 Ml=20
 Ms=100
@@ -419,6 +534,10 @@ plot(bs_est, bMMe[(Ml+1):(Ms+Ml)], col="blue")
 abline(a=0, b=1, col="red")
 
 ```
+
+### Gametic model
+
+### Reduced model
 
 ## ADD+Dom
 Eq 26.21, 26.22, 26.23
