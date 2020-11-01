@@ -1297,29 +1297,23 @@ $$\begin{bmatrix}
 \mathbf{K}&0\\
 0&0\\
 \end{bmatrix},
-
-
 \frac{\partial Q}{\partial \sigma^2_{a_2}}=\begin{bmatrix}
 0&0\\
 0&\mathbf{K}
 \end{bmatrix},
-
 \frac{\partial Q}{\partial \gamma_g}=\begin{bmatrix}
 0&\mathbf{K}\\
 \mathbf{K}&0
 \end{bmatrix}
 \\
-
 \frac{\partial Q}{\partial \sigma^2_{e_1}}=\begin{bmatrix}
 \mathbf{I}_N&0\\
 0&0
 \end{bmatrix},
-
 \frac{\partial Q}{\partial \sigma^2_{e_2}}=\begin{bmatrix}
 0&0\\
 0&\mathbf{I}_N
 \end{bmatrix},
-
 \frac{\partial Q}{\partial \gamma_e}=\begin{bmatrix}
 0&\mathbf{I}_N\\
 \mathbf{I}_N&0
@@ -1335,16 +1329,12 @@ $$\left \{
 \\
 \frac{\partial Q}{\partial \sigma^2_{e_1}}&=2\{tr(\mathbf{y_1y_1}^T\mathbf{I}_N)-\sigma^2_{a_1}tr(\mathbf{KI}_N)-\sigma^2_{e_1}tr(\mathbf{I}_N)\}=0
 \\
-
 \frac{\partial Q}{\partial \sigma^2_{a_2}}&=2\{tr(\mathbf{y_2y_2}^T\mathbf{K})-\sigma^2_{a_2}tr(\mathbf{KK})-\sigma^2_{e_2}tr(\mathbf{K})\}=0
 \\
-
 \frac{\partial Q}{\partial \sigma^2_{e_2}}&=2\{tr(\mathbf{y_2y_2}^T\mathbf{I}_N)-\sigma^2_{a_2}tr(\mathbf{KI}_N)-\sigma^2_{e_2}tr(\mathbf{I}_N)\}=0
 \\
-
 \frac{\partial Q}{\partial \sigma^2_{r_g}}&=2\{tr(\mathbf{y_1y_2}^T\mathbf{K}+\mathbf{y_1y_2}^T\mathbf{K})-\gamma_{g}tr(\mathbf{KK}+\mathbf{KK})-\gamma_{e}tr(\mathbf{K}+\mathbf{K})\}=0
 \\
-
 \frac{\partial Q}{\partial \sigma^2_{r_e}}&=2\{tr(\mathbf{y_1y_2}^T\mathbf{I}_N+\mathbf{y_1y_2}^T\mathbf{I}_N)-\gamma_{g}tr(\mathbf{K}+\mathbf{K})-\gamma_{e}tr(\mathbf{I}_N+\mathbf{I}_N)\}=0
 \\
 \end{align}
@@ -1356,21 +1346,17 @@ And, it turns out a normal equation as below
 $$\begin{bmatrix} 
 tr(\mathbf{KK}) & tr(\mathbf{K}) & 0 & 0 &0 &0 \\
 tr(\mathbf{K}) & tr(\mathbf{I}_N) & 0 & 0 &0 &0 \\
-
 0& 0& tr(\mathbf{KK}) & tr(\mathbf{K}) & 0 & 0 \\
 0& 0&tr(\mathbf{K}) & tr(\mathbf{I}_N) & 0 & 0 \\
-
 0& 0 & 0 & 0& tr(\mathbf{KK}) & tr(\mathbf{K}) \\
 0& 0& 0 & 0 &tr(\mathbf{K}) & tr(\mathbf{I}_N) \\
-\end{bmatrix} 
- 
+\end{bmatrix}
 \left[ \begin{array}{c} \hat{\sigma}^2_{a_1} \\
 \hat{\sigma}^2_{e_1} \\
 \hat{\sigma}^2_{a_2} \\
 \hat{\sigma}^2_{e_2} \\
 \hat{\gamma}_g \\
 \hat{\gamma}_e \\
-
 \end{array} \right] 
 = 
 \left [ \begin{array}{c} tr[y^T_1\mathbf{K}y_1] \\ tr[y^T_1\mathbf{I}_Ny_1]\\ tr[y^T_2\mathbf{K}y_2] \\ tr[y^T_2\mathbf{I}_Ny_2]\\tr[y^T_1\mathbf{K}y_2]\\tr[y^T_1\mathbf{I}_Ny_2] 
