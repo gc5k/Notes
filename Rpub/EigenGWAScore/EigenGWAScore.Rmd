@@ -971,69 +971,11 @@ abline(a=0, b=1, lty=2, col="grey")
 
 
 ## 7 EigenGWAS pipeline
-### Manhattan plot function
-```{r, manhattan}
-manhattan <- function(dataframe, colors=c("gray10", "gray50"), ymax="max", limitchromosomes=NULL, suggestiveline=-log10(1e-5), genomewideline=NULL, title="", annotate=NULL, ...) {
-  
-  d=dataframe
-  if (!("CHR" %in% names(d) & "BP" %in% names(d) & "P" %in% names(d))) stop("Make sure your data frame contains columns CHR, BP, and P")
-  if (!is.null(limitchromosomes)) {
-    d=d[d$CHR %in% limitchromosomes, ]
-  }
-  
-  d=subset(na.omit(d[order(d$CHR, d$BP), ]), (P>0 & P<=1)) # remove na's, sort, and keep only 0<P<=1
-  d$logp = -log10(d$P)
-  d$pos=NA
-  ticks=NULL
-  lastbase=0 #  colors <- rep(colors,max(d$CHR))[1:max(d$CHR)]
-  colors <- rep(colors,max(d$CHR))[1:length(unique(d$CHR))]
-  
-  if (ymax=="max") ymax<-ceiling(max(d$logp))
-  if (ymax<8) ymax<-8
-  numchroms=length(unique(d$CHR))
-  if (numchroms==1) {
-    d$pos=d$BP
-    ticks=floor(length(d$pos))/2+1
-  } else {
-    Uchr=unique(d$CHR)
-    for (i in 1:length(Uchr)) {
-      if (i==1) {
-        d[d$CHR==Uchr[i], ]$pos=d[d$CHR==Uchr[i], ]$BP
-      } else {
-        lastbase=lastbase+tail(subset(d, CHR==Uchr[i-1])$BP, 1)
-        d[d$CHR==Uchr[i], ]$pos=d[d$CHR==Uchr[i], ]$BP+lastbase
-      }
-      ticks=c(ticks, d[d$CHR==Uchr[i], ]$pos[floor(length(d[d$CHR==Uchr[i], ]$pos)/2)+1])
-    }
-  }
-  if (numchroms==1) {
-    with(d, plot(main=title, pos, logp, ylim=c(0,ymax), ylab=expression(-log[10](italic(p))), xlab=paste("Chromosome",unique(d$CHR),"position"), ...))
-  } else {
-    with(d, plot(main=title, pos, logp, ylim=c(0,ymax), ylab=expression(-log[10](italic(p))), xlab="Chromosome", xaxt="n", type="n", ...))
-    axis(1, at=ticks, lab=unique(d$CHR), ...)
-    icol=1
-    Uchr=unique(d$CHR)
-    for (i in 1:length(Uchr)) {
-      with(d[d$CHR==Uchr[i], ], points(pos, logp, col=colors[icol], ...))
-      icol=icol+1
-    }
-  }
-  if (!is.null(annotate)) {
-    d.annotate=d[which(d$SNP %in% annotate), ]
-    with(d.annotate, points(pos, logp, col="green3", ...))
-  }
-  #  if (suggestiveline) abline(h=suggestiveline, col="blue")
-  if (!is.null(genomewideline)) {
-    abline(h=genomewideline, col="gray")
-  } else {
-    abline(h=-log10(0.05/nrow(d)), col="gray")    
-  }
-}
-```
 
 #### Random mating population (CEU vs TSI)
 Replace the plink with your own path. Using HapMap CEU (northwest European) vs TSI (south Europeans) as example. The data can be found [here](https://github.com/gc5k/EigenGWASRDoc/tree/master/data/euro).
 ```{r, euro-demo, collapse=TRUE}
+library(qqman)
 plink2='/Users/gc5k/bin/plink_mac/plink' #replace it with your own path
 dat="./data/euro/euro_10K"
 layout(matrix(1:6, 2, 3))
@@ -1068,7 +1010,7 @@ EigenRes$Praw=EigenRes$P
 gc=qchisq(median(EigenRes$P), 1, lower.tail = F)/qchisq(0.5, 1, lower.tail = F)
 print(paste("GC = ", format(gc, digits = 4)))
 EigenRes$P=pchisq(qchisq(EigenRes$Praw, 1, lower.tail = F)/gc, 1, lower.tail = F)
-manhattan(EigenRes, title="EigenGWAS 1", pch=16, cex=0.3, bty='n')
+manhattan(EigenRes, main="EigenGWAS 1", p="P", cex=0.3, bty='n')
 
 #QQplot
 chiseq=rchisq(nrow(EigenRes), 1)
@@ -1082,6 +1024,7 @@ abline(a=0, b=1, col="red", lty=2)
 #### Inbred population (Arabdopsis)
 Replace the plink with your own path. The Arabidopsis data can be found [here](https://github.com/gc5k/EigenGWASRDoc/tree/master/data/arab).
 ```{r, arab-demo, collapse=TRUE}
+library(qqman)
 plink2='/Users/gc5k/bin/plink_mac/plink' #replace it with your own path
 dat="./data/arab/arab"
 
@@ -1116,7 +1059,7 @@ EigenRes$Praw=EigenRes$P
 gc=qchisq(median(EigenRes$P), 1, lower.tail = F)/qchisq(0.5, 1, lower.tail = F)
 print(paste("GC = ", format(gc, digits = 4)))
 EigenRes$P=pchisq(qchisq(EigenRes$Praw, 1, lower.tail = F)/gc, 1, lower.tail = F)
-manhattan(EigenRes, title="EigenGWAS 1", pch=16, cex=0.3, bty='n')
+manhattan(EigenRes, main="EigenGWAS 1", cex=0.3, bty='n')
 
 #QQplot
 chiseq=rchisq(nrow(EigenRes), 1)
@@ -1162,6 +1105,98 @@ for(p in 1:length(pop)) {
   }
 }
 ```
+
+## Poor chi
+```{r, poor-chi}
+####downward correction
+tests=10000
+NCP=c(0.1, 0.5, 0.9, 1, 5, 9)
+layout(matrix(1:6, 2, 3))
+for(i in 1:length(NCP)) {
+  chi1=rchisq(tests, 1, ncp=NCP[i])
+#  if(NCP[i]<1) {
+    c_chi1=chi1/(1+NCP[i])
+#  } else {
+#    c_chi1=chi1/NCP[i]
+#  }
+  qqplot(xlim=c(0, 20), ylim=c(0, 20), xlab=expression("chi^2"), ylab="Observed chi^2", main=NCP[i],rchisq(tests,1),c_chi1, pch=16)
+  abline(a=0, b=1, col="red", xlab="Expected", ylab="Corrected")
+}
+
+```
+
+
+## Bayes-P
+```{r, Bayes-P}
+arabEV=read.table("./data/arab/arab.eigenval", as.is = T)
+arabVec=read.table("./data/arab/arab.1.egwas", as.is = T, header = T)
+gc=median(arabVec$Chi)/0.455
+arabVec$Pprice=pchisq(arabVec$Chi/arabEV[1,1], 1, lower.tail = F) #linear correction
+arabVec$Pgc=pchisq(arabVec$Chi/gc, 1, lower.tail = F) #linear correction
+arabVec$Pfst=pchisq(arabVec$Chi, 1, ncp=arabVec$Fst*295, lower.tail = F) #ncp correction
+arabVec$Pgc_fdr=p.adjust(arabVec$Pgc, method = "BH") #ncp correction
+arabVec$Pfst_fdr=p.adjust(arabVec$Pfst, method = "BH") #ncp correction
+
+hist(arabVec$Fst)
+
+library(qqman)
+logPcut=-log10(0.05/nrow(arabVec))
+
+vmin <- function(x,y)
+{
+  n=length(x)
+  res <-x
+  for(i in 1:n)
+  {
+    res[i]=min(x[i],y[i])
+  }
+  return(res)
+}
+
+library(locfdr)
+zzp=qnorm(arabVec$P)
+zzp[is.infinite(zzp)]=5.4 # pnorm(5.4)=1
+resp=locfdr(zzp,nulltype=1,df=50,bre=100,plot=1,main="arabVec$P")
+arrows(resp$z.2[1]-0.2,100,-8,1000,code=2,length=0.1,col='red',lwd=1.5)
+text(-8,1200,labels=signif(resp$z.2[1],digits = 4),col='red')
+ppz=1-pnorm(zzp,mean=resp$fp0[3,1],sd=resp$fp0[3,2])
+ppz0=pnorm(zzp,mean=resp$fp0[3,1],sd=resp$fp0[3,2])
+ppz=2*vmin(ppz,ppz0)
+hist(ppz)
+arabVec$ppz=ppz
+manhattan(arabVec, main="ppz", p="ppz", genomewideline = logPcut)
+
+layout(matrix(c(1,1,2,3), 2,2, byrow = T))
+zzp1=qnorm(arabVec$Pfst)
+zzp[is.infinite(zzp1)]=5.4 # pnorm(5.4)=1
+resp1=locfdr(zzp1,nulltype=1,df=50,bre=100,plot=1,main="Test data")
+arrows(resp1$z.2[1]-0.1,100,-4,600,code=2,length=0.1,col='red',lwd=1.5)
+text(-4,800,labels=signif(resp1$z.2[1],digits = 4),col='red')
+arrows(resp1$z.2[2]+0.1,100,6,600,code=2,length=0.1,col='red',lwd=1.5)
+text(6,800,labels=signif(resp1$z.2[2],digits = 4),col='red')
+ppz1=1-pnorm(zzp1,mean=resp1$fp0[3,1],sd=resp1$fp0[3,2])
+ppz2=pnorm(zzp1,mean=resp1$fp0[3,1],sd=resp1$fp0[3,2])
+ppz1=2*vmin(ppz1,ppz2)
+#hist(ppz1)
+arabVec$ppz1=ppz1
+manhattan(arabVec, main="P (GC)", p="Pgc", suggestiveline=FALSE, genomewideline = logPcut, cex=0.3)
+manhattan(arabVec, main="Bayes-P", p="ppz1", suggestiveline=FALSE, genomewideline = logPcut, cex=0.3)
+
+layout(matrix(1:6, 2, 3))
+manhattan(arabVec, main="P-Heredity2016/AJHG2016", p = "Pprice", suggestiveline=FALSE, genomewideline = logPcut, cex=0.3)
+hist(main="P-Heredity2016/AJHG2016", xlab="p-value", arabVec$Pprice)
+abline(h=nrow(arabVec)/20, lty=2, col="gray")
+
+manhattan(arabVec, main="P/MER2021", cex=0.3, p="Pgc", suggestiveline=FALSE, genomewideline =logPcut)
+hist(main="P/MER2020", xlab="p-value", arabVec$Pgc)
+abline(h=nrow(arabVec)/20, lty=2, col="gray")
+
+manhattan(arabVec, main="P-Bayes", p="ppz", suggestiveline=FALSE, genomewideline = logPcut, cex=0.3)
+hist(main="P-Bayes", xlab="p-value", arabVec$ppz)
+abline(h=nrow(arabVec)/20, lty=2, col="gray")
+
+```
+
 
 ## R.sys
 

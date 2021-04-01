@@ -7,9 +7,9 @@ Options in effect:
 
 Hostname: Guo-Bos-MacBook-Pro.local
 Working directory: /Users/gc5k/git/Notes/Rpub/EigenGWAScore
-Start time: Wed Jul 22 18:26:53 2020
+Start time: Fri Mar  5 21:58:05 2021
 
-Random number seed: 1595413613
+Random number seed: 1614952685
 16384 MB RAM detected; reserving 8192 MB for main workspace.
 100000 variants loaded from .bim file.
 200 people (101 males, 99 females) loaded from .fam.
@@ -23,4 +23,4 @@ Phenotype data is quantitative.
 Writing linear model association results to ./data/euro/euro_10K.assoc.linear
 ... done.
 
-End time: Wed Jul 22 18:26:54 2020
+End time: Fri Mar  5 21:58:06 2021

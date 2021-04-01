@@ -531,7 +531,7 @@ UKB cohorts test,
 
 ```{r me}
 
-ukMe=read.table("~/manuscript/Linkage_Association/h2ss/meMarker.txt", as.is = T)
+ukMe=read.table("meMarker.txt", as.is = T)
 me=ukMe[,-1]
 rownames(me)=ukMe[,1]
 layout(matrix(1:3, 3, 1))
@@ -814,6 +814,7 @@ When $A$ is asymmetric,
 $$x^T\tilde{A}x=x^T(A+A^T)x/2$$
 the expression of var and cov are the same, provided $A$ is replaced by $\tilde{A}=(A+A^T)/2$.
 
+Resources for quadratic forms [wiki link](https://en.wikipedia.org/wiki/Quadratic_form_(statistics)) and [Lecture notes](http://pages.stat.wisc.edu/~st849-1/lectures/Ch02.pdf).
 
 ## Isserlis theorem
 It may be related to high-order moments for multivariate normal distribution, see [Isserlis Theorem](https://en.wikipedia.org/wiki/Isserlis%27_theorem), published in *Biometrika*, 12:[134-139](https://www.jstor.org/stable/2331932?seq=1). 

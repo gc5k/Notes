@@ -6,5 +6,6 @@
 *.xlsx
 *.csv
 *.html
+*.egwas
 rsconnect/
 ALS/*.pptx
