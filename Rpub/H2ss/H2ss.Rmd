@@ -1540,6 +1540,14 @@ $$
 \hat{\gamma}_g=\frac{y_1^T\mathbf{K}y_2-y_1^Ty_2}{tr(\mathbf{KK^T})-N_c}=\frac{\sqrt{N_1N_2}(\gamma_g\sqrt{h^2_1h^2_2}/M_e+\frac{N_c}{N_1N_2}r_e)-\frac{N_c}{\sqrt{N_1N_2}}r_e}{\frac{N_1N_2}{M_e}}
 $$
 
+The correlation is $$\hat{r}_g=\frac{\hat{\gamma_g}}{\sqrt{\hat{\sigma}^2_{g_1}\hat{\sigma}^2_{g_2}}}$$
+
+The sampling variance of $\hat{r}_g$, according to Delta method (see [eq 11](https://doi.org/10.1038/s41467-020-18085-5)), is 
+
+$$
+var(\hat{r}_g)=\gamma^2_g (\frac{var(\sigma^2_{g_1})}{4(\sigma^2_{g_1})^2}+\frac{var(\sigma^2_{g_2})}{4(\sigma^2_{g_2})^2}+\frac{var(\gamma_g)}{(\gamma_g)^2}+\frac{2cov(\sigma^2_{g_1},\sigma^2_{g_2})}{4\sigma^2_{g_1}\sigma^2_{g_2}}-\frac{2cov(\sigma^2_{g_1},\gamma_g)}{2\sigma^2_{g_1}\gamma_g}-\frac{2cov(\sigma^2_{g_2},\gamma_g)}{2\sigma^2_{g_2}\gamma_g})
+$$
+
 ```{r biV2}
 S=10
 
